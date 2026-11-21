@@ -49,7 +49,8 @@ export type A11yIssue = {
     | "counter-title"
     | "flip-box-face"
     | "countdown-title"
-    | "hotspot-names";
+    | "hotspot-names"
+    | "mega-panel";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -264,6 +265,8 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
   const menuNames = DEVICES.map(() => new Set<string>());
   // W-1076: carousels are regions, listed by name like menus.
   const carouselNames = DEVICES.map(() => new Set<string>());
+  // W-1069: inside a menu item's dropdown, where a mega panel would open from a flyout.
+  let inDropdown = false;
   const walk = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
     // W-413: an element hidden on every device (and what's inside it) is never shown or read.
     if (node !== layout.root && hiddenOnEveryDevice(node)) {
@@ -708,6 +711,28 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         message: "This box is a link, but nothing inside it has text, so the link has no name.",
       });
     }
+    // W-1069: a mega panel's toggle is named by its item's text ("Open Products", or the text
+    // itself), so a vague one says nothing about what opens; and one in a dropdown is a whole
+    // layout opened from a flyout, two disclosures deep for keyboard and screen reader users.
+    if (node.type === "menu-item" && spoken(props["panelPartId"])) {
+      const text = spoken(props["text"]);
+      if (inDropdown) {
+        add({
+          nodeId: node.id,
+          rule: "mega-panel",
+          severity: "warning",
+          message:
+            "This mega panel opens from inside another dropdown; put the item straight in the Menu so it opens from the menu bar.",
+        });
+      } else if (text && VAGUE.test(text)) {
+        add({
+          nodeId: node.id,
+          rule: "mega-panel",
+          severity: "warning",
+          message: `"${text}" doesn't say what this item's panel holds; name it for its contents, such as "Products".`,
+        });
+      }
+    }
     if (LINKISH.has(node.type) || (node.type === "icon" && props["href"])) {
       const text = spoken(props["text"] ?? props["title"]);
       const hasHref = typeof props["href"] === "string" && props["href"].trim() !== "";
@@ -799,9 +824,12 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
       });
     }
     const outerHidden = ariaHiddenAbove;
+    const outerDropdown = inDropdown;
     if (ownAriaHidden) ariaHiddenAbove = true;
+    if (node.type === "menu-item") inDropdown = true;
     if (isParentNode(node)) for (const child of node.children) walk(child, nextBg, nextColor);
     ariaHiddenAbove = outerHidden;
+    inDropdown = outerDropdown;
   };
   walk(layout.root, undefined, undefined);
   if (h1s.every((count) => count === 0) && layout.root.children.length > 0) {

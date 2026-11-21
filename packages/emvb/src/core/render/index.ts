@@ -33,6 +33,7 @@ import {
   cssTypeName,
   type Layout,
   type LayoutNode,
+  type MenuItemNode,
   type PaginationNode,
 } from "../schema/layout.ts";
 import {
@@ -57,7 +58,8 @@ import { renderForm, withFieldOptions } from "./form.ts";
 import { renderLoop } from "./loop.ts";
 import { renderPagination } from "./pagination.ts";
 import { pushSpacerBasis } from "./spacer-basis.ts";
-import { renderSection } from "./section.ts";
+import { renderPanelPart, renderSection } from "./section.ts";
+import { buildMenuItem, MEGA_MENU_CSS, megaPanelPartId } from "../elements/menu.ts";
 import { renderTabs } from "./tabs.ts";
 import { designHasDark, THEME_BOOT_SCRIPT } from "./theme-boot.ts";
 import { serialize, type VNode } from "./vnode.ts";
@@ -235,6 +237,8 @@ const MAX_SECTION_ELEMENTS = 20 * MAX_NODES;
 const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def.baseCss]));
 // W-927: placeholder + wrapper styles ship with every page that may hold an extension node.
 baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
+// W-1069: mega panel rules, only with a page that renders a mega panel.
+baseCss.set("menu-mega", MEGA_MENU_CSS);
 
 type StickyStyle =
   | { motion?: { sticky?: { hide?: unknown } }; stickyMotion?: { hide?: unknown } }
@@ -495,6 +499,11 @@ export function renderPage(
       const props = (node as { props: { contentWidth?: unknown; fullWidth?: unknown } }).props;
       const width = props.fullWidth === true ? "none" : cssLength(props.contentWidth);
       if (width) declarations.push({ property: "--emvb-content-width", value: width });
+    }
+    if (node.type === "menu-item") {
+      // W-1069: the Mega panel width, read by the panel's rules.
+      const width = cssLength((node as { props: { panelWidth?: unknown } }).props.panelWidth);
+      if (width) declarations.push({ property: "--emvb-menu-panel-width", value: width });
     }
     if (node.type === "loop") {
       // W-308: grid and cards columns, as a custom property the Loop's base CSS reads.
@@ -802,6 +811,16 @@ export function renderPage(
           text,
           ...(hiddenOn.length > 0 ? { tocClass: `emvb-e-${tocId}` } : {}),
         });
+      }
+    }
+    const panelPartId = megaPanelPartId(node);
+    if (panelPartId) {
+      // W-1069: a mega menu item; a missing, looping or refused part leaves the item's own children.
+      const mega = renderPanelPart(panelPartId, ctx, dynamic);
+      if (mega) {
+        usedTypes.add("menu-mega");
+        rendered.menuDropdown = true;
+        return finish(node, buildMenuItem(node as MenuItemNode, attrs, [], mega));
       }
     }
     if (isParentNode(node)) {

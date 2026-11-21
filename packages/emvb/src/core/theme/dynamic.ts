@@ -364,15 +364,18 @@ export function collectCollectionLoops(layout: Layout): CollectionLoop[] {
   return loops;
 }
 
-/** Collect `section.partId` values so hosts can load Section templates. */
+/**
+ * Collect `section.partId` values so hosts can load Section templates. W-1069: and the Section
+ * parts mega menu items show (`menu-item` `panelPartId`).
+ */
 export function collectSectionPartIds(layout: Layout): string[] {
   const ids = new Set<string>();
   const walk = (node: LayoutNode): void => {
-    if (node.type === "part-ref") {
-      const id =
-        typeof (node.props as { partId?: unknown }).partId === "string"
-          ? (node.props as { partId: string }).partId.trim()
-          : "";
+    const key =
+      node.type === "part-ref" ? "partId" : node.type === "menu-item" ? "panelPartId" : undefined;
+    if (key) {
+      const value = (node.props as Record<string, unknown>)[key];
+      const id = typeof value === "string" ? value.trim() : "";
       if (id) ids.add(id);
     }
   };

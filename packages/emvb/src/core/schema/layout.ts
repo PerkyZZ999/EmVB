@@ -492,6 +492,14 @@ export const MenuItemNode = parentNode(
     newTab: z.boolean().optional(),
     /** The panel stretches across the menu instead of sitting under the item. */
     wide: z.boolean().optional(),
+    /**
+     * W-1069: a mega menu. The published Section theme part whose layout fills this item's
+     * dropdown panel, in place of its children. A missing part leaves the item's own children
+     * (none: a plain link).
+     */
+    panelPartId: z.string().max(128).optional(),
+    /** W-1069: the mega panel's width (the most it takes when `wide`). Unset: its content's. */
+    panelWidth: Length.optional(),
   }),
 );
 
@@ -1752,7 +1760,14 @@ export type MenuNode = NodeEnvelope & {
 
 export type MenuItemNode = NodeEnvelope & {
   type: "menu-item";
-  props: { text: string; href?: string; newTab?: boolean; wide?: boolean };
+  props: {
+    text: string;
+    href?: string;
+    newTab?: boolean;
+    wide?: boolean;
+    panelPartId?: string;
+    panelWidth?: z.infer<typeof Length>;
+  };
   children: LayoutNode[];
 };
 

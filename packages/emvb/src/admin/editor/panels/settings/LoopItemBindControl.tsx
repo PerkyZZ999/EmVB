@@ -21,6 +21,8 @@ export function LoopItemBindControl({
   label = "Loop item",
   emptyLabel = "Use nested elements",
   marker = "loop-item",
+  helper,
+  partName = label,
 }: {
   value: string;
   fetcher: Fetcher;
@@ -30,6 +32,10 @@ export function LoopItemBindControl({
   emptyLabel?: string;
   /** `data-emvb-${marker}-bind` keeps the loop-item tests stable. */
   marker?: string;
+  /** Replaces the helper line under the list. */
+  helper?: string;
+  /** The part type as the empty and failed notes name it; unset is `label`. */
+  partName?: string;
 }) {
   const [parts, setParts] = React.useState<ThemePartSummary[] | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -96,7 +102,7 @@ export function LoopItemBindControl({
           onChange={(event) => onChange(event.target.value.trim())}
         />
         <p className="emvb-helper">
-          Optional published {label} theme part. Leave blank to use nested elements.
+          {helper ?? `Optional published ${label} theme part. Leave blank to use nested elements.`}
           {adminLinks && <a href="/_emdash/admin/plugins/emvb/theme"> Open Theme Builder</a>}
         </p>
         {chosen && chosen.status !== "published" && (
@@ -118,8 +124,8 @@ export function LoopItemBindControl({
       />
       <p className="emvb-helper">
         {failed
-          ? `Could not load ${label} parts. Paste a theme-part id${adminLinks ? ", or " : "."}`
-          : `No ${label} theme parts yet. Paste an id${adminLinks ? ", or " : "."}`}
+          ? `Could not load ${partName} parts. Paste a theme-part id${adminLinks ? ", or " : "."}`
+          : `No ${partName} theme parts yet. Paste an id${adminLinks ? ", or " : "."}`}
         {adminLinks && (
           <>
             <a href="/_emdash/admin/plugins/emvb/theme">create one in Theme Builder</a>.

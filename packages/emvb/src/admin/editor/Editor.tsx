@@ -380,7 +380,8 @@ function EditorApp({
       if (!node) return "Element";
       const name = node.editorLabel ?? ELEMENT_NAMES[node.type] ?? node.type;
       // W-970: a synced section or Loop item drawn from unpublished changes says so on the canvas.
-      const partId = (node.props as { partId?: unknown } | undefined)?.partId;
+      const props = node.props as { partId?: unknown; panelPartId?: unknown } | undefined;
+      const partId = props?.partId ?? props?.panelPartId;
       const status = typeof partId === "string" ? partStatus?.[partId] : undefined;
       return status && status !== "published" ? `${name} · ${partDraftLabel(status)}` : name;
     },

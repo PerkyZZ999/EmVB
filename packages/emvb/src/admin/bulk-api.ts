@@ -59,7 +59,11 @@ export async function partsInUse(
     const layout = item.data?.["layout"];
     const text = typeof layout === "string" ? layout : JSON.stringify(layout ?? null);
     for (const id of ids) {
-      if (!text.includes(`"partId":${JSON.stringify(id)}`)) continue;
+      // W-1069: a mega menu item's panel uses its part too.
+      const quoted = JSON.stringify(id);
+      if (!text.includes(`"partId":${quoted}`) && !text.includes(`"panelPartId":${quoted}`)) {
+        continue;
+      }
       used.set(id, [...(used.get(id) ?? []), titleOf(item, "Untitled")]);
     }
   }

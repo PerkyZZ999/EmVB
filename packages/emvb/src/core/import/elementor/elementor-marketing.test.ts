@@ -224,3 +224,54 @@ describe("Elementor import part 2 (W-1049)", () => {
     ]);
   });
 });
+
+describe("Elementor Mega Menu (W-1069)", () => {
+  const megaMenu = (settings: Record<string, unknown>) => {
+    const result = importElementor(
+      JSON.stringify([
+        {
+          id: "m",
+          elType: "widget",
+          widgetType: "mega-menu",
+          settings: {
+            menu_items: [
+              { item_title: "Products", item_dropdown_content: "yes" },
+              { item_title: "About", item_link: { url: "/about" } },
+            ],
+            ...settings,
+          },
+          elements: [
+            {
+              id: "c",
+              elType: "container",
+              settings: {},
+              elements: [
+                {
+                  id: "h",
+                  elType: "widget",
+                  widgetType: "heading",
+                  settings: { title: "Boots" },
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(validateLayout(result.layout).ok).toBe(true);
+    return all(result.layout.root as Node).filter((n) => n.type === "menu-item");
+  };
+
+  test("an item's dropdown content becomes its panel, across the menu by default", () => {
+    const [products, about] = megaMenu({});
+    expect(products?.props).toEqual({ text: "Products", wide: true });
+    expect(all(products as Node).some((n) => n.type === "heading")).toBe(true);
+    expect(about?.props).toEqual({ text: "About", href: "/about" });
+  });
+
+  test("Fit to content keeps the panel under its item", () => {
+    const [products] = megaMenu({ content_width: "fit_to_content" });
+    expect(products?.props).toEqual({ text: "Products" });
+  });
+});

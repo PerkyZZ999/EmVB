@@ -79,6 +79,24 @@ export function FieldControl({
     );
   }
 
+  if (field.key === "panelPartId" && node.type === "menu-item" && fetcher) {
+    // W-1069: a mega menu item's panel is a Section theme part.
+    return (
+      <LoopItemBindControl
+        key={field.key}
+        value={typeof raw === "string" ? raw : ""}
+        fetcher={fetcher}
+        partType="section"
+        label="Mega panel"
+        emptyLabel="No mega panel"
+        marker="mega-panel"
+        partName="Section"
+        helper="Optional published Section theme part. Its layout fills this item's panel in place of the items under it."
+        onChange={(partId) => onChange(withProp(node, "panelPartId", partId || undefined))}
+      />
+    );
+  }
+
   if (field.key === "field" && fetcher) {
     return (
       <React.Fragment key={field.key}>

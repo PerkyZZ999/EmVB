@@ -198,7 +198,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `accordion` | (none) |
 | `accordion-item` | summary, open |
 | `menu` | direction, label |
-| `menu-item` | text, href, newTab, wide |
+| `menu-item` | text, href, newTab, wide, panelPartId, panelWidth |
 
 These style keys are allowed in `style`, `devices.*`, `query.style` and class styles; `states.*` takes
 the same keys except `motion`:

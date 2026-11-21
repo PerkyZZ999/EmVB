@@ -500,3 +500,36 @@ describe("Search form over MCP (W-1073)", () => {
     expect(JSON.stringify(refused.error)).toContain("buttonText");
   });
 });
+
+describe("Mega menu over MCP (W-1069)", () => {
+  test("list_element_types describes the panel keys; add_element adds a mega item; a negative width is refused", async () => {
+    const item = (await catalogue()).get("menu-item");
+    const keys = Object.keys(item?.props.properties ?? {});
+    expect(keys).toContain("panelPartId");
+    expect(keys).toContain("panelWidth");
+    const pageId = await newPage();
+    const mega = (panelWidth: unknown) => ({
+      type: "menu",
+      props: { direction: "row" },
+      children: [
+        {
+          type: "menu-item",
+          props: { text: "Products", panelPartId: "sect0001", wide: true, panelWidth },
+        },
+      ],
+    });
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: mega({ value: 48, unit: "rem" }),
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: mega({ value: -4, unit: "rem" }),
+    });
+    expect(refused.success).toBe(false);
+    expect(JSON.stringify(refused.error)).toContain("panelWidth");
+  });
+});

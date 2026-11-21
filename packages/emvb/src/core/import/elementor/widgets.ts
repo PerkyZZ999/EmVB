@@ -1572,11 +1572,18 @@ const navMenu: Widget = (s, ctx, el) => {
   ];
 };
 
+/**
+ * Elementor's Mega Menu → a Menu whose items hold their dropdown content. W-1069: Elementor's
+ * dropdowns span the menu unless Content width is Fit to content, so those panels are wide. The
+ * content stays in the item (Elementor keeps it in the widget, not in a shared template), so it
+ * isn't turned into a Section theme part.
+ */
 const megaMenu: Widget = (s, ctx, _el, env, raw) => {
   const items = (Array.isArray(s["menu_items"]) ? s["menu_items"] : [])
     .filter(isRecord)
     .slice(0, 50);
   const kids = Array.isArray(raw["elements"]) ? raw["elements"] : [];
+  const wide = str(s["content_width"]) !== "fit_to_content";
   const children = items.map((item, i) => {
     const text = plain(item["item_title"]).text || "Item";
     const panel =
@@ -1586,7 +1593,11 @@ const megaMenu: Widget = (s, ctx, _el, env, raw) => {
     return node(
       ctx,
       "menu-item",
-      { text: short(text), ...href(item["item_link"], ctx) },
+      {
+        text: short(text),
+        ...href(item["item_link"], ctx),
+        ...(wide && panel.length > 0 ? { wide: true } : {}),
+      },
       { children: panel },
     );
   });

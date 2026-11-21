@@ -312,3 +312,35 @@ describe("the 1.3 widgets (W-1076)", () => {
     ]);
   });
 });
+
+describe("mega menu (W-1069)", () => {
+  const item = (id: string, text: string, props: object = {}, children: unknown[] = []) => ({
+    id,
+    type: "menu-item",
+    props: { text, ...props },
+    children,
+  });
+  const menu = (...items: unknown[]) => ({
+    id: "menu0001",
+    type: "menu",
+    props: { direction: "row" },
+    children: items,
+  });
+
+  test("a mega item named for its panel passes", () => {
+    expect(audit(menu(item("item0001", "Products", { panelPartId: "p1" })))).toEqual([]);
+  });
+
+  test("a vague mega item name warns", () => {
+    expect(audit(menu(item("item0002", "More", { panelPartId: "p1" })))).toEqual([
+      "mega-panel:warning:item0002",
+    ]);
+  });
+
+  test("a mega panel inside another item's dropdown warns", () => {
+    const nested = item("item0004", "Products", { panelPartId: "p1" });
+    expect(audit(menu(item("item0003", "Shop", {}, [nested])))).toEqual([
+      "mega-panel:warning:item0004",
+    ]);
+  });
+});

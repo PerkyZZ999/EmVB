@@ -52083,6 +52083,335 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
       "expect": "\\(fail\\).*plain one-liners"
+    },
+    {
+      "id": "W-1069/panel-ignored",
+      "requirement": "W-1069",
+      "description": "A mega item ignores its Section part and renders as a plain item.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      const mega = renderPanelPart(panelPartId, ctx, dynamic);",
+          "replace": "      const mega = undefined as VNode[] | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*holds the Section part's layout"
+    },
+    {
+      "id": "W-1069/no-cycle-guard",
+      "requirement": "W-1069",
+      "description": "A panel that shows its own part renders again and again, up to the depth limit.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/section.ts",
+          "search": "  if (!template?.root || stack.includes(id) || stack.length >= MAX_SECTION_DEPTH) return undefined;",
+          "replace": "  if (!template?.root || stack.length >= MAX_SECTION_DEPTH) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*renders once"
+    },
+    {
+      "id": "W-1069/missing-drops-children",
+      "requirement": "W-1069",
+      "description": "A missing panel part drops the item's own dropdown.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (mega) {\n        usedTypes.add(\"menu-mega\");",
+          "replace": "      if (mega || panelPartId) {\n        usedTypes.add(\"menu-mega\");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*a missing part leaves them"
+    },
+    {
+      "id": "W-1069/width-dropped",
+      "requirement": "W-1069",
+      "description": "Mega panel width never reaches the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (width) declarations.push({ property: \"--emvb-menu-panel-width\", value: width });",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*Mega panel width becomes"
+    },
+    {
+      "id": "W-1069/phone-floats",
+      "requirement": "W-1069",
+      "description": "On phones the mega panel still floats over the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "{position:static;width:auto;min-width:0;",
+          "replace": "{position:absolute;width:auto;min-width:0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*on phones the panel stacks inline"
+    },
+    {
+      "id": "W-1069/host-skips-part",
+      "requirement": "W-1069",
+      "description": "Hosts don't load the Section parts mega items show.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "node.type === \"part-ref\" ? \"partId\" : node.type === \"menu-item\" ? \"panelPartId\" : undefined;",
+          "replace": "node.type === \"part-ref\" ? \"partId\" : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*hosts load the part"
+    },
+    {
+      "id": "W-1069/schema-refuses",
+      "requirement": "W-1069",
+      "description": "The layout schema refuses a menu item's panelPartId.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    panelPartId: z.string().max(128).optional(),\n",
+          "replace": "    panelPartId: z.number().max(128).optional(),\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*schema takes the new keys"
+    },
+    {
+      "id": "W-1069/css-on-every-menu",
+      "requirement": "W-1069",
+      "description": "Mega panel rules are sent with every menu, changing pages without one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "  baseCss: MENU_CSS,",
+          "replace": "  baseCss: MENU_CSS + MEGA_MENU_CSS,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*renders as before"
+    },
+    {
+      "id": "W-1069/in-use-misses-panel",
+      "requirement": "W-1069",
+      "description": "Theme Builder deletes a Section part a mega menu shows without a warning.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/bulk-api.ts",
+          "search": "      if (!text.includes(`\"partId\":${quoted}`) && !text.includes(`\"panelPartId\":${quoted}`)) {",
+          "replace": "      if (!text.includes(`\"partId\":${quoted}`)) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/bulk-api.test.ts"],
+      "expect": "\\(fail\\).*mega menu panel counts as in use"
+    },
+    {
+      "id": "W-1069/no-picker",
+      "requirement": "W-1069",
+      "description": "The Menu item inspector has no Section part picker for Mega panel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  if (field.key === \"panelPartId\" && node.type === \"menu-item\" && fetcher) {",
+          "replace": "  if (field.key === \"panelPartId\" && node.type === \"menu-item\" && !fetcher) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/mega-panel-field.test.tsx"
+      ],
+      "expect": "\\(fail\\).*picks its mega panel"
+    },
+    {
+      "id": "W-1069/a11y-vague",
+      "requirement": "W-1069",
+      "description": "A vague mega item name passes the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      } else if (text && VAGUE.test(text)) {\n        add({\n          nodeId: node.id,\n          rule: \"mega-panel\",",
+          "replace": "      } else if (text && false) {\n        add({\n          nodeId: node.id,\n          rule: \"mega-panel\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts", "-t", "W-1069"],
+      "expect": "\\(fail\\).*vague mega item name warns"
+    },
+    {
+      "id": "W-1069/a11y-nested",
+      "requirement": "W-1069",
+      "description": "A mega panel inside another dropdown passes the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"menu-item\") inDropdown = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts", "-t", "W-1069"],
+      "expect": "\\(fail\\).*inside another item's dropdown warns"
+    },
+    {
+      "id": "W-1069/elementor-narrow",
+      "requirement": "W-1069",
+      "description": "Elementor's Mega Menu dropdowns import under their item instead of across the menu.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        ...(wide && panel.length > 0 ? { wide: true } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor-marketing.test.ts",
+        "-t",
+        "W-1069"
+      ],
+      "expect": "\\(fail\\).*across the menu by default"
+    },
+    {
+      "id": "W-1069/elementor-fit-ignored",
+      "requirement": "W-1069",
+      "description": "Elementor's Fit to content still imports a wide panel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  const wide = str(s[\"content_width\"]) !== \"fit_to_content\";",
+          "replace": "  const wide = true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor-marketing.test.ts",
+        "-t",
+        "W-1069"
+      ],
+      "expect": "\\(fail\\).*Fit to content keeps the panel"
+    },
+    {
+      "id": "W-1069/mcp-negative-width",
+      "requirement": "W-1069",
+      "description": "Agents can save a negative Mega panel width.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    panelWidth: Length.optional(),\n  }),",
+          "replace": "    panelWidth: z.unknown().optional(),\n  }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-widgets.test.ts", "-t", "W-1069"],
+      "expect": "\\(fail\\).*Mega menu over MCP"
+    },
+    {
+      "id": "W-1069/no-menu-script",
+      "requirement": "W-1069",
+      "description": "A page whose only dropdown is a mega panel doesn't load the menu script, so Escape does nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        rendered.menuDropdown = true;\n        return finish(node, buildMenuItem",
+          "replace": "        return finish(node, buildMenuItem"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/mega-menu.e2e.ts",
+        "--project=node",
+        "-g",
+        "Escape closes"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1069/phone-floats-e2e",
+      "requirement": "W-1069",
+      "description": "On a phone the mega panel floats over the page instead of opening inline.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "{position:static;width:auto;min-width:0;",
+          "replace": "{position:absolute;width:auto;min-width:0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/mega-menu.e2e.ts",
+        "--project=node",
+        "-g",
+        "on a phone"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1069/canvas-no-part",
+      "requirement": "W-1069",
+      "description": "The editor canvas never loads a mega item's Section part, so the panel can't be previewed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "node.type === \"part-ref\" ? \"partId\" : node.type === \"menu-item\" ? \"panelPartId\" : undefined;",
+          "replace": "node.type === \"part-ref\" ? \"partId\" : undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/mega-menu.e2e.ts",
+        "--project=node",
+        "-g",
+        "editor picks"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1069/proto-part",
+      "requirement": "W-1069",
+      "description": "A part id like \"constructor\" reads Object.prototype and the render throws.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/section.ts",
+          "search": "  const template = id && templates && Object.hasOwn(templates, id) ? templates[id] : undefined;\n  if (!template?.root || stack.includes(id)",
+          "replace": "  const template = id && templates ? templates[id] : undefined;\n  if (!template || stack.includes(id)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*Object.prototype key"
+    },
+    {
+      "id": "W-1069/script-for-missing-part",
+      "requirement": "W-1069",
+      "description": "A mega item whose part is missing still loads the menu script on a page with no dropdown.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/tabs/presence.ts",
+          "search": "    (node) => node.type === \"menu-item\" && nodeChildren(node).length > 0,",
+          "replace": "    (node) =>\n      node.type === \"menu-item\" &&\n      (nodeChildren(node).length > 0 || \"panelPartId\" in (node.props as object)),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
+      "expect": "\\(fail\\).*loads no menu script"
     }
   ]
 }

@@ -1,7 +1,14 @@
-import type { MenuItemNode, MenuNode } from "../schema/layout.ts";
+import type { LayoutNode, MenuItemNode, MenuNode } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDefinition } from "./definition.ts";
+
+/** W-1069: the Section part a mega menu item shows, trimmed; "" for anything else. */
+export function megaPanelPartId(node: LayoutNode): string {
+  if (node.type !== "menu-item") return "";
+  const value = (node.props as { panelPartId?: unknown }).panelPartId;
+  return typeof value === "string" ? value.trim() : "";
+}
 
 const newTabAttrs = (newTab: boolean | undefined): Record<string, string> =>
   newTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
@@ -91,6 +98,27 @@ const MENU_CSS = [
   "@media (max-width: 767.98px){.emvb-menu--column .emvb-menu-panel,.emvb-menu--column .emvb-menu-panel--wide{top:100%;inset-inline:auto;inset-inline-start:0;min-width:min(12rem,calc(100vw - 2rem));max-width:calc(100vw - 2rem)}}",
 ].join("");
 
+/**
+ * W-1069: mega panels. Sent only with a page that renders one (base type `menu-mega`), so pages
+ * without one keep their CSS byte for byte. `--emvb-menu-panel-width` is the item's Mega panel
+ * width. On phones the panel stacks inline under its item, as part of the menu, instead of
+ * floating over the page.
+ */
+export const MEGA_MENU_CSS = [
+  ".emvb-menu-panel--mega{width:var(--emvb-menu-panel-width,max-content);max-width:calc(100vw - 2rem);padding:1rem}",
+  ".emvb-menu-panel--mega.emvb-menu-panel--wide{width:auto;max-width:var(--emvb-menu-panel-width,none);margin-inline:auto}",
+  ".emvb-menu--column .emvb-menu-panel--mega.emvb-menu-panel--wide{inset-inline-end:auto;width:var(--emvb-menu-panel-width,max-content);max-width:calc(100vw - 2rem)}",
+  "@media (max-width: 767.98px){" +
+    ".emvb-menu .emvb-menu-item--mega{position:relative}" +
+    ".emvb-menu .emvb-menu-item--mega:has(>.emvb-menu-item__bar>.emvb-menu-item__disclosure[open]){flex-basis:100%}" +
+    ".emvb-menu .emvb-menu-item--mega>.emvb-menu-item__bar{position:relative;flex-wrap:wrap;row-gap:0;width:auto;min-height:1.75rem}" +
+    ".emvb-menu .emvb-menu-item--mega>.emvb-menu-item__bar>.emvb-menu-item__disclosure{flex:1 1 100%}" +
+    ".emvb-menu .emvb-menu-item--mega>.emvb-menu-item__bar>.emvb-menu-item__link{padding-inline-end:2rem}" +
+    ".emvb-menu .emvb-menu-item--mega>.emvb-menu-item__bar>.emvb-menu-item__link+.emvb-menu-item__disclosure>.emvb-menu-item__toggle{position:absolute;top:0;inset-inline-end:0}" +
+    ".emvb-menu .emvb-menu-item--mega .emvb-menu-panel--mega{position:static;width:auto;min-width:0;max-width:none;margin:0;padding:.5rem 0 .75rem;border:0;box-shadow:none;background:none;color:inherit}" +
+    "}",
+].join("");
+
 export const menu: ElementDefinition<MenuNode> = {
   baseCss: MENU_CSS,
   defaults: () => ({ type: "menu", props: { direction: "row" }, children: [] }),
@@ -160,52 +188,86 @@ export const menuItem: ElementDefinition<MenuItemNode> = {
       },
       { key: "newTab", kind: "boolean", label: "Open in a new tab", optional: true },
       { key: "wide", kind: "boolean", label: "Wide panel", optional: true },
+      {
+        key: "panelPartId",
+        kind: "text",
+        label: "Mega panel",
+        optional: true,
+        message:
+          "Optional published Section theme part. Its layout fills this item's panel in place of the items under it.",
+      },
+      {
+        key: "panelWidth",
+        kind: "number",
+        label: "Mega panel width",
+        optional: true,
+        message: "Panel width can't be negative. Leave it empty to fit the panel's content.",
+      },
     ],
   },
-  build: (node, attrs, children) => {
-    const wide = node.props.wide === true;
-    const classes = [attrs.class, wide ? "emvb-menu-item--wide" : ""].filter(Boolean).join(" ");
-    const href = node.props.href?.trim() ? sanitizeHref(node.props.href) : undefined;
-    const label: VNode = href
-      ? {
-          tag: "a",
-          attrs: { class: "emvb-menu-item__link", href, ...newTabAttrs(node.props.newTab) },
-          children: [node.props.text],
-        }
-      : { tag: "span", attrs: { class: "emvb-menu-item__label" }, children: [node.props.text] };
-    // W-614: with no link, the item's text is the dropdown's toggle, so tapping "Shop" opens it
-    // (the chevron alone was a 28 px target, and the text did nothing on touch screens).
-    const textToggle = !href && children.length > 0;
-    const bar: VNode["children"] = textToggle ? [] : [label];
-    if (children.length > 0) {
-      const panelClass = wide ? "emvb-menu-panel emvb-menu-panel--wide" : "emvb-menu-panel";
-      bar.push({
-        tag: "details",
-        attrs: { class: "emvb-menu-item__disclosure" },
-        children: [
-          textToggle
-            ? {
-                tag: "summary",
-                attrs: { class: "emvb-menu-item__toggle emvb-menu-item__toggle--label" },
-                children: [node.props.text],
-              }
-            : {
-                tag: "summary",
-                attrs: { class: "emvb-menu-item__toggle", "aria-label": `Open ${node.props.text}` },
-                children: [],
-              },
-          {
-            tag: "div",
-            attrs: { class: panelClass },
-            children: groupItems(stampGroup(children, `emvb-menu-${node.id}`)),
-          },
-        ],
-      });
-    }
-    return {
-      tag: "li",
-      attrs: { ...attrs, class: classes },
-      children: [{ tag: "div", attrs: { class: "emvb-menu-item__bar" }, children: bar }],
-    };
-  },
+  build: (node, attrs, children) => buildMenuItem(node, attrs, children),
 };
+
+/**
+ * A menu item's markup. W-1069: with `mega` (its Section part's rendered elements), the panel
+ * holds those instead of the children, in the same `<details>`, so it opens by click, tap,
+ * keyboard and hover like any dropdown, without a script.
+ */
+export function buildMenuItem(
+  node: MenuItemNode,
+  attrs: Record<string, string>,
+  children: VNode[],
+  mega?: VNode[],
+): VNode {
+  const wide = node.props.wide === true;
+  const classes = [
+    attrs.class,
+    wide ? "emvb-menu-item--wide" : "",
+    mega ? "emvb-menu-item--mega" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const href = node.props.href?.trim() ? sanitizeHref(node.props.href) : undefined;
+  const label: VNode = href
+    ? {
+        tag: "a",
+        attrs: { class: "emvb-menu-item__link", href, ...newTabAttrs(node.props.newTab) },
+        children: [node.props.text],
+      }
+    : { tag: "span", attrs: { class: "emvb-menu-item__label" }, children: [node.props.text] };
+  const panelChildren = mega ?? children;
+  // W-614: with no link, the item's text is the dropdown's toggle, so tapping "Shop" opens it
+  // (the chevron alone was a 28 px target, and the text did nothing on touch screens).
+  const textToggle = !href && panelChildren.length > 0;
+  const bar: VNode["children"] = textToggle ? [] : [label];
+  if (panelChildren.length > 0) {
+    const panelClass = wide ? "emvb-menu-panel emvb-menu-panel--wide" : "emvb-menu-panel";
+    bar.push({
+      tag: "details",
+      attrs: { class: "emvb-menu-item__disclosure" },
+      children: [
+        textToggle
+          ? {
+              tag: "summary",
+              attrs: { class: "emvb-menu-item__toggle emvb-menu-item__toggle--label" },
+              children: [node.props.text],
+            }
+          : {
+              tag: "summary",
+              attrs: { class: "emvb-menu-item__toggle", "aria-label": `Open ${node.props.text}` },
+              children: [],
+            },
+        {
+          tag: "div",
+          attrs: { class: mega ? `${panelClass} emvb-menu-panel--mega` : panelClass },
+          children: mega ?? groupItems(stampGroup(children, `emvb-menu-${node.id}`)),
+        },
+      ],
+    });
+  }
+  return {
+    tag: "li",
+    attrs: { ...attrs, class: classes },
+    children: [{ tag: "div", attrs: { class: "emvb-menu-item__bar" }, children: bar }],
+  };
+}

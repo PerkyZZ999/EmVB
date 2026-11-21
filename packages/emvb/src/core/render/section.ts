@@ -62,3 +62,31 @@ export function renderSection(
   };
   return ELEMENTS["part-ref"].build(node as never, attrs, ctx.children(templateNodes, next));
 }
+
+/**
+ * W-1069: a mega menu item's panel, the Section part's elements rendered under the same guards as
+ * a synced section (the part stack against cycles, the depth limit, the render's budget).
+ * Undefined when the part is missing, refused or empty, so the item renders as it would without.
+ */
+export function renderPanelPart(
+  partId: string,
+  ctx: RenderContext,
+  dynamic: ThemeDynamicData | undefined,
+): VNode[] | undefined {
+  const id = partId.trim();
+  const stack = dynamic?.sectionStack ?? [];
+  const templates = dynamic?.sectionTemplates;
+  // An own key only: a part id such as "constructor" must not reach Object.prototype.
+  const template = id && templates && Object.hasOwn(templates, id) ? templates[id] : undefined;
+  if (!template?.root || stack.includes(id) || stack.length >= MAX_SECTION_DEPTH) return undefined;
+  const nodes = template.root.children;
+  if (nodes.length === 0) return undefined;
+  if (ctx.takeSectionBudget && !ctx.takeSectionBudget(partSize(nodes))) return undefined;
+  const next: ThemeDynamicData = {
+    ...dynamic,
+    sectionStack: [...stack, id],
+    idOrigin: `${dynamic?.idOrigin ?? ""}/s:${id}`,
+  };
+  const children = ctx.children(nodes, next);
+  return children.length > 0 ? children : undefined;
+}

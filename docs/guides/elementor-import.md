@@ -96,6 +96,10 @@ pick another type in the dialog if you want.
 - **Nav Menu (since 1.2):** the Menu is filled with the links of your site's menu of the same name,
   as EmDash's WordPress import brings it over; links to pages and posts go to their addresses
   here. When the site has no menu of that name, the Menu stays empty and the report says so.
+- **Mega Menu:** a Menu whose items keep their dropdown content under them. Since 1.4 those
+  dropdowns span the menu, as Elementor shows them, unless Content width is Fit to content. The
+  content stays in the item rather than becoming a Section theme part; to share one panel between
+  menus, save it as a Section and pick it under the item's **Mega panel**.
 - **Theme builder:** Post Title, Post Content, Post Excerpt, Featured Image, Post Info (author and
   date) and the Elementor Pro dynamic tags for the post title and featured image become EmVB's
   dynamic elements.

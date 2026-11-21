@@ -182,6 +182,21 @@ the address isn't offered for translation, so set it on each translated page). P
 **Search Results** template in Theme Builder.
 Being a form itself, it can't go inside a **Form** element.
 
+## Mega menu
+
+A Menu item can open a whole layout instead of a list of links. Build the panel as a **Section**
+in Theme Builder (headings, columns of links, a picture, a button), publish it, then select the
+Menu item and pick it under **Mega panel**. Turn on **Wide panel** to stretch it across the menu,
+and set **Mega panel width** to cap it (unset, it fits its content). The panel replaces any items
+under that menu item.
+
+It opens like any dropdown, with no script: a click or tap on the item's text (or on its arrow
+when the item is also a link), Enter or Space from the keyboard, or hovering with a mouse. The
+menu's small script, already loaded for dropdowns, closes it with Escape or a click elsewhere. On
+phones the panel opens inline under its item, inside the menu, so it works in a mobile menu
+popup or off-canvas panel. If the Section is deleted or unpublished, the item stays a plain link.
+A panel that would show itself (a Section whose own menu opens the same Section) shows once.
+
 ## Light and dark, and the Theme toggle
 
 In **Site styles → Colors**, open a colour and give it a **Dark mode** value. Visitors whose device
@@ -223,5 +238,6 @@ Elementor's Star Rating, Alert, Icon Box, Image Box, Testimonial, Social Icons, 
 Gallery, and Image and Media Carousel widgets import as these elements, with their options. Since
 1.3 so do its Counter, Progress Bar, Countdown, Google Maps, Price Table, Price List, Call to
 Action, Flip Box, Animated Headline, Share Buttons and Hotspot, and Slides and Testimonial Carousel
-become a Carousel. See
+become a Carousel. Elementor's Mega Menu imports as a Menu whose items keep their dropdown content
+under them, across the menu unless its Content width is Fit to content (1.4). See
 [Import from Elementor](elementor-import.md).

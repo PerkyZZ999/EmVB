@@ -27,7 +27,7 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `single_post` | Replaces `<main>` on EmDash `posts` singular | `kind=singular`, `collection=posts` (e.g. `/posts/welcome`) |
 | `archive` | Replaces `<main>` on posts archive / category / tag | `kind=archive` and not search |
 | `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.partId` (`itemPartId` before layout schema 18) |
-| `section` | Reusable synced block | **Never** a page location; referenced by `section.partId`. Pages render the part's children live |
+| `section` | Reusable synced block | **Never** a page location; referenced by `section.partId`, or by a menu item's `panelPartId` as its mega menu panel (W-1069). Pages render the part's children live |
 | `page_template` | Starting layout for a new page | **Never** a page location. New page copies the layout with fresh ids |
 | `popup` | Overlay dialog at body end | Always competes; conditions decide; **not** a content replace |
 | `float` | Bar or corner pinned to the viewport | Always competes; every match shows; **not** a dialog |
