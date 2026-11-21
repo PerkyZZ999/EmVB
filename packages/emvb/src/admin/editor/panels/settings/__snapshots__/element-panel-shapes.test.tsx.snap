@@ -7371,7 +7371,7 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
       "Image field"
     input.emvb-field aria-describedby="(generated)" aria-labelledby="(generated)" data-emvb-field="imageField" value=""
     p
-      "The field Post image shows, such as photo. Leave it empty for the featured image."
+      "The field Post image shows, such as photo. Leave it empty for the featured image, or else the collection's first image field."
     label for="(generated)"
       "Excerpt field"
     input.emvb-field aria-describedby="(generated)" aria-labelledby="(generated)" data-emvb-field="excerptField" value=""
@@ -7408,7 +7408,7 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
             span aria-hidden="true"
               svg
     p.emvb-helper data-emvb-loop-note="true"
-      "A Loop lists posts only in an Archive template. Here the editor shows sample posts, but the live page shows nothing. Build post lists in Theme Builder › Archive.""
+      "A Loop lists posts only in an Archive template. Here the editor shows sample posts, but the live page shows nothing. Build post lists in Theme Builder › Archive, or pick a Collection to list its entries here.""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-element="loop" data-emvb-panel="element"

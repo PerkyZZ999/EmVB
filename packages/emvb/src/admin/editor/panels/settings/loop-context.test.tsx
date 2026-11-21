@@ -53,3 +53,58 @@ describe("Loop and Pagination outside an archive (W-271)", () => {
     );
   });
 });
+
+describe("W-1090 (#31): a Loop with a collection in an Archive template", () => {
+  const listing = {
+    id: "loop0002",
+    type: "loop",
+    props: { collection: "posts" },
+    children: [],
+  } as unknown as LayoutNode;
+  const archive = (...children: LayoutNode[]) =>
+    ({
+      schemaVersion: 18,
+      root: { id: "root0001", type: "container", props: {}, children },
+    }) as Layout;
+
+  test("says it shows the same entries on every archive page and how to follow the archive", () => {
+    const note = loopContextNote(listing, "archive", archive(listing, pagination));
+    expect(note).toContain("same entries on every page of the archive");
+    expect(note).toContain("leave Collection empty");
+    expect(loopContextNote(loop, "archive", archive(loop, pagination))).toBeUndefined();
+  });
+
+  test("Pagination says so when only collection Loops are in the archive", () => {
+    expect(loopContextNote(pagination, "archive", archive(listing, pagination))).toContain(
+      "leave its Collection empty",
+    );
+    expect(
+      loopContextNote(pagination, "archive", archive(loop, listing, pagination)),
+    ).toBeUndefined();
+  });
+
+  test("a collection Loop on a page or in a section lists its entries, so it gets no note", () => {
+    expect(loopContextNote(listing, undefined)).toBeUndefined();
+    expect(loopContextNote(listing, "header")).toBeUndefined();
+    expect(loopContextNote(listing, "section")).toBeUndefined();
+  });
+
+  test("the Loop panel in an Archive template shows the note", async () => {
+    await mount(
+      <ElementPanel
+        node={listing}
+        layout={archive(listing, pagination)}
+        design={emptyDesign()}
+        partType="archive"
+        rejection={null}
+        fetcher={stubFetcher}
+        onChange={() => undefined}
+        onDesignChange={async () => undefined}
+        onSelect={() => undefined}
+      />,
+    );
+    expect(document.querySelector("[data-emvb-loop-note]")?.textContent).toContain(
+      "same entries on every page of the archive",
+    );
+  });
+});

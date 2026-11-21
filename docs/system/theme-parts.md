@@ -49,6 +49,8 @@ A part matches when **any include** matches and **no exclude** matches. Among ma
 
 MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection,entry}`, `archive/{all,collection,taxonomy,search}`.
 
+`general/entire_site` matches every request that calls `resolveThemeParts`, not every URL on the host: a route whose page or layout doesn't call it (a starter blog home or `/posts` built from the site's own templates, say) shows no header, footer, popup or float from EmVB. The editor says so under an Entire site include and links to [Theme parts on your site's other routes](../guides/install-in-a-host-site.md#theme-parts-on-your-sites-other-routes) (W-1090, #40).
+
 ## Triggers (schemaVersion 1, S7b)
 
 ```json
@@ -93,9 +95,9 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 | `post-title` | Escaped title as `h1`–`h6` |
 | `post-excerpt` | Escaped excerpt paragraph (omitted if empty), cut to `maxWords` words with "…" when set |
 | `post-content` | Portable Text / string → safe blocks: paragraphs, headings, lists, quotes, links, bold, italic, code, underline, strike-through and line breaks. Images, embeds, custom blocks and raw HTML are left out; text is escaped (W-328) |
-| `post-image` | `<img>` when a media `src`/`url` exists (sanitized) |
+| `post-image` | `<img>` when the post's image has a URL (sanitized): `featured_image`, else the post's first image field; a Loop's `imageField` names another. An upload picked in EmDash's admin has no `src`, so its URL is EmDash's media route for `meta.storageKey` (W-1090, #32) |
 | `post-link` | Permalink `<a>`; blank text uses the title |
-| `loop` | Repeats item template for each archive post; `perPage` (1–50, empty = 20) sets the archive page size (W-221) |
+| `loop` | Repeats item template for each archive post; `perPage` (1–50, empty = 20) sets the archive page size (W-221). With `collection` set (W-308) it lists that collection's newest entries instead, the same on every archive page and whatever the category or tag; the Loop and Pagination panels say so in an Archive template (W-1090, #31). Leave `collection` empty for a Loop that follows the archive |
 | `pagination` | `nav aria-label="Pagination"` with plain Previous / page numbers / Next links (`rel` prev/next, `aria-current="page"`). Nothing when there is one page or no archive data; nothing inside a Loop item (W-222, W-228) |
 
 **Loop Item:** set `loop.partId` (`itemPartId` before layout schema 18) to a published `loop_item` theme-part id, or nest post-* elements under Loop as an inline template. Editor canvas shows sample placeholders when no live post is bound.

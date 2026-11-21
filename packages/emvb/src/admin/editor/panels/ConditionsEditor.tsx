@@ -111,6 +111,10 @@ export function ruleFromOption(
   };
 }
 
+/** W-1090 (#40): the install guide's section on theme parts for the site's own routes. */
+const OTHER_ROUTES_DOCS =
+  "https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/install-in-a-host-site.md#theme-parts-on-your-sites-other-routes";
+
 let ruleSeq = 0;
 const newConditionId = () => `r-${Date.now().toString(36)}-${(++ruleSeq).toString(36)}`;
 
@@ -121,6 +125,10 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
 
   /** The schema allows at most 20 rules, so a 21st would make the part unsavable (W-092). */
   const full = doc.rules.length >= MAX_CONDITION_RULES;
+  // W-1090 (#40): routes that don't call resolveThemeParts never show the part.
+  const entireSite = doc.rules.some(
+    (rule) => rule.op === "include" && rule.group === "general" && rule.name === "entire_site",
+  );
   const fullReason = `${MAX_CONDITION_RULES} conditions is the most one part can have. Remove one to add another.`;
 
   const add = (op: "include" | "exclude") => {
@@ -190,6 +198,16 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           </li>
         ))}
       </ul>
+      {entireSite && (
+        <p className="emvb-helper" data-emvb-entire-site-hint="">
+          Entire site means every page that renders EmVB theme parts: EmVB pages and the routes
+          whose layout adds them. A blog home or post list from your site&apos;s own templates may
+          not.{" "}
+          <a href={OTHER_ROUTES_DOCS} target="_blank" rel="noopener noreferrer">
+            Add theme parts to other routes
+          </a>
+        </p>
+      )}
       {/* UX-051: sentence case; the plus says "add", so both fit on one row at 264 px. */}
       <div className="emvb-condition-actions">
         <Button

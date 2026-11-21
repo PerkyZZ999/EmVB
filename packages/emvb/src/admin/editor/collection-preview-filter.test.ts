@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { collectCollectionLoops, type Layout } from "../../core/index.ts";
-import { matchesPreviewFilter, withPartLayouts } from "./collection-previews.ts";
+import { matchesPreviewFilter, previewPost, withPartLayouts } from "./collection-previews.ts";
 
 describe("canvas Loop previews apply field filters (W-330)", () => {
   test("a field the entries have is checked; either value of a repeated field matches", () => {
@@ -46,5 +46,22 @@ describe("W-667: collection Loops inside parts on the canvas", () => {
     ]);
     expect(withPartLayouts(page, [])).toBe(page);
     expect(withPartLayouts(null, [part])).toBeNull();
+  });
+});
+
+describe("W-1090 (#32): canvas Loop images read as on the published page", () => {
+  const picked = {
+    id: "01JMEDIA",
+    provider: "local",
+    mimeType: "image/png",
+    meta: { storageKey: "01JK.png" },
+  };
+  const loop = { nodeId: "loop0001", collection: "team", limit: 6, order: "newest" } as const;
+
+  test("a picked upload without src shows, and unset falls back to the first image field", () => {
+    const item = { id: "1", slug: "ana", data: { title: "Ana", photo: picked } };
+    expect(previewPost(item, loop).featuredImageUrl).toBe("/_emdash/api/media/file/01JK.png");
+    const named = { ...loop, imageField: "banner" };
+    expect(previewPost(item, named).featuredImageUrl).toBeUndefined();
   });
 });

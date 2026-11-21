@@ -711,7 +711,10 @@ export const LoopNode = parentNode(
       .max(200)
       .regex(LOOP_PERMALINK, "A site path with {slug} or {id}, such as /team/{slug}")
       .optional(),
-    /** The entry field holding the image Post Image shows (W-330). Unset = featured_image. */
+    /**
+     * The entry field holding the image Post Image shows (W-330). Unset = featured_image, else the
+     * entry's first image field (W-1090).
+     */
     imageField: z.string().regex(FIELD_SLUG, FIELD_SLUG_HINT).optional(),
     /** The entry field Post Excerpt shows (W-330). Unset = excerpt. */
     excerptField: z.string().regex(FIELD_SLUG, FIELD_SLUG_HINT).optional(),

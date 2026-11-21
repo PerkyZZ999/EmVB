@@ -1,7 +1,9 @@
 import * as React from "react";
 import {
   collectCollectionLoops,
+  entryImageValue,
   loopPermalink,
+  mediaUrlOf,
   type CollectionLoop,
   type Layout,
   type ThemePostFields,
@@ -13,16 +15,13 @@ type ContentItem = { id: string; slug?: string | null; data?: Record<string, unk
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 
 /** A content API item as Loop fields; the host's mapping covers images and plain fields. */
-function previewPost(item: ContentItem, loop: CollectionLoop): ThemePostFields {
+export function previewPost(item: ContentItem, loop: CollectionLoop): ThemePostFields {
   const data = item.data ?? {};
   const slug = item.slug || text(data["slug"]);
-  const image = loop.imageField ? data[loop.imageField] : (data["featured_image"] ?? data["image"]);
-  const src =
-    typeof image === "string"
-      ? image
-      : image && typeof image === "object" && "src" in image
-        ? text((image as { src?: unknown }).src)
-        : "";
+  // W-1090 (#32): as published pages read it: a picked upload has no `src`, only a storage key,
+  // and unset falls back from featured_image to the entry's first image field.
+  const image = entryImageValue(data, loop.imageField);
+  const src = typeof image === "string" ? image : (mediaUrlOf(image) ?? "");
   const fields: Record<string, string> = {};
   for (const [key, value] of Object.entries(data).slice(0, 100)) {
     if (typeof value === "string" && value.length <= 2000) fields[key] = value;

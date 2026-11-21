@@ -1,30 +1,23 @@
-import { clipText, loopPermalink, type ThemePostFields } from "../core/index.ts";
+import {
+  clipText,
+  entryImageValue,
+  loopPermalink,
+  mediaUrlOf,
+  type ThemePostFields,
+} from "../core/index.ts";
 
-type MediaLike = {
-  src?: unknown;
-  url?: unknown;
-  previewUrl?: unknown;
-  alt?: unknown;
-};
-
-/** Pull a sanitized-ready image URL + alt from an EmDash media / image field value. */
+/**
+ * Pull a sanitized-ready image URL + alt from an EmDash media / image field value. W-1090 (#32):
+ * a local upload picked in EmDash's admin has no `src`, only its storage key.
+ */
 export function mediaFieldsFrom(value: unknown): {
   featuredImageUrl?: string;
   featuredImageAlt?: string;
 } {
   if (!value || typeof value !== "object") return {};
-  const media = value as MediaLike;
-  const candidates = [media.src, media.url, media.previewUrl];
-  let featuredImageUrl: string | undefined;
-  for (const candidate of candidates) {
-    if (typeof candidate === "string" && candidate.trim()) {
-      featuredImageUrl = candidate.trim();
-      break;
-    }
-  }
-  const featuredImageAlt =
-    typeof media.alt === "string" && media.alt.trim() ? media.alt.trim() : undefined;
-  return { featuredImageUrl, featuredImageAlt };
+  const alt = (value as { alt?: unknown }).alt;
+  const featuredImageAlt = typeof alt === "string" && alt.trim() ? alt.trim() : undefined;
+  return { featuredImageUrl: mediaUrlOf(value), featuredImageAlt };
 }
 
 /**
@@ -46,7 +39,7 @@ export function themePostFromEntry(
     permalinkPrefix?: string;
     /** W-330: a Loop's link pattern, e.g. `/team/{slug}`. */
     permalinkPattern?: string;
-    /** W-330: the field with the entry's image, instead of `featured_image`. */
+    /** W-330: the field with the entry's image, instead of the automatic one (W-1090). */
     imageField?: string;
     /** W-330: the field with the entry's excerpt, instead of `excerpt`. */
     excerptField?: string;
@@ -67,7 +60,8 @@ export function themePostFromEntry(
   const permalink = options.permalinkPattern
     ? loopPermalink(options.permalinkPattern, { slug: slug || id, id: id || slug })
     : `${prefix.replace(/\/$/, "")}/${slug || id}`;
-  const media = mediaFieldsFrom(data[options.imageField ?? "featured_image"]);
+  // W-1090 (#32): unset reads featured_image, else the entry's first image field.
+  const media = mediaFieldsFrom(entryImageValue(data, options.imageField));
   // W-303: EmDash's own publish date is `data.publishedAt`, a `Date`; a custom field may be text.
   const publishedAt = ["published_at", "publishedAt", "date"]
     .map((key) => entryTimestamp(data[key]))

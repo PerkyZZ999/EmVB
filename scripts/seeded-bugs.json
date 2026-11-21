@@ -10474,9 +10474,9 @@
       "description": "a blank image src wins over a real preview URL",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/theme-posts.ts",
-          "search": "    if (typeof candidate === \"string\" && candidate.trim()) {",
-          "replace": "    if (typeof candidate === \"string\") {"
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  const direct = text(media.src) ?? text(media.url) ?? text(media.previewUrl);",
+          "replace": "  const direct = typeof media.src === \"string\" ? media.src : (text(media.url) ?? text(media.previewUrl));"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
@@ -16646,8 +16646,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "const selector = `:where(.emvb-root) ${tag}`;",
-          "replace": "const selector = tag;"
+          "search": "        : `:where(.emvb-root) ${tag}`;",
+          "replace": "        : tag;"
         }
       ],
       "command": [
@@ -24509,8 +24509,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "          {loopContextNote(node, partType) && (",
-          "replace": "          {false && loopContextNote(node, partType) && ("
+          "search": "          {loopContextNote(node, partType, layout) && (",
+          "replace": "          {false && loopContextNote(node, partType, layout) && ("
         }
       ],
       "command": [
@@ -27552,8 +27552,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/theme-posts.ts",
-          "search": "mediaFieldsFrom(data[options.imageField ?? \"featured_image\"])",
-          "replace": "mediaFieldsFrom(data[\"featured_image\"])"
+          "search": "mediaFieldsFrom(entryImageValue(data, options.imageField))",
+          "replace": "mediaFieldsFrom(entryImageValue(data))"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/loop-options.test.ts"],
@@ -55685,6 +55685,442 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/visitor-cookie.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1090/button-default-only-tag",
+      "requirement": "W-1090",
+      "description": "#30: the site-wide button tag default styles only <button> again, not Button elements with a URL that render as <a>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "        ? \":where(.emvb-root) button,:where(.emvb-root) a:where(.emvb-button)\"",
+          "replace": "        ? \":where(.emvb-root) button\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/button-default.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/button-default-class-weight",
+      "requirement": "W-1090",
+      "description": "#30: the link Button selector carries the class in its weight (0,1,1), so the button default beats the site's classes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "        ? \":where(.emvb-root) button,:where(.emvb-root) a:where(.emvb-button)\"",
+          "replace": "        ? \":where(.emvb-root) button,:where(.emvb-root) a.emvb-button\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/button-default.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/button-default-trace",
+      "requirement": "W-1090",
+      "description": "#30: the style trace leaves the button default out of a link Button's inherited values.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/trace.ts",
+          "search": "  if (tag === \"a\" && node.type === \"button\" && buttonStyle) {",
+          "replace": "  if (tag === \"button\" && node.type === \"button\" && buttonStyle) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/button-default.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/e2e-button-default-only-tag",
+      "requirement": "W-1090",
+      "description": "#30 on a published page: the button tag default reaches only <button>, so a Button with a URL keeps the default look.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "        ? \":where(.emvb-root) button,:where(.emvb-root) a:where(.emvb-button)\"",
+          "replace": "        ? \":where(.emvb-root) button\""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-fixes-1.4.1.e2e.ts",
+        "--project=node",
+        "-g",
+        "#30"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1090/archive-collection-loop-silent",
+      "requirement": "W-1090",
+      "description": "#31: a Loop with a collection in an Archive template gets no note, so editors don't learn it ignores the archive's pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  if (partType === \"archive\" && collectionOf(node)) {",
+          "replace": "  if (partType === \"archive\" && collectionOf(node) && node.type === \"pagination\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/archive-pagination-any-loop",
+      "requirement": "W-1090",
+      "description": "#31: Pagination warns as soon as one Loop has a collection, even when another Loop follows the archive.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  someNode(layout.root, (n) => collectionOf(n) !== undefined) &&\n  !someNode(layout.root, (n) => n.type === \"loop\" && collectionOf(n) === undefined);",
+          "replace": "  someNode(layout.root, (n) => collectionOf(n) !== undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/page-collection-loop-shows-nothing",
+      "requirement": "W-1090",
+      "description": "#31: a collection Loop on a page is told again that the live page shows nothing, though it lists its entries anywhere.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  if (collectionOf(node)) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/e2e-archive-collection-loop-silent",
+      "requirement": "W-1090",
+      "description": "#31 in the editor: the archive Loop with a collection shows no note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  if (partType === \"archive\" && collectionOf(node)) {",
+          "replace": "  if (partType === \"archive\" && collectionOf(node) && node.type === \"pagination\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-fixes-1.4.1.e2e.ts",
+        "--project=node",
+        "-g",
+        "#31"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1090/image-storage-key-ignored",
+      "requirement": "W-1090",
+      "description": "#32: an upload picked in EmDash's admin (no src, a storage key) gets no image URL from its key again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (path) return `${LOCAL_MEDIA}${path}`;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts", "-t", "W-1090"],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-no-first-field",
+      "requirement": "W-1090",
+      "description": "#32: with no featured_image, an entry's first image field isn't used.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  return Object.keys(data).find((key) => isImageValue(data[key]));",
+          "replace": "  return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts", "-t", "W-1090"],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-post-reads-featured-only",
+      "requirement": "W-1090",
+      "description": "#32: the post mapping reads only the named field or featured_image again, by src.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  const media = mediaFieldsFrom(entryImageValue(data, options.imageField));",
+          "replace": "  const media = mediaFieldsFrom(data[options.imageField ?? \"featured_image\"]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts", "-t", "W-1090"],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-named-field-falls-back",
+      "requirement": "W-1090",
+      "description": "#32: a Loop's named image field falls back to the automatic one when the entry lacks it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (field) return data[field];",
+          "replace": "  if (field && field in data) return data[field];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts", "-t", "W-1090"],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-any-mime",
+      "requirement": "W-1090",
+      "description": "#32: a file field (PDF) counts as an image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (mimeType) return mimeType.toLowerCase().startsWith(\"image/\");",
+          "replace": "  if (mimeType) return true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/media-value.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-key-traversal",
+      "requirement": "W-1090",
+      "description": "#32: a storage key with .. segments is put in the media URL as is.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (segments.some((s) => s === \"\" || s === \".\" || s === \"..\")) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/media-value.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-fields-order",
+      "requirement": "W-1090",
+      "description": "#32: the picker's Automatic names the first image field even when featured_image is another.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (preferred > 0) images.unshift(...images.splice(preferred, 1));\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/media-value.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-picker-not-wired",
+      "requirement": "W-1090",
+      "description": "#32: a collection Loop's Image field is a text box again, not the list of image fields.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  if (field.key === \"imageField\" && node.type === \"loop\" && fetcher) {",
+          "replace": "  if (field.key === \"imageField\" && node.type === \"loop\" && fetcher && field.kind !== \"text\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/image-field-control.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/image-canvas-src-only",
+      "requirement": "W-1090",
+      "description": "#32: the canvas preview reads featured_image only, so a Loop of entries whose image is another field shows none.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/collection-previews.ts",
+          "search": "  const image = entryImageValue(data, loop.imageField);",
+          "replace": "  const image = loop.imageField ? data[loop.imageField] : data[\"featured_image\"];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/collection-preview-filter.test.ts",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/e2e-image-storage-key-ignored",
+      "requirement": "W-1090",
+      "description": "#32 on a published page: a Loop's post image picked in the admin (no src) renders nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/media-value.ts",
+          "search": "  if (path) return `${LOCAL_MEDIA}${path}`;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-fixes-1.4.1.e2e.ts",
+        "--project=node",
+        "-g",
+        "#32"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1090/entire-site-hint-missing",
+      "requirement": "W-1090",
+      "description": "#40: an Entire site include no longer says it only covers pages that render EmVB theme parts.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "    (rule) => rule.op === \"include\" && rule.group === \"general\" && rule.name === \"entire_site\",",
+          "replace": "    (rule) => rule.op === \"include\" && rule.group === \"general\" && rule.name === \"all\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/entire-site-hint-always",
+      "requirement": "W-1090",
+      "description": "#40: the Entire site hint shows under every condition list, Entire site or not.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "    (rule) => rule.op === \"include\" && rule.group === \"general\" && rule.name === \"entire_site\",",
+          "replace": "    (rule) => rule.op === \"include\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/entire-site-docs-link-anchor",
+      "requirement": "W-1090",
+      "description": "#40: the hint links to the install guide without the section about other routes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "install-in-a-host-site.md#theme-parts-on-your-sites-other-routes\";",
+          "replace": "install-in-a-host-site.md\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx",
+        "-t",
+        "W-1090"
+      ],
+      "expect": "\\(fail\\).*W-1090"
+    },
+    {
+      "id": "W-1090/e2e-entire-site-hint-missing",
+      "requirement": "W-1090",
+      "description": "#40 in the editor: a popup's Entire site condition has no hint.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "    (rule) => rule.op === \"include\" && rule.group === \"general\" && rule.name === \"entire_site\",",
+          "replace": "    (rule) => rule.op === \"include\" && rule.group === \"general\" && rule.name === \"all\","
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-fixes-1.4.1.e2e.ts",
+        "--project=node",
+        "-g",
+        "#40"
+      ],
       "env": {
         "CI": "1"
       },

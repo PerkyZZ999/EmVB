@@ -119,7 +119,12 @@ function tagDefaultCss(
     if (!style) continue;
     // W-670: tracked like classes, so a tag default's entrance gets its keyframes and turns off
     // for reduced motion.
-    const selector = `:where(.emvb-root) ${tag}`;
+    // W-1090 (#30): a Button with a URL renders as `<a>`, and the `button` default reaches it
+    // too, at the same tag weight and after the `a` default. Link elements are not Buttons.
+    const selector =
+      tag === "button"
+        ? ":where(.emvb-root) button,:where(.emvb-root) a:where(.emvb-button)"
+        : `:where(.emvb-root) ${tag}`;
     css += block(selector, track(selector, styleDeclarations(style).declarations));
   }
   return css;

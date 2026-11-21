@@ -230,7 +230,7 @@ export const loop: ElementDefinition<LoopNode> = {
         label: "Image field",
         optional: true,
         message:
-          "The field Post image shows, such as photo. Leave it empty for the featured image.",
+          "The field Post image shows, such as photo. Leave it empty for the featured image, or else the collection's first image field.",
       },
       {
         key: "excerptField",

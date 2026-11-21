@@ -109,3 +109,36 @@ test("a bound text field cut at 2000 keeps a whole emoji (W-557)", () => {
   const fields = plainFieldsOf({ note: `${"a".repeat(1999)}😀 tail` });
   expect(fields["note"]).toBe("a".repeat(1999));
 });
+
+describe("W-1090 (#32): Post image reads the image an editor picked", () => {
+  /** What EmDash 1.5's admin stores for an uploaded image: no `src`, a storage key. */
+  const picked = {
+    id: "01JMEDIA",
+    provider: "local",
+    mimeType: "image/png",
+    meta: { storageKey: "01JK.png" },
+  };
+
+  test("a local upload from the admin shows by its storage key", () => {
+    const post = themePostFromEntry({ id: "a", data: { slug: "a", featured_image: picked } });
+    expect(post?.featuredImageUrl).toBe("/_emdash/api/media/file/01JK.png");
+  });
+
+  test("with no featured_image, the entry's first image field shows", () => {
+    const post = themePostFromEntry({
+      id: "a",
+      data: { slug: "a", subtitle: "Hi", cover: picked, gallery_hero: { src: "/b.jpg" } },
+    });
+    expect(post?.featuredImageUrl).toBe("/_emdash/api/media/file/01JK.png");
+  });
+
+  test("a Loop's named image field is still read as named", () => {
+    const data = { slug: "a", featured_image: picked, photo: { src: "/team/ana.jpg" } };
+    expect(themePostFromEntry({ id: "a", data }, { imageField: "photo" })?.featuredImageUrl).toBe(
+      "/team/ana.jpg",
+    );
+    expect(
+      themePostFromEntry({ id: "a", data }, { imageField: "missing" })?.featuredImageUrl,
+    ).toBeUndefined();
+  });
+});

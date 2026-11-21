@@ -674,9 +674,9 @@ function KnownElementPanel({
               {buttonUrlNote(node)}
             </p>
           )}
-          {loopContextNote(node, partType) && (
+          {loopContextNote(node, partType, layout) && (
             <p className="emvb-helper" data-emvb-loop-note>
-              {loopContextNote(node, partType)}
+              {loopContextNote(node, partType, layout)}
             </p>
           )}
           {imageAltNote(node) && (

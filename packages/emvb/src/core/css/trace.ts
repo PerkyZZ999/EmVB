@@ -94,6 +94,14 @@ export function styleLayers(
       style: tagStyle,
     });
   }
+  // W-1090 (#30): a link Button gets the `button` default too, above the `a` one.
+  const buttonStyle = design.defaults?.button;
+  if (tag === "a" && node.type === "button" && buttonStyle) {
+    layers.push({
+      source: { kind: "default", label: "Site default (BUTTON)", layer: "Desktop" },
+      style: buttonStyle,
+    });
+  }
   const applied = new Set(node.classes ?? []);
   const owners: Owner[] = [];
   for (const cls of design.classes ?? []) {

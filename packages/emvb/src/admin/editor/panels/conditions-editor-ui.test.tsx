@@ -218,3 +218,24 @@ test("UX-051: the add buttons read Include and Exclude, and are named as adding 
     "Exclude = Add exclude rule",
   ]);
 });
+
+describe("W-1090 (#40): Entire site says it means pages that render EmVB theme parts", () => {
+  test("an Entire site include gets the hint and a link to adding theme parts to other routes", async () => {
+    const view = await editor(TWO);
+    const hint = view.host.querySelector("[data-emvb-entire-site-hint]");
+    expect(hint?.textContent ?? "").toContain("every page that renders EmVB theme parts");
+    const link = hint?.querySelector("a");
+    expect(link?.getAttribute("href") ?? "").toBe(
+      "https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/install-in-a-host-site.md#theme-parts-on-your-sites-other-routes",
+    );
+    expect(link?.getAttribute("rel") ?? "").toContain("noopener");
+  });
+
+  test("without an Entire site include there is no hint", async () => {
+    const view = await editor({
+      schemaVersion: CONDITIONS_SCHEMA_VERSION,
+      rules: [{ id: "r2", op: "include", group: "singular", name: "front", args: {} }],
+    });
+    expect(view.host.querySelector("[data-emvb-entire-site-hint]")?.outerHTML ?? null).toBeNull();
+  });
+});

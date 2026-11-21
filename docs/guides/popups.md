@@ -13,7 +13,12 @@ and focus goes back to where it was.
 1. In **Theme Builder**, press **New theme part** and choose **Popup**.
 2. Build its content like a page.
 3. With nothing selected, the Settings panel shows **Theme part settings**. Set the display
-   conditions (which pages), then the **Triggers** (when it opens):
+   conditions (which pages), then the **Triggers** (when it opens). **Entire site** means every
+   page that renders EmVB theme parts: EmVB pages and the routes whose layout adds them. A blog
+   home or post list built from your site's own templates shows no popup until its layout adds
+   theme parts; see
+   [Theme parts on your site's other routes](install-in-a-host-site.md#theme-parts-on-your-sites-other-routes).
+   The triggers:
    - **On page load**, **After delay**, **On scroll**, **Exit intent** or **After inactivity**.
    - **On click (selector)**: it opens when a visitor clicks an element that matches a CSS selector,
      such as `#menu-button`. Give that button a **CSS id** in its Advanced settings.

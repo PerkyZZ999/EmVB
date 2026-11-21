@@ -10,6 +10,7 @@ import { HintedSwitch } from "./HintedSwitch.tsx";
 import { RequiredFieldsNotice } from "./RequiredFieldsNotice.tsx";
 import { LoopItemBindControl } from "./LoopItemBindControl.tsx";
 import { IconPicker } from "./IconPicker.tsx";
+import { ImageFieldControl } from "./ImageFieldControl.tsx";
 import { ImageSourcesField } from "./ImageSourcesField.tsx";
 import { MediaPicker } from "./MediaPicker.tsx";
 import { propsOf, withProp } from "./node-props.ts";
@@ -50,6 +51,20 @@ export function FieldControl({
         />
         <RequiredFieldsNotice node={node} fetcher={fetcher} />
       </React.Fragment>
+    );
+  }
+
+  if (field.key === "imageField" && node.type === "loop" && fetcher) {
+    // W-1090 (#32): picked from the collection's image fields.
+    return (
+      <ImageFieldControl
+        key={field.key}
+        field={field}
+        node={node}
+        collection={typeof props["collection"] === "string" ? props["collection"] : undefined}
+        fetcher={fetcher}
+        onChange={onChange}
+      />
     );
   }
 

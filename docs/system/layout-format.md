@@ -203,7 +203,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 - The document is at most 256 KiB (`MAX_DESIGN_BYTES`).
 - A font size or spacing variable may set `fluid: { min, max }` (px, 0–1000). It is emitted as `clamp()` between `fluidRange` (unset is 360 to 1280 px; `minWidth` must be less than `maxWidth`). `value` stays the fixed fallback (W-316).
 - `direction` is `ltr`, `rtl` or `auto` (unset is left to right). It is `dir` on every EmVB root, and hosts get it back for `<html dir>` (W-230).
-- `defaults` is a starting style per tag (`h1`–`h6`, `p`, `a`, `button`), emitted under `:where(.emvb-root)` so a class still wins.
+- `defaults` is a starting style per tag (`h1`–`h6`, `p`, `a`, `button`), emitted under `:where(.emvb-root)` so a class still wins. The `button` default also reaches Button elements that have a URL and so render as `<a>` (`:where(.emvb-root) a:where(.emvb-button)`, the same tag weight, after the `a` default so it wins over it there); Link elements get only the `a` default (1.4.1, W-1090).
 
 ## Limits and validation
 
@@ -288,7 +288,7 @@ A rule the host cannot check does not match. Pages with a variant or an audience
 Schema 14 only adds optional fields, so a v13 document upgrades unchanged.
 
 - **Visitor segments (W-329).** `audience.segments`, above. Hosts pass them as `resolveEmVBPage(Astro, { visitor: { segments } })` and the same option on `resolveThemeParts`. `country`, `device` and `returning` on that object replace what EmVB detects.
-- **Loop fields (W-330).** On a collection Loop, `permalink` is a site path containing `{slug}` or `{id}` (unset is `/<collection>/{slug}`). `imageField` and `excerptField` name the entry fields Post Image and Post Excerpt read (unset is `featured_image` and `excerpt`). `filter` is up to five `field=value` pairs separated by `;`. A taxonomy name filters by term, and the same field twice matches either value.
+- **Loop fields (W-330).** On a collection Loop, `permalink` is a site path containing `{slug}` or `{id}` (unset is `/<collection>/{slug}`). `imageField` and `excerptField` name the entry fields Post Image and Post Excerpt read (unset is `featured_image` and `excerpt`; since 1.4.1, an entry with no `featured_image` image shows its first image field, W-1090). The editor offers the collection's image fields as a list. An image field's value is read from its `src` or `url`, or, for an upload picked in EmDash's admin (which stores no `src`), from `meta.storageKey` as `/_emdash/api/media/file/<key>`, as EmDash's own image component does. `filter` is up to five `field=value` pairs separated by `;`. A taxonomy name filters by term, and the same field twice matches either value.
 - **`ch` and negative margins (W-331).** Lengths may use `ch`. Margins may be negative (−10000 to 10000). Padding stays 0 or more.
 
 ## Internal proposal records (W-928)

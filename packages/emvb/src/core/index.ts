@@ -478,6 +478,13 @@ export {
   type ArchivePagination,
   type PaginationItem,
 } from "./theme/pagination.ts";
+export {
+  DEFAULT_IMAGE_FIELD,
+  automaticImageField,
+  entryImageValue,
+  imageFieldsOf,
+  mediaUrlOf,
+} from "./theme/media-value.ts";
 
 export { layoutHasMenuDropdown, layoutHasTabs } from "./tabs/presence.ts";
 export {
