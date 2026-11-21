@@ -11,7 +11,7 @@
 
 [![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
 
-A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0–1.4 (built and tested on 1.4.0). Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS. It runs on Node (SQLite) and Cloudflare Workers (D1).
+A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.4 and 1.5 (built and tested on 1.5.0, tested on 1.4.0). Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
 ![The EmVB editor](https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/site/public/screenshots/editor-1600.webp)
 
@@ -25,7 +25,7 @@ Library pictures can be cropped, adjusted, filtered and saved as a new media ite
 npm i @perkyzz/emvb
 ```
 
-Peers, which an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. `@emdash-cms/plugin-forms` ^0.2.9 is optional and enables forms. Use the Astro version your EmDash site already has: EmVB is verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7.
+Peers, which an EmDash 1.4 or 1.5 site already has: `emdash` >=1.4.0 <2, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash 1.4) or 2.15.0 (EmDash 1.5) and `@phosphor-icons/react` ^2.1.10. `@emdash-cms/plugin-forms` is optional and enables forms: 0.2.13 on EmDash 1.5, 0.2.9 to 0.2.12 on EmDash 1.4. Use the Astro version your EmDash site already has: each release is installed on stock `create-emdash` sites of EmDash 1.4.0 and 1.5.0.
 
 Dependencies installed with it: `zod` and [`@perkyzz/emvb-icons`](https://www.npmjs.com/package/@perkyzz/emvb-icons), the icon sets for the editor's Icon library. Only the editor loads them; a placed icon is saved into the page as SVG.
 

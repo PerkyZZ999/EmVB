@@ -4,7 +4,7 @@ EmVB is a **native** EmDash plugin: add the package, register it in `astro.confi
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
-EmVB 1.2 is verified on EmDash 1.4.0 and 1.5.0: each release is installed on a fresh `create-emdash` site of each version, following this guide (on 2026-11-13 with Astro 7.4.10 on 1.4.0 and Astro 7.4.11 on 1.5.0), and every change is tested on both in CI. EmVB 1.0 was verified on EmDash 1.4.0 with Astro 7.4.7 and 7.4.8; earlier releases on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
+EmVB 1.4 is verified on EmDash 1.4.0 and 1.5.0: each release is installed on a fresh `create-emdash` site of each version, Node and Cloudflare, following this guide (on 2026-11-21 with Astro 7.4.13 on both), and every change is tested on both in CI. EmVB 1.0 was verified on EmDash 1.4.0 with Astro 7.4.7 and 7.4.8; earlier releases on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
 
 ## 1. Install the package
 
@@ -19,10 +19,12 @@ EmVB ships TypeScript source and has no build step; your site's Vite build compi
 
 It also installs two dependencies: `zod` and `@perkyzz/emvb-icons`, the icon sets for the editor's Icon library (pinned to the exact version EmVB was built with). Only the editor loads the icon sets; a placed icon is saved into the page as SVG, so public pages never fetch them.
 
-Optional (forms on EmVB pages):
+Optional (forms on EmVB pages): EmDash Forms pins EmDash's exact Kumo version, so pick the release
+that matches your EmDash:
 
 ```bash
-bun add @emdash-cms/plugin-forms@0.2.9
+npm i @emdash-cms/plugin-forms@0.2.13   # EmDash 1.5 (Kumo 2.15.0)
+npm i @emdash-cms/plugin-forms@0.2.12   # EmDash 1.4 (Kumo 2.6.0; 0.2.9 to 0.2.12 work)
 ```
 
 ## 2. Register the plugin
