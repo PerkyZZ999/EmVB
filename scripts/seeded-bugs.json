@@ -41629,7 +41629,7 @@
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
           "search": "if (typeof value === \"string\") return undefined; // raw HTML / text — refused",
-          "replace": "if (typeof value === \"string\") return { id: newNodeId(random), type: \"heading\", props: { text: value, level: 2 } };"
+          "replace": "if (typeof value === \"string\") return { node: { id: newNodeId(random), type: \"heading\", props: { text: value, level: 2 } }, classes: [] };"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -51450,12 +51450,12 @@
     {
       "id": "W-1062/basis-in-columns-e2e",
       "requirement": "W-1062",
-      "description": "A Spacer in a column keeps its desktop height on a phone.",
+      "description": "A Spacer in a column keeps its desktop height on a phone: every Spacer gets its desktop height as flex-basis, as W-1062 first shipped.",
       "edits": [
         {
           "file": "packages/emvb/src/core/render/spacer-basis.ts",
-          "search": "    return typeof direction === \"string\" && ROW_DIRECTIONS.has(direction);\n",
-          "replace": "    return true;\n"
+          "search": "    parentRow(level) && !sized(level) ? lastValue(chain(level), \"height\") : undefined;\n",
+          "replace": "    !sized(level) ? lastValue([lists.desktop], \"height\") : undefined;\n"
         }
       ],
       "command": [
