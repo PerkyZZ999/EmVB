@@ -48,11 +48,15 @@ export function FormBindControl({
     );
   }
 
-  if (capability?.status === "ready" && capability.forms.length > 0) {
-    const known = capability.forms.some((form) => form.id === value);
-    const placeholder = !known && value ? "Current id (not in list)" : "Choose a form…";
-    return (
-      <div className="emvb-field-group" data-emvb-form-bind="list">
+  // W-1094: one tree for both states, so the Form id input stays the same element when the forms
+  // list arrives. Swapping trees remounted it, so a person typing there lost focus and the next
+  // Delete or Backspace reached the editor, which offered to delete the selected Form.
+  const listed = capability?.status === "ready" && capability.forms.length > 0;
+  const known = listed && capability.forms.some((form) => form.id === value);
+  const placeholder = !known && value ? "Current id (not in list)" : "Choose a form…";
+  return (
+    <div className="emvb-field-group" data-emvb-form-bind={listed ? "list" : "manual"}>
+      {listed && (
         <Select
           label="Form"
           className={FIELD}
@@ -73,38 +77,30 @@ export function FormBindControl({
             </Select.Option>
           ))}
         </Select>
-        <Input
-          label="Form id"
-          className={`${FIELD} emvb-mono`}
-          value={value}
-          onChange={(event) => onChange(event.target.value.trim())}
-        />
-        {adminLinks && (
-          <p className="emvb-helper">
-            <a href="/_emdash/admin/plugins/emdash-forms/pages">Create or edit forms</a>
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="emvb-field-group" data-emvb-form-bind="manual">
+      )}
       <Input
         label="Form id"
         className={`${FIELD} emvb-mono`}
         value={value}
         onChange={(event) => onChange(event.target.value.trim())}
       />
-      <p className="emvb-helper">
-        Paste a forms-plugin form id.
-        {adminLinks && (
-          <>
-            {" "}
-            <a href="/_emdash/admin/plugins/emdash-forms/pages">Open Forms</a>
-          </>
-        )}
-      </p>
+      {listed ? (
+        adminLinks && (
+          <p className="emvb-helper">
+            <a href="/_emdash/admin/plugins/emdash-forms/pages">Create or edit forms</a>
+          </p>
+        )
+      ) : (
+        <p className="emvb-helper">
+          Paste a forms-plugin form id.
+          {adminLinks && (
+            <>
+              {" "}
+              <a href="/_emdash/admin/plugins/emdash-forms/pages">Open Forms</a>
+            </>
+          )}
+        </p>
+      )}
     </div>
   );
 }

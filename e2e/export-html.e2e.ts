@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { api, createPage, parsed, publishPage, setUpEmvbOnce } from "./support/api.ts";
-import { unique } from "./support/helpers.ts";
+import { settleAdminColorScheme, unique } from "./support/helpers.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
 
 /**
@@ -83,7 +83,7 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   await page.getByRole("option", { name: title, exact: true }).click();
 
   for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme });
+    await settleAdminColorScheme(page, colorScheme);
     const axe = await new AxeBuilder({ page })
       .include('[data-emvb-dialog="export-pages"]')
       .analyze();
@@ -180,7 +180,7 @@ test("W-963: published pages copy into a collection as rich-text drafts", async 
   await dialog.getByRole("combobox", { name: "Pages" }).click();
   await page.getByRole("option", { name: title, exact: true }).click();
   for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme });
+    await settleAdminColorScheme(page, colorScheme);
     const axe = await new AxeBuilder({ page })
       .include('[data-emvb-dialog="export-pages"]')
       .analyze();

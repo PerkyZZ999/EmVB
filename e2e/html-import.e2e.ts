@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { publishPage, storedLayout, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
+import { canvas, overlay, settleAdminColorScheme, unique } from "./support/helpers.ts";
 
 /**
  * W-1074 acceptance: WordPress block markup or an HTML page goes into Import HTML, its report is
@@ -42,7 +42,7 @@ test("W-1074: WordPress block markup becomes a page that edits and publishes", a
 
   // The dialog with its report open: no serious or critical axe findings, light and dark.
   for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme });
+    await settleAdminColorScheme(page, colorScheme);
     const axe = await new AxeBuilder({ page })
       .include('[data-emvb-dialog="import-html"]')
       .analyze();

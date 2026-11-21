@@ -1,7 +1,14 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { canvas, openEditor, overlay, saveDraft, unique } from "./support/helpers.ts";
+import {
+  canvas,
+  colorsSettled,
+  openEditor,
+  overlay,
+  saveDraft,
+  unique,
+} from "./support/helpers.ts";
 
 setUpEmvbOnce();
 
@@ -134,6 +141,11 @@ test("W-1084 the Elements/Templates switch reads at 4.5:1 in light and dark", as
     await openEditor(page, id, title);
     // oxlint-disable-next-line no-await-in-loop -- same
     await expect(overlay(page).getByRole("tablist", { name: "Add" })).toBeVisible();
+    // W-1094: the admin applies the scheme after load, then fades its colours into it.
+    // oxlint-disable-next-line no-await-in-loop -- same
+    await expect(page.locator("html")).toHaveAttribute("data-mode", scheme);
+    // oxlint-disable-next-line no-await-in-loop -- same
+    await colorsSettled(page);
     // oxlint-disable-next-line no-await-in-loop -- same
     const results = await new AxeBuilder({ page })
       .include(".emvb-add-switch")

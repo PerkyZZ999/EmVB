@@ -20,6 +20,7 @@ test("W-735: field definitions explain loading, unavailable and empty states wit
   const releases = Array.from({ length: 3 }, () => Promise.withResolvers<void>());
   let phase = 0;
   const requested: number[] = [];
+  const formsList = Promise.withResolvers<void>();
   await page.route("**/_emdash/api/plugins/emdash-forms/definition", async (route) => {
     const body = route.request().postDataJSON() as { id: string };
     if (body.id !== formId) return route.fallback();
@@ -105,8 +106,25 @@ test("W-735: field definitions explain loading, unavailable and empty states wit
     await expect(canvas(page).locator('input[name="email"]')).toHaveCount(1);
     expect(await frame.evaluate((el) => el.getBoundingClientRect().width)).toBe(width);
 
+    // W-1094: the forms list can arrive while a person edits the Form id (it did on a slow CI
+    // runner). The field keeps focus, so a Delete typed there never reaches the editor, which
+    // would offer to delete the selected Form.
+    await page.route("**/_emdash/api/plugins/emdash-forms/forms/list", async (route) => {
+      await formsList.promise;
+      await route.fulfill({
+        json: { data: { items: [{ id: "01OTHERFORM", name: "Other form", slug: "other" }] } },
+      });
+    });
     await formLayer.click();
-    await overlay(page).getByRole("textbox", { name: "Form id", exact: true }).fill("");
+    const formIdInput = overlay(page).getByRole("textbox", { name: "Form id", exact: true });
+    await formIdInput.click();
+    await expect(formIdInput).toBeFocused();
+    formsList.resolve();
+    await expect(overlay(page).getByRole("combobox", { name: "Form", exact: true })).toBeVisible();
+    await expect(formIdInput).toBeFocused();
+    await formIdInput.fill("");
+    await expect(formIdInput).toHaveValue("");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await fieldLayer.click();
     await expect(status).toHaveText(
       "Choose a form on the parent Form element to list its fields, or enter a field name manually.",
@@ -117,5 +135,6 @@ test("W-735: field definitions explain loading, unavailable and empty states wit
     expect([...new Set(requested)]).toEqual([0, 1, 2]);
   } finally {
     for (const release of releases) release.resolve();
+    formsList.resolve();
   }
 });

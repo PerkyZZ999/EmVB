@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import { expect, test } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { canvas, openEditor, saveDraft, unique } from "./support/helpers.ts";
+import { canvas, colorsSettled, openEditor, saveDraft, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
@@ -152,10 +152,26 @@ test("the active device tab follows a light/dark switch at once (W-905)", async 
   await page.emulateMedia({ colorScheme: "light" });
   await openEditor(page, id, text);
   const pill = page.locator('.emvb-device-tabs [role="tablist"] > div');
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "light");
   const light = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
+  // W-1094: the admin turns dark when EmDash sets <html data-mode="dark">, some time after the
+  // media change (seconds on a slow runner). Read the pill in the same task as that switch: a
+  // colour transition would still show the light colour then, so "at once" is checked exactly.
+  await pill.evaluate((el) => {
+    const root = document.documentElement;
+    (window as { emvbFirstDark?: Promise<string> }).emvbFirstDark = new Promise((resolve) => {
+      new MutationObserver((_, observer) => {
+        if (root.dataset["mode"] !== "dark") return;
+        observer.disconnect();
+        resolve(getComputedStyle(el).backgroundColor);
+      }).observe(root, { attributes: true, attributeFilter: ["data-mode"] });
+    });
+  });
   await page.emulateMedia({ colorScheme: "dark" });
-  const first = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
-  await page.waitForTimeout(500);
+  const first = await page.evaluate(
+    () => (window as { emvbFirstDark?: Promise<string> }).emvbFirstDark,
+  );
+  await colorsSettled(page);
   const settled = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(settled).not.toBe(light);
   expect(first).toBe(settled);

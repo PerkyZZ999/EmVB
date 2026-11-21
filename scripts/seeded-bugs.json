@@ -10081,8 +10081,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "      <div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">",
-          "replace": "      <div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">\n        <span data-emvb-form-bind=\"manual\" />"
+          "search": "      {listed && (\n        <Select",
+          "replace": "      {listed && <span data-emvb-form-bind=\"manual\" />}\n      {listed && (\n        <Select"
         }
       ],
       "command": [
@@ -25386,8 +25386,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "        {adminLinks && (\n          <p className=\"emvb-helper\">",
-          "replace": "        {(adminLinks || true) && (\n          <p className=\"emvb-helper\">"
+          "search": "        adminLinks && (\n          <p className=\"emvb-helper\">",
+          "replace": "        (adminLinks || true) && (\n          <p className=\"emvb-helper\">"
         }
       ],
       "command": [
@@ -35741,8 +35741,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">",
-          "replace": "<div data-emvb-form-bind=\"list\">"
+          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind={listed ? \"list\" : \"manual\"}>",
+          "replace": "<div className={listed ? undefined : \"emvb-field-group\"} data-emvb-form-bind={listed ? \"list\" : \"manual\"}>"
         }
       ],
       "command": [
@@ -35761,8 +35761,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind=\"manual\">",
-          "replace": "<div data-emvb-form-bind=\"manual\">"
+          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind={listed ? \"list\" : \"manual\"}>",
+          "replace": "<div className={listed ? \"emvb-field-group\" : undefined} data-emvb-form-bind={listed ? \"list\" : \"manual\"}>"
         }
       ],
       "command": [
@@ -56335,6 +56335,41 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1094/form-id-remounts-when-list-arrives",
+      "requirement": "W-1094",
+      "description": "The Form id input is rebuilt when the forms list arrives, so focus leaves it mid-typing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "    <div className=\"emvb-field-group\" data-emvb-form-bind={listed ? \"list\" : \"manual\"}>",
+          "replace": "    <div\n      key={listed ? \"list\" : \"manual\"}\n      className=\"emvb-field-group\"\n      data-emvb-form-bind={listed ? \"list\" : \"manual\"}\n    >"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-1094"
+    },
+    {
+      "id": "W-1094/form-id-remounts-when-list-arrives-e2e",
+      "requirement": "W-1094",
+      "description": "In the editor, a Form id being edited loses focus when the forms list arrives late.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "    <div className=\"emvb-field-group\" data-emvb-form-bind={listed ? \"list\" : \"manual\"}>",
+          "replace": "    <div\n      key={listed ? \"list\" : \"manual\"}\n      className=\"emvb-field-group\"\n      data-emvb-form-bind={listed ? \"list\" : \"manual\"}\n    >"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/field-feedback.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*W-735"
     }
   ]
 }

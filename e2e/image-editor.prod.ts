@@ -9,7 +9,14 @@ import {
   type Page,
 } from "@playwright/test";
 import { createPage, ensureEmvbSetup, getPage, publishPage, storedLayout } from "./support/api.ts";
-import { EDITOR, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
+import {
+  EDITOR,
+  openLayers,
+  overlay,
+  saveDraft,
+  settleAdminColorScheme,
+  unique,
+} from "./support/helpers.ts";
 import { stripJpegGps } from "../packages/emvb/src/admin/image-editor/exif.ts";
 
 // W-482: the image editor under the production CSP (EmDash sends it only in production builds).
@@ -253,15 +260,14 @@ test("the active tool stays readable after the admin switches from dark to light
     timeout: 30_000,
   });
   const light = await activeColors();
-  await page.emulateMedia({ colorScheme: "dark" });
-  await page.waitForTimeout(300);
+  await settleAdminColorScheme(page, "dark");
   await shot(page, "dark-adjust");
   await page.locator('[data-emvb-image-tool="compose"]').click();
   await page.waitForTimeout(400);
   await shot(page, "dark-crop");
   await page.locator('[data-emvb-image-tool="adjust"]').click();
-  await page.emulateMedia({ colorScheme: "light" });
-  await page.waitForTimeout(300);
+  // W-1094: wait for the admin to be light again with its fades done, not a fixed 300 ms.
+  await settleAdminColorScheme(page, "light");
   expect(await activeColors()).toEqual(light);
   await page.setViewportSize({ width: 1024, height: 680 });
   await page.locator('[data-emvb-image-tool="compose"]').click();

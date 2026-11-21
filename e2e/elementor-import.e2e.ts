@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
+import { canvas, overlay, settleAdminColorScheme, unique } from "./support/helpers.ts";
 
 /**
  * W-945 acceptance: an Elementor export is chosen in Import from Elementor, its report shown,
@@ -41,7 +41,7 @@ test("W-945: an Elementor template becomes a page that edits and publishes", asy
 
   // The dialog with its report open: no serious or critical axe findings, light and dark.
   for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme });
+    await settleAdminColorScheme(page, colorScheme);
     const axe = await new AxeBuilder({ page })
       .include('[data-emvb-dialog="import-elementor"]')
       .analyze();
@@ -297,7 +297,7 @@ test("W-1091 (#27): an Elementor form says it needs connecting, and Create the f
   );
   await expect(notice).toContainText("Thanks, we'll reply soon.");
   for (const colorScheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme });
+    await settleAdminColorScheme(page, colorScheme);
     const axe = await new AxeBuilder({ page })
       .include('[data-emvb-dialog="import-elementor"]')
       .analyze();

@@ -37,6 +37,39 @@ describe("FormBindControl (W-036)", () => {
     expect(document.querySelector('[data-emvb-form-bind="manual"]')?.outerHTML ?? null).toBeNull();
   });
 
+  test("W-1094: the Form id input keeps focus and its text when the forms list arrives", async () => {
+    const pending = Promise.withResolvers<Response>();
+    const sent: string[] = [];
+    const fetcher: Fetcher = async () => pending.promise;
+    const host = await mount(
+      <FormBindControl value="01OLD" fetcher={fetcher} onChange={(id) => sent.push(id)} />,
+    );
+    const input = host.querySelector<HTMLInputElement>("input.emvb-mono");
+    if (!input) throw new Error("No form id input");
+    try {
+      await act(async () => {
+        input.focus();
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+          input,
+          "01TYPED",
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () =>
+        pending.resolve(
+          Response.json({ data: { items: [{ id: "01FORM", name: "Contact", slug: "contact" }] } }),
+        ),
+      );
+      await flush();
+      expect(host.querySelector('[data-emvb-form-bind="list"]') !== null).toBe(true);
+      expect(host.querySelector<HTMLInputElement>("input.emvb-mono") === input).toBe(true);
+      expect(document.activeElement === input).toBe(true);
+      expect(sent).toEqual(["01TYPED"]);
+    } finally {
+      await act(async () => pending.resolve(Response.json({ data: { items: [] } })));
+    }
+  });
+
   test("editor path shows manual id when list is forbidden", async () => {
     const fetcher: Fetcher = async () =>
       new Response(JSON.stringify({ error: { code: "FORBIDDEN", message: "no" } }), {
