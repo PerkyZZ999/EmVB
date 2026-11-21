@@ -4,7 +4,7 @@ import type { Fetcher } from "../api.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
-import { cleanup, mount, rerender } from "../../../test/dom/mount.ts";
+import { cleanup, mount, rerender, untilPopupClosed } from "../../../test/dom/mount.ts";
 
 afterEach(cleanup);
 
@@ -243,8 +243,8 @@ test("NewThemePartDialog: choosing another type re-derives an untouched slug", a
   expect(footer).toBeTruthy();
   await act(async () => {
     footer?.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
   });
+  await untilPopupClosed();
   expect((input("Slug") as HTMLInputElement).value).toBe("footer-main");
 });
 

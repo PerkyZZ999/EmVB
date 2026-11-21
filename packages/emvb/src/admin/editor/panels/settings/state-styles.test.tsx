@@ -3,7 +3,7 @@ import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type DesignSystem, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 import type { StyleStateChoice } from "./StateSwitcher.tsx";
 
@@ -111,14 +111,8 @@ async function choose(label: string, option: string) {
   const options = [...document.querySelectorAll<HTMLElement>('[role="option"]')];
   await act(async () => {
     options.find((o) => o.textContent === option)?.click();
-    // Base UI closes the popup on timers; under load they can outlast a fixed pause and update
-    // outside act() (W-1094). Wait inside act() until the options are gone.
-    for (let waited = 0; waited < 2000; waited += 10) {
-      // oxlint-disable-next-line no-await-in-loop -- polls until the popup has closed
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      if (!document.querySelector('[role="option"]')) break;
-    }
   });
+  await untilPopupClosed();
   return options.map((o) => o.textContent);
 }
 
