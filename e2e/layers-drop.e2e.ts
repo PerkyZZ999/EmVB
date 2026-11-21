@@ -68,6 +68,8 @@ test("an Add tile dragged over the Layers tab drops between two rows, in one und
   const id = await createPage(request, "Layers drop add", layoutFor(), `ldrop-${unique()}`);
   await openEditor(page, id, "Alpha");
   await overlay(page).getByRole("tab", { name: "Add" }).click();
+  // Filter so the tile sits under the tabs: the Add panel is taller than the window.
+  await overlay(page).getByRole("searchbox", { name: "Search elements" }).fill("Heading");
   await startDrag(page, overlay(page).locator('[data-emvb-add-tile="heading"]'));
   // Hovering the Layers tab opens Layers mid-drag.
   const tab = await centre(overlay(page).getByRole("tab", { name: "Layers" }));
