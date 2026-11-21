@@ -3,7 +3,8 @@ import { act } from "react";
 import { emptyDesign, type Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
-import { ImportElementorDialog, fileNameOf } from "./ImportElementorDialog.tsx";
+import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
+import { fileNameOf } from "./ImportImageCopies.tsx";
 
 let restoreNavigation: () => void = () => undefined;
 afterEach(async () => {

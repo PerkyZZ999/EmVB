@@ -43943,7 +43943,7 @@
       "description": "Chosen SVG files only match when the case is identical.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "file": "packages/emvb/src/admin/pages/ImportImageCopies.tsx",
           "search": "    return decodeURIComponent(last).toLowerCase();",
           "replace": "    return decodeURIComponent(last);"
         }
@@ -44207,7 +44207,7 @@
       "description": "Copy images sends the person's cookies to the old site.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "file": "packages/emvb/src/admin/pages/ImportImageCopies.tsx",
           "search": "      credentials: \"omit\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(20_000),",
           "replace": "      credentials: \"include\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(20_000),"
         }
@@ -44221,7 +44221,7 @@
       "description": "Copy images uploads whatever the old site returns.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "file": "packages/emvb/src/admin/pages/ImportImageCopies.tsx",
           "search": "    if (!blob.type.startsWith(\"image/\") || blob.size > MAX_IMAGE_FILE) return undefined;",
           "replace": "    if (blob.size > MAX_IMAGE_FILE) return undefined;"
         }
@@ -51918,6 +51918,171 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/translatable.test.ts"],
       "expect": "\\(fail\\).*search page address isn't"
+    },
+    {
+      "id": "W-1074/script-content-kept",
+      "requirement": "W-1074",
+      "description": "A script's code in imported HTML is read as page text and not reported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/parse.ts",
+          "search": "const RAW_TEXT = new Set([\n  \"script\",",
+          "replace": "const RAW_TEXT = new Set([\n  \"x-script\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*scripts, handlers, unsafe addresses, frames and styles are all left out"
+    },
+    {
+      "id": "W-1074/unsafe-href-kept",
+      "requirement": "W-1074",
+      "description": "An imported link's address is used without EmVB's href sanitizer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/map.ts",
+          "search": "    const safe = this.ctx.href(raw);",
+          "replace": "    const safe = raw;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*hostile HTML"
+    },
+    {
+      "id": "W-1074/image-src-unsanitized",
+      "requirement": "W-1074",
+      "description": "An imported image's address skips the media URL sanitizer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/map.ts",
+          "search": "    const src = sanitizeMediaUrl(raw.trim());",
+          "replace": "    const src = raw.trim();"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*hostile HTML"
+    },
+    {
+      "id": "W-1074/handler-not-reported",
+      "requirement": "W-1074",
+      "description": "Event handlers on imported elements are dropped silently, without a report line.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/map.ts",
+          "search": "      if (name.startsWith(\"on\")) {",
+          "replace": "      if (name.startsWith(\"x-on\")) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*scripts, handlers, unsafe addresses, frames and styles are all left out"
+    },
+    {
+      "id": "W-1074/oversize-not-refused",
+      "requirement": "W-1074",
+      "description": "HTML over 4 MB is read instead of refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/index.ts",
+          "search": "  if (input.length > MAX_HTML_IMPORT_CHARS)",
+          "replace": "  if (input.length > MAX_HTML_IMPORT_CHARS * 2)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*a file over 4 MB is refused before reading"
+    },
+    {
+      "id": "W-1074/box-depth-unbounded",
+      "requirement": "W-1074",
+      "description": "Boxes nested in imported HTML are never flattened, so deep markup exceeds EmVB's depth.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/map.ts",
+          "search": "    const deep = depth >= MAX_BOX_DEPTH;",
+          "replace": "    const deep = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*deep nesting stays within EmVB's depth"
+    },
+    {
+      "id": "W-1074/any-frame-kept",
+      "requirement": "W-1074",
+      "description": "Any imported iframe address becomes a Video, not only YouTube and Vimeo.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/map.ts",
+          "search": "    const url = this.videoUrl(raw);\n",
+          "replace": "    const url = raw.trim() || undefined;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*W-1074"
+    },
+    {
+      "id": "W-1074/old-site-scan-quadratic",
+      "requirement": "W-1074",
+      "description": "The old-site search scans the whole text before every /wp-content/ instead of a short window.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "text.slice(Math.max(0, hit - MAX_SITE_URL), hit + marker.length)",
+          "replace": "text.slice(0, hit + marker.length)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*W-1074"
+    },
+    {
+      "id": "W-1074/dialog-ignores-copies",
+      "requirement": "W-1074",
+      "description": "Import HTML ignores the media library copies Copy images made.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportHtmlDialog.tsx",
+          "search": "importHtml(html, { media: (url: string) => copies.get(url) })",
+          "replace": "importHtml(html, {})"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/import-html.test.tsx"],
+      "expect": "\\(fail\\).*W-1074: Copy images"
+    },
+    {
+      "id": "W-1074/no-import-html-button",
+      "requirement": "W-1074",
+      "description": "The Pages screen has no Import HTML button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "      <ImportButton source=\"html\" onClick={() => setImportingHtml(true)} />\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/html-import.e2e.ts",
+        "--project=node",
+        "-g",
+        "WordPress block markup"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1074/block-attr-text-raw",
+      "requirement": "W-1074",
+      "description": "Texts from WordPress block attributes (search label, social link label) keep control characters and line breaks.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/html/blocks.ts",
+          "search": "  cleanText(stripControl(str(value) ?? \"\")).slice(0, max);",
+          "replace": "  (str(value) ?? \"\").slice(0, max);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/html/html-import.test.ts"],
+      "expect": "\\(fail\\).*plain one-liners"
     }
   ]
 }

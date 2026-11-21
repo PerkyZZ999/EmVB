@@ -911,32 +911,43 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   });
   if (pageStyle.devices) root["devices"] = pageStyle.devices;
   if (options.media) pointAtCopies(root, ctx);
+  const checked = validImport(root, ctx);
+  if (!checked.ok) return checked;
+  const partType = source.type ? PART_TYPES[source.type] : undefined;
+  return {
+    ok: true,
+    layout: checked.layout,
+    ...(source.title ? { title: source.title } : {}),
+    ...(partType ? { partType } : {}),
+    elements: ctx.elements,
+    mapped: ctx.mapped,
+    notes: ctx.report(),
+    fonts: [...ctx.fonts].toSorted(),
+    svgFiles: [...ctx.svgFiles],
+    pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
+    menus: [...ctx.menus].toSorted(),
+    images: [...ctx.images],
+    classes: usedClasses(checked.layout, ctx).map((cls) =>
+      options.media ? (pointAtCopies(structuredClone(cls), ctx) as StyleClass) : cls,
+    ),
+  };
+}
+
+/**
+ * The imported tree as a layout EmVB accepts: whatever validation or the nesting rules refuse is
+ * pruned (and noted) until it passes. Shared with the HTML import (W-1074).
+ */
+export function validImport(
+  root: N,
+  ctx: ImportContext,
+): { ok: true; layout: Layout } | { ok: false; error: string } {
   const candidate: Record<string, unknown> = { schemaVersion: LAYOUT_SCHEMA_VERSION, root };
   const tried = new Set<string>();
   for (let attempt = 0; attempt < 500; attempt++) {
     const checked = validateLayout(candidate);
     // The save hook also refuses misplaced elements (a field outside a form, …): prune those too.
     const misplaced = checked.ok ? nestingIssues(checked.layout, 1)[0] : undefined;
-    if (checked.ok && !misplaced) {
-      const partType = source.type ? PART_TYPES[source.type] : undefined;
-      return {
-        ok: true,
-        layout: checked.layout,
-        ...(source.title ? { title: source.title } : {}),
-        ...(partType ? { partType } : {}),
-        elements: ctx.elements,
-        mapped: ctx.mapped,
-        notes: ctx.report(),
-        fonts: [...ctx.fonts].toSorted(),
-        svgFiles: [...ctx.svgFiles],
-        pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
-        menus: [...ctx.menus].toSorted(),
-        images: [...ctx.images],
-        classes: usedClasses(checked.layout, ctx).map((cls) =>
-          options.media ? (pointAtCopies(structuredClone(cls), ctx) as StyleClass) : cls,
-        ),
-      };
-    }
+    if (checked.ok && !misplaced) return { ok: true, layout: checked.layout };
     const issue = checked.ok ? misplaced : checked.issues[0];
     if (!issue || !prune(root, issue, ctx, tried)) {
       return {
@@ -952,7 +963,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
  * W-958: points every use of an old-site image at its media library copy: image sources (which
  * also get the library id), backgrounds and any other stored address equal to it.
  */
-function pointAtCopies(value: unknown, ctx: ImportContext): unknown {
+export function pointAtCopies(value: unknown, ctx: ImportContext): unknown {
   if (typeof value === "string")
     return /^https?:\/\//i.test(value) ? (ctx.copied(value)?.url ?? value) : value;
   if (Array.isArray(value)) {

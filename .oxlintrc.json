@@ -151,7 +151,7 @@
     {
       "files": [
         "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
-        "packages/emvb/src/admin/pages/ImportElementorDialog.tsx"
+        "packages/emvb/src/admin/pages/ImportReport.tsx"
       ],
       "rules": {
         "jsx-a11y/no-noninteractive-tabindex": "off"
@@ -215,6 +215,8 @@
         "packages/emvb/src/admin/pages/CreateDialog.tsx",
         "packages/emvb/src/admin/pages/ExportDialog.tsx",
         "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+        "packages/emvb/src/admin/pages/ImportImageCopies.tsx",
+        "packages/emvb/src/admin/pages/ImportReport.tsx",
         "packages/emvb/src/admin/pages/bulk.tsx",
         "packages/emvb/src/admin/pages/list-kit.tsx",
         "packages/emvb/src/admin/widgets/CanvasField.tsx",

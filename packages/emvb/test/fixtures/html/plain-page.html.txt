@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- Hand-built fixture for W-1074: a whole page as a browser saves it. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Harbour Walks &amp; Tours</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>body { font-family: Georgia; }</style>
+  <script src="/analytics.js"></script>
+</head>
+<body class="home">
+  <header class="site-header"><a href="/">Harbour Walks</a><nav><a href="/tours">Tours</a> <a href="/contact">Contact</a></nav></header>
+  <main id="content">
+    <section id="intro" class="hero" style="background:#0b3d5c;padding:40px">
+      <h1 style="text-align:center">Walk the old <span style="color:#d97706">harbour</span></h1>
+      <p>Two-hour guided walks<br>every weekend.
+      <p><a class="button" href="/book">Book a walk</a>
+    </section>
+    <section>
+      <h2>What you'll see</h2>
+      <ul>
+        <li>The lighthouse
+        <li>The fish market
+        <li>The <b>old customs house</b>
+      </ul>
+      <figure><img src="https://harbour.example/images/lighthouse.jpg" alt="The lighthouse at dusk" width="800" height="600"><figcaption>The lighthouse</figcaption></figure>
+      <p><img src="/images/decor.png" alt=""></p>
+      <blockquote><p>A wonderful afternoon.</p><footer>Sam, from Leeds</footer></blockquote>
+      <table><caption>Prices</caption><tr><th>Ticket</th><th>Price</th></tr><tr><td>Adult</td><td>12</td></tr><tr><td>Child</td><td>6</td></tr></table>
+      <iframe src="https://player.vimeo.com/video/76979871" title="The walk in 60 seconds"></iframe>
+      <iframe src="https://maps.example/embed?q=harbour"></iframe>
+      <details><summary>Is it accessible?</summary><p>Yes, the route is step-free.</p></details>
+      <pre>Meet at:
+  Pier 3, by the clock</pre>
+      <form action="/subscribe"><input name="email"><button>Subscribe</button></form>
+      <p>Email <a href="mailto:hello@harbour.example">hello@harbour.example</a> or call <a href="tel:+44 20 7946 0000">020 7946 0000</a>.</p>
+      <hr>
+      <video src="/media/harbour.mp4" title="Harbour at dawn"></video>
+    </section>
+  </main>
+  <footer><p>&copy; Harbour Walks</p></footer>
+</body>
+</html>

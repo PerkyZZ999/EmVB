@@ -87,6 +87,8 @@ const DEFAULT_TYPOGRAPHY: Record<string, GlobalTypography> = {
 
 /** Old-site images listed for copying; an export with more lists the first ones. */
 const MAX_IMAGES = 300;
+/** The longest old-site address (`https://old.example/blog`) looked for before `/wp-content/`. */
+const MAX_SITE_URL = 512;
 
 /** Notes kept per import; the rest are counted into one line. */
 const MAX_NOTES = 300;
@@ -213,16 +215,23 @@ export class ImportContext {
    */
   findOldSite(text: string): void {
     const found = new Map<string, URL>();
-    for (const match of text.matchAll(
-      /https?:\/\/[^"'<>\s/\\]+(?:\/[^"'<>/\\]*)*?(?=\/wp-content\/)/gi,
-    )) {
+    // W-1074: only the text just before each `/wp-content/` is searched, so input full of
+    // addresses that never reach one (`http://http://…`) reads in linear time, not quadratic.
+    const marker = "/wp-content/";
+    let at = 0;
+    for (let hits = 0; hits < 200 && found.size < 5; hits++) {
+      const hit = text.indexOf(marker, at);
+      if (hit === -1) break;
+      at = hit + marker.length;
+      const window = text.slice(Math.max(0, hit - MAX_SITE_URL), hit + marker.length);
+      const match = /https?:\/\/[^"'<>\s/\\]+(?:\/[^"'<>/\\]*)*?(?=\/wp-content\/$)/i.exec(window);
+      if (!match) continue;
       try {
         const url = new URL(match[0]);
         found.set(url.href.toLowerCase(), url);
       } catch {
         // Not an address: ignore it.
       }
-      if (found.size >= 5) break;
     }
     this.oldSites = [...found.values()];
   }

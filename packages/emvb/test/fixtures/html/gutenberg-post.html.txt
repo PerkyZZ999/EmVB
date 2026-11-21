@@ -1,0 +1,116 @@
+<!-- Hand-built fixture for W-1074: WordPress block markup as the code editor shows it. -->
+<!-- wp:heading {"level":1,"textAlign":"center"} -->
+<h1 class="wp-block-heading has-text-align-center">Visit the <em>Riverside</em> bakery</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"style":{"color":{"text":"#334155"}}} -->
+<p class="has-text-color" style="color:#334155">Fresh bread every morning, <strong>baked by hand</strong>. See <a href="https://bakery.example/menu/">our menu</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Sourdough</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Rye<ul><li>Dark rye</li></ul></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:image {"id":12,"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="https://bakery.example/wp-content/uploads/2026/03/loaf.jpg" alt="A loaf on a board" class="wp-image-12"/><figcaption class="wp-element-caption">Our country loaf</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:gallery {"columns":2,"linkTo":"media"} -->
+<figure class="wp-block-gallery has-nested-images columns-2"><!-- wp:image {"id":13,"linkDestination":"media"} -->
+<figure class="wp-block-image"><a href="https://bakery.example/wp-content/uploads/2026/03/croissant.jpg"><img src="https://bakery.example/wp-content/uploads/2026/03/croissant.jpg" alt="Croissants"/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"id":14,"linkDestination":"media"} -->
+<figure class="wp-block-image"><a href="https://bakery.example/wp-content/uploads/2026/03/tart.jpg"><img src="https://bakery.example/wp-content/uploads/2026/03/tart.jpg" alt="Fruit tart"/></a></figure>
+<!-- /wp:image --></figure>
+<!-- /wp:gallery -->
+
+<!-- wp:quote -->
+<blockquote class="wp-block-quote"><!-- wp:paragraph -->
+<p>The best croissant in town.</p>
+<!-- /wp:paragraph --><cite>A happy customer</cite></blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://bakery.example/order/" target="_blank" rel="noreferrer noopener">Order online</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:columns -->
+<div class="wp-block-columns"><!-- wp:column {"width":"40%"} -->
+<div class="wp-block-column" style="flex-basis:40%"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Opening hours</h3>
+<!-- /wp:heading --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:paragraph -->
+<p>Monday to Saturday, 7 to 19.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
+<!-- wp:group {"style":{"color":{"background":"#fef3c7"},"spacing":{"padding":{"top":"32px","bottom":"32px"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-background" style="background-color:#fef3c7;padding-top:32px;padding-bottom:32px"><!-- wp:paragraph -->
+<p>Gift cards are available in the shop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Ask at the counter.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:cover {"url":"https://bakery.example/wp-content/uploads/2026/03/oven.jpg","dimRatio":40,"minHeight":360,"minHeightUnit":"px"} -->
+<div class="wp-block-cover" style="min-height:360px"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-40 has-background-dim"></span><img class="wp-block-cover__image-background" alt="" src="https://bakery.example/wp-content/uploads/2026/03/oven.jpg" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":2} -->
+<h2 class="wp-block-heading">Baked since 1987</h2>
+<!-- /wp:heading --></div></div>
+<!-- /wp:cover -->
+
+<!-- wp:separator -->
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
+<!-- wp:spacer {"height":"48px"} -->
+<div style="height:48px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:embed {"url":"https://www.youtube.com/watch?v=aqz-KE-bpKQ","type":"video","providerNameSlug":"youtube"} -->
+<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">
+https://www.youtube.com/watch?v=aqz-KE-bpKQ
+</div><figcaption class="wp-element-caption">A morning in the bakery</figcaption></figure>
+<!-- /wp:embed -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table><thead><tr><th>Bread</th><th>Price</th></tr></thead><tbody><tr><td>Sourdough</td><td>6.50</td></tr><tr><td>Rye</td><td>5.00</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:html -->
+<div class="promo">Free coffee on Fridays<script>track()</script></div>
+<!-- /wp:html -->
+
+<!-- wp:social-links -->
+<ul class="wp-block-social-links"><!-- wp:social-link {"url":"https://instagram.example/riverside","service":"instagram"} /-->
+
+<!-- wp:social-link {"url":"mailto:hello@bakery.example","service":"mail"} /--></ul>
+<!-- /wp:social-links -->
+
+<!-- wp:latest-posts {"postsToShow":3} /-->
+
+<!-- wp:shortcode -->
+[contact-form-7 id="12"]
+<!-- /wp:shortcode -->
+
+<!-- wp:more -->
+<!--more-->
+<!-- /wp:more -->
+
+<!-- wp:acme/testimonial-slider {"speed":3} -->
+<div class="wp-block-acme-testimonial-slider"><p>Lovely staff.</p></div>
+<!-- /wp:acme/testimonial-slider -->

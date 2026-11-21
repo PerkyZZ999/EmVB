@@ -18,6 +18,7 @@ import {
   useList,
 } from "./list-kit.tsx";
 import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
+import { ImportHtmlDialog } from "./ImportHtmlDialog.tsx";
 import { ImportButton } from "./ImportButton.tsx";
 import { ExportButton, ExportDialog } from "./ExportDialog.tsx";
 import { NewPageDialog } from "./NewPageDialog.tsx";
@@ -45,6 +46,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listPages);
   const [creating, setCreating] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
+  const [importingHtml, setImportingHtml] = React.useState(false);
   const [exporting, setExporting] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const searchRef = React.useRef<HTMLInputElement>(null);
@@ -64,6 +66,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
       {list.state === "ready" && list.items.length > 0 && (
         <ExportButton onClick={() => setExporting(true)} />
       )}
+      <ImportButton source="html" onClick={() => setImportingHtml(true)} />
       <ImportButton onClick={() => setImporting(true)} />
       <NewButton label="New page" onClick={() => setCreating(true)} />
     </div>
@@ -166,6 +169,12 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         }}
         pages={list.state === "ready" ? list.items : []}
         selectedIds={exportIds}
+      />
+      <ImportHtmlDialog
+        fetcher={fetcher}
+        open={importingHtml}
+        onOpenChange={setImportingHtml}
+        target="page"
       />
       <ImportElementorDialog
         fetcher={fetcher}

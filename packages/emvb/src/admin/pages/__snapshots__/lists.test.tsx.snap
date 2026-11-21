@@ -9,6 +9,10 @@ exports[`PageList renders rows 1`] = `
       svg aria-hidden="true"
         path
       "Export pages"
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -88,6 +92,10 @@ div.emvb-surface-card.emvb-empty-shell
   p
     "Create a page to start building."
   div.emvb-list-actions
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -119,6 +127,10 @@ exports[`ThemePartList renders rows 1`] = `
   h1.emvb-page-title
     "Theme Builder"
   div.emvb-list-actions
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -240,6 +252,10 @@ div.emvb-surface-card.emvb-empty-shell
   p
     "Create a Header, Footer, content template, Popup, or Float."
   div.emvb-list-actions
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -271,6 +287,10 @@ exports[`ThemePartList filters by type and shows the filter's empty state 1`] = 
   h1.emvb-page-title
     "Theme Builder"
   div.emvb-list-actions
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -364,6 +384,10 @@ exports[`ThemePartList filters by type and shows the filter's empty state 2`] = 
   h1.emvb-page-title
     "Theme Builder"
   div.emvb-list-actions
+    button.emvb-btn data-emvb-import-html="" type="button"
+      svg aria-hidden="true"
+        path
+      "Import HTML"
     button.emvb-btn data-emvb-import-elementor="" type="button"
       svg aria-hidden="true"
         path
@@ -417,6 +441,10 @@ div aria-labelledby="emvb-theme-filter-footer" id="emvb-theme-parts-panel" role=
     p
       "Create one or choose a different filter."
     div.emvb-list-actions
+      button.emvb-btn data-emvb-import-html="" type="button"
+        svg aria-hidden="true"
+          path
+        "Import HTML"
       button.emvb-btn data-emvb-import-elementor="" type="button"
         svg aria-hidden="true"
           path

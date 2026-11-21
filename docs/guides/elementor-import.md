@@ -4,6 +4,9 @@ Bring pages and templates you built with Elementor on WordPress into EmVB. The i
 Elementor's own JSON, builds an EmVB page from it, and tells you what it kept, what it changed to
 fit EmVB, and what it left out, before anything is created.
 
+Pages built with WordPress's block editor (Gutenberg), or any other HTML page, import with
+**Import HTML** instead: see [Import from WordPress or HTML](html-import.md).
+
 ## Export from Elementor
 
 In WordPress, go to **Templates → Saved Templates**, then **Export** the template you want. To

@@ -73,6 +73,11 @@ export const DOC_GROUPS: DocGroup[] = [
         summary: "Bring Elementor pages and templates over, with a report.",
       },
       {
+        slug: "html-import",
+        title: "Import from WordPress or HTML",
+        summary: "Turn WordPress block content or any HTML page into a draft, with a report.",
+      },
+      {
         slug: "leaving-emvb",
         title: "Leaving EmVB",
         summary: "Export as HTML or rich text, and remove the plugin cleanly.",

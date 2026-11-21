@@ -595,6 +595,7 @@ export {
   importElementor,
   MAX_IMPORT_CHARS,
 } from "./import/elementor/index.ts";
+export { type HtmlImport, importHtml, MAX_HTML_IMPORT_CHARS } from "./import/html/index.ts";
 
 export {
   EXTENSION_API_VERSION,

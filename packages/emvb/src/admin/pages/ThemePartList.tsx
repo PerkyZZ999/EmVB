@@ -22,6 +22,7 @@ import {
 } from "./list-kit.tsx";
 import { ImportButton } from "./ImportButton.tsx";
 import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
+import { ImportHtmlDialog } from "./ImportHtmlDialog.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
 
 type Filter = "all" | ThemePartType;
@@ -128,12 +129,14 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listThemeParts);
   const [creating, setCreating] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
+  const [importingHtml, setImportingHtml] = React.useState(false);
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const searchRef = React.useRef<HTMLInputElement>(null);
 
   const newPart = (
     <div className="emvb-list-actions">
+      <ImportButton source="html" onClick={() => setImportingHtml(true)} />
       <ImportButton onClick={() => setImporting(true)} />
       <NewButton label="New theme part" onClick={() => setCreating(true)} />
     </div>
@@ -276,6 +279,12 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           )}
         </div>
       )}
+      <ImportHtmlDialog
+        fetcher={fetcher}
+        open={importingHtml}
+        onOpenChange={setImportingHtml}
+        target="part"
+      />
       <ImportElementorDialog
         fetcher={fetcher}
         open={importing}

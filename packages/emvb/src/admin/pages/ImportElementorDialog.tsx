@@ -3,7 +3,6 @@ import { FileArrowUpIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   type ElementorImport,
-  type ImportNote,
   importElementor,
   mergeSectionClasses,
   remapClassIds,
@@ -15,7 +14,6 @@ import {
 import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { createPage, listPages, type PageSummary } from "../content-api.ts";
-import { uploadImage } from "../media-api.ts";
 import { loadSiteMenus } from "../menus-api.ts";
 import type { MenuLink } from "../../core/import/elementor/context.ts";
 import { editorUrl } from "../editor/exit.ts";
@@ -25,6 +23,8 @@ import { saveDesign } from "../design-api.ts";
 import { loadDesign } from "../editor/useEditorData.ts";
 import { BUTTON, FIELD } from "../ui.ts";
 import { CreateDialog } from "./CreateDialog.tsx";
+import { ImportReport } from "./ImportReport.tsx";
+import { type Copy, fileNameOf, ImportImageCopies } from "./ImportImageCopies.tsx";
 import {
   ImportPageLinks,
   type PageLinks,
@@ -43,61 +43,24 @@ function loadIcons(): Promise<IconMap> {
   );
 }
 
-const GROUPS: { kind: ImportNote["kind"]; title: string }[] = [
-  { kind: "unmapped", title: "Not recognised" },
-  { kind: "skipped", title: "Left out" },
-  { kind: "approximated", title: "Changed to fit EmVB" },
-];
-
-/** What the import will do, before anything is created. */
-function ImportReport({
+/** The Elementor report: Elementor elements, and the fonts the page uses. */
+function ElementorReport({
   result,
   partType,
 }: {
   result: ElementorImport | undefined;
   partType?: ThemePartType;
 }) {
-  if (!result) return null;
-  if (!result.ok) {
-    return (
-      <p className="emvb-inline-error" role="alert" data-emvb-import-error="">
-        {result.error}
-      </p>
-    );
-  }
+  const summary = result?.ok
+    ? `Ready to import ${result.mapped} of ${result.elements} Elementor elements` +
+      (partType ? ` as a ${THEME_PART_TYPE_LABELS[partType].toLowerCase()}.` : ".")
+    : "";
   return (
-    <section
-      className="emvb-import-report"
-      aria-label="Import report"
-      // The report can be long; it scrolls on its own and must be reachable by keyboard.
-      tabIndex={0}
-      data-emvb-import-report=""
-    >
-      <p className="emvb-import-summary" role="status">
-        {`Ready to import ${result.mapped} of ${result.elements} Elementor elements`}
-        {partType ? ` as a ${THEME_PART_TYPE_LABELS[partType].toLowerCase()}.` : "."}
-      </p>
-      {result.fonts.length > 0 && (
+    <ImportReport result={result} summary={summary}>
+      {result?.ok && result.fonts.length > 0 && (
         <p className="emvb-helper">{`Fonts used: ${result.fonts.join(", ")}. Make sure your site loads them.`}</p>
       )}
-      {GROUPS.map(({ kind, title }) => {
-        const notes = result.notes.filter((note) => note.kind === kind);
-        if (notes.length === 0) return null;
-        return (
-          <details key={kind} open={kind !== "approximated"} data-emvb-import-group={kind}>
-            <summary>{`${title} (${notes.length})`}</summary>
-            <ul>
-              {notes.map((note) => (
-                <li key={`${note.element}:${note.message}`}>
-                  <strong>{note.element}:</strong> {note.message}
-                  {note.count > 1 ? ` (${note.count}×)` : ""}
-                </li>
-              ))}
-            </ul>
-          </details>
-        );
-      })}
-    </section>
+    </ImportReport>
   );
 }
 
@@ -105,16 +68,6 @@ function ImportReport({
 const MAX_SVG_FILE = 65_536;
 /** Files fetched in one go; an export with more names them in the report. */
 const MAX_SVG_FETCHES = 100;
-
-/** A URL's file name, decoded and lower-cased, to match a chosen file to the export's address (W-951, W-958). */
-export function fileNameOf(url: string): string {
-  const last = url.split(/[?#]/)[0]?.split("/").pop() ?? "";
-  try {
-    return decodeURIComponent(last).toLowerCase();
-  } catch {
-    return last.toLowerCase();
-  }
-}
 
 /** Fetches an SVG file without cookies; undefined when the site refuses (CORS) or it's too big. */
 async function fetchSvg(url: string): Promise<string | undefined> {
@@ -131,44 +84,6 @@ async function fetchSvg(url: string): Promise<string | undefined> {
     return undefined;
   }
 }
-
-/** W-958: an image copied into the media library is at most this large. */
-const MAX_IMAGE_FILE = 20 * 1024 * 1024;
-
-/** Fetches an old-site image without cookies; undefined when refused (CORS), not an image or too big. */
-async function fetchImage(url: string): Promise<File | undefined> {
-  try {
-    const response = await fetch(url, {
-      credentials: "omit",
-      redirect: "follow",
-      signal: AbortSignal.timeout(20_000),
-    });
-    if (!response.ok) return undefined;
-    const blob = await response.blob();
-    if (!blob.type.startsWith("image/") || blob.size > MAX_IMAGE_FILE) return undefined;
-    return new File([blob], fileNameOf(url) || "image", { type: blob.type });
-  } catch {
-    return undefined;
-  }
-}
-
-/** Runs `run` on every item, at most `limit` at a time. */
-async function eachLimited<T>(
-  items: readonly T[],
-  limit: number,
-  run: (item: T) => Promise<void>,
-): Promise<void> {
-  let next = 0;
-  const worker = async (): Promise<void> => {
-    const index = next++;
-    if (index >= items.length) return;
-    await run(items[index] as T);
-    return worker();
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-}
-
-type Copy = { url: string; id: string };
 
 /** Reads a chosen file as text, refusing one larger than the importer reads. */
 async function readJsonFile(file: File): Promise<string> {
@@ -213,9 +128,8 @@ export function ImportElementorDialog({
   const [pages, setPages] = React.useState<PageSummary[]>();
   // W-958: old-site images copied into the media library, by their old address.
   const [copies, setCopies] = React.useState<ReadonlyMap<string, Copy>>(new Map());
-  const [imageStatus, setImageStatus] = React.useState<string>();
-  const [copying, setCopying] = React.useState(false);
-  const imageRef = React.useRef<HTMLInputElement>(null);
+  // A new import starts the image copy row afresh (its status line and file input).
+  const [session, setSession] = React.useState(0);
   // W-1026: the site's own menus (from its WordPress import) for imported Nav Menus, by name.
   // A menu the site doesn't have is kept as no links, so it is asked for once.
   const [siteMenus, setSiteMenus] = React.useState<ReadonlyMap<string, MenuLink[]>>(new Map());
@@ -240,7 +154,7 @@ export function ImportElementorDialog({
       setSvgStatus(undefined);
       setPageLinks(readPageLinks());
       setCopies(new Map());
-      setImageStatus(undefined);
+      setSession((n) => n + 1);
       setSiteMenus(new Map());
     }
   }
@@ -279,54 +193,6 @@ export function ImportElementorDialog({
   const linkedPages = result?.ok ? result.pageLinks : [];
   const oldImages = result?.ok ? result.images.filter((url) => !copies.has(url)) : [];
 
-  const upload = async (url: string, file: File, done: [string, Copy][]) => {
-    try {
-      const item = await uploadImage(fetcher, file);
-      done.push([url, { url: item.url, id: item.id }]);
-    } catch {
-      // Counted as not copied below.
-    }
-  };
-
-  const copyImages = async () => {
-    setCopying(true);
-    const done: [string, Copy][] = [];
-    const urls = [...oldImages];
-    await eachLimited(urls, 4, async (url) => {
-      const file = await fetchImage(url);
-      if (file) await upload(url, file, done);
-    });
-    setCopies((current) => new Map([...current, ...done]));
-    const failed = urls.length - done.length;
-    setImageStatus(
-      failed === 0
-        ? `Copied ${done.length} ${done.length === 1 ? "image" : "images"} to the media library.`
-        : `Copied ${done.length} of ${urls.length}. The rest couldn't be read from your old site from here: download them from its media library and add them with Add image files.`,
-    );
-    setCopying(false);
-  };
-
-  const addImages = async (files: readonly File[]) => {
-    setCopying(true);
-    const wanted = new Map(oldImages.map((url) => [fileNameOf(url), url]));
-    const usable = (file: File) =>
-      file.size <= MAX_IMAGE_FILE &&
-      file.type.startsWith("image/") &&
-      wanted.has(file.name.toLowerCase());
-    const unused = files.filter((file) => !usable(file)).map((file) => file.name);
-    const done: [string, Copy][] = [];
-    await eachLimited(files.filter(usable), 4, (file) =>
-      upload(wanted.get(file.name.toLowerCase()) ?? "", file, done),
-    );
-    setCopies((current) => new Map([...current, ...done]));
-    setImageStatus(
-      `Copied ${done.length} ${done.length === 1 ? "image" : "images"} to the media library.` +
-        (unused.length > 0
-          ? ` Not used (not in this export, not an image, or over 20 MB): ${unused.join(", ")}.`
-          : ""),
-    );
-    setCopying(false);
-  };
   // W-1026: fetch each menu the export's Nav Menus name once; the import re-runs with them.
   const wantedMenus = (result?.ok ? result.menus : []).filter((name) => !siteMenus.has(name));
   const wantedKey = wantedMenus.join("\u0000");
@@ -612,45 +478,13 @@ export function ImportElementorDialog({
             />
           </div>
         )}
-        {(oldImages.length > 0 || imageStatus) && (
-          <div className="emvb-import-row" data-emvb-import-images="">
-            <Button
-              type="button"
-              variant="secondary"
-              className={BUTTON}
-              disabled={copying || oldImages.length === 0}
-              onClick={() => void copyImages()}
-            >
-              {copying ? "Copying…" : "Copy images"}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              className={BUTTON}
-              disabled={copying || oldImages.length === 0}
-              onClick={() => imageRef.current?.click()}
-            >
-              Add image files
-            </Button>
-            <span className="emvb-helper" role="status">
-              {imageStatus ??
-                `${oldImages.length} ${oldImages.length === 1 ? "image loads" : "images load"} from your old site. Copy them to your media library (copies stay there even if you don't import), or add the files.`}
-            </span>
-            <input
-              ref={imageRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              data-emvb-elementor-images=""
-              onChange={(event) => {
-                const files = [...(event.target.files ?? [])];
-                event.target.value = "";
-                if (files.length > 0) void addImages(files);
-              }}
-            />
-          </div>
-        )}
+        <ImportImageCopies
+          key={session}
+          fetcher={fetcher}
+          images={oldImages}
+          onCopied={(done) => setCopies((current) => new Map([...current, ...done]))}
+          dataAttribute="data-emvb-elementor-images"
+        />
         <ImportPageLinks
           ids={linkedPages}
           links={pageLinks}
@@ -686,7 +520,7 @@ export function ImportElementorDialog({
             ))}
           </Select>
         )}
-        <ImportReport result={result} {...(target === "part" ? { partType } : {})} />
+        <ElementorReport result={result} {...(target === "part" ? { partType } : {})} />
       </div>
     </CreateDialog>
   );
