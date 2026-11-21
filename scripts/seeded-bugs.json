@@ -55064,6 +55064,43 @@
         "W-1084"
       ],
       "expect": "\\(fail\\).*W-1084"
+    },
+    {
+      "id": "W-1084/add-switch-subtle-text",
+      "requirement": "W-1068",
+      "description": "The Add panel's Elements/Templates switch shows its other tab in Kumo's subtle grey again: 4.03:1 on the light admin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-add-switch-tabs [role=\"tab\"][aria-selected=\"false\"] { color: var(--text-color-kumo-default); }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "W-1084"
+      ],
+      "expect": "\\(fail\\).*W-1084"
+    },
+    {
+      "id": "W-1084/add-switch-subtle-text-e2e",
+      "requirement": "W-1068",
+      "description": "The Add panel's Elements/Templates switch fails colour contrast in the light admin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-add-switch-tabs [role=\"tab\"][aria-selected=\"false\"] { color: var(--text-color-kumo-default); }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/templates.e2e.ts", "--project=node", "-g", "W-1084"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

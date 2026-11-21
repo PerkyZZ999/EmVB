@@ -71,3 +71,10 @@ test("W-1068: a template tile shows the keyboard focus ring of its insert button
   // Scoped to the panel's own classes: nothing styles the admin's global elements.
   expect(rules.every((line) => line.trimStart().startsWith(".emvb-"))).toBe(true);
 });
+
+test("W-1084: the Elements/Templates switch's other tab is readable text, not Kumo's subtle grey", () => {
+  // Kumo's subtle text on the segmented track is 4.03:1 in the light admin (axe, 1.4.0 box round).
+  expect(FEATURE_CSS).toContain(
+    '.emvb-add-switch-tabs [role="tab"][aria-selected="false"] { color: var(--text-color-kumo-default); }',
+  );
+});

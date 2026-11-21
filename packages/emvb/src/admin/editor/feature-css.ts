@@ -154,6 +154,7 @@ export const FEATURE_CSS = `
 .emvb-add-switch-tabs { width: 100%; }
 .emvb-add-switch-tabs [role="tablist"] { width: 100%; height: var(--emvb-control); min-height: var(--emvb-control); }
 .emvb-add-switch-tabs [role="tab"] { flex: 1 1 0; justify-content: center; height: 100%; font-size: 13px; line-height: 18px; }
+.emvb-add-switch-tabs [role="tab"][aria-selected="false"] { color: var(--text-color-kumo-default); }
 .emvb-template-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .emvb-template-tile { position: relative; display: grid; gap: 2px; padding: 0 0 8px; border-radius: 8px; border: 1px solid var(--color-kumo-line); background: var(--color-kumo-base, transparent); overflow: hidden; }
 .emvb-template-tile:hover, .emvb-template-tile:has(.emvb-template-insert:focus-visible) { border-color: var(--color-kumo-brand); }

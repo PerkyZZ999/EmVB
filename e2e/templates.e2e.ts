@@ -1,3 +1,4 @@
+import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, overlay, saveDraft, unique } from "./support/helpers.ts";
@@ -109,6 +110,36 @@ test("W-1068 starter templates: browse with the keyboard, insert twice with new 
       const heading = page.getByRole("heading", { name }).first();
       expect(await heading.evaluate(contrastBehind)).toBeGreaterThanOrEqual(4.5);
     }
+  }
+});
+
+test("W-1084 the Elements/Templates switch reads at 4.5:1 in light and dark", async ({
+  page,
+  request,
+}) => {
+  const title = `Switch ${unique()}`;
+  const id = await createPage(request, title, {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [{ id: "head0001", type: "heading", props: { text: title, level: 1 } }],
+    },
+  });
+  for (const scheme of ["light", "dark"] as const) {
+    // oxlint-disable-next-line no-await-in-loop -- one scheme after the other
+    await page.emulateMedia({ colorScheme: scheme });
+    // oxlint-disable-next-line no-await-in-loop -- same
+    await openEditor(page, id, title);
+    // oxlint-disable-next-line no-await-in-loop -- same
+    await expect(overlay(page).getByRole("tablist", { name: "Add" })).toBeVisible();
+    // oxlint-disable-next-line no-await-in-loop -- same
+    const results = await new AxeBuilder({ page })
+      .include(".emvb-add-switch")
+      .withRules(["color-contrast"])
+      .analyze();
+    expect(results.violations.map((v) => `${scheme}: ${v.id} ×${v.nodes.length}`)).toEqual([]);
   }
 });
 
