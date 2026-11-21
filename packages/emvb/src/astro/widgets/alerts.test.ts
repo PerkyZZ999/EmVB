@@ -70,4 +70,42 @@ describe("alerts runtime (W-1025)", () => {
     button?.click();
     expect(document.activeElement?.id).toBe("first");
   });
+
+  /** An Alert, then `between`, then a button that should get the focus. */
+  const dismissBefore = (between: string) => {
+    document.body.innerHTML = `
+      <div class="emvb-alert" role="note">
+        <p>Saved.</p>
+        <button type="button" data-emvb-alert-dismiss aria-label="Dismiss"></button>
+      </div>
+      ${between}
+      <button type="button" id="next">Next</button>`;
+    initAlerts(document);
+    const button = document.querySelector<HTMLButtonElement>("[data-emvb-alert-dismiss]");
+    button?.focus();
+    button?.click();
+    return document.activeElement?.id;
+  };
+
+  test("skips an element taken out of the Tab order (W-1054)", () => {
+    expect(dismissBefore('<a id="skipped" href="#x" tabindex="-1">Out of order</a>')).toBe("next");
+  });
+
+  test("skips an element inside an inert region (W-1054)", () => {
+    expect(dismissBefore('<div inert><a id="skipped" href="#x">Inert</a></div>')).toBe("next");
+  });
+
+  test("skips an element hidden from assistive tech (W-1054)", () => {
+    expect(
+      dismissBefore('<div aria-hidden="true"><a id="skipped" href="#x">Hidden</a></div>'),
+    ).toBe("next");
+  });
+
+  test("skips an element hidden by CSS on this device, so focus doesn't fall to the page (W-1054)", () => {
+    expect(
+      dismissBefore(
+        '<style>.hidden-here{display:none}</style><div class="hidden-here"><a id="skipped" href="#x">Desktop only</a></div>',
+      ),
+    ).toBe("next");
+  });
 });

@@ -264,6 +264,26 @@ describe("the 1.3 widgets (W-1076)", () => {
     expect(audit(flip({ frontTitle: "Plans" }))).toEqual(["flip-box-face:warning:flip0001"]);
   });
 
+  test("a flip box whose back button has no usable link warns: the page leaves it out", () => {
+    const flip = (props: Record<string, unknown>) => ({
+      id: "flip0001",
+      type: "flip-box",
+      props: { frontTitle: "Plans", backText: "From $5", ...props },
+    });
+    expect(audit(flip({ buttonText: "See plans", href: "/plans" }))).toEqual([]);
+    expect(audit(flip({ href: "/plans" }))).toEqual([]);
+    expect(audit(flip({ buttonText: "See plans" }))).toEqual(["link-name:warning:flip0001"]);
+    expect(audit(flip({ buttonText: "See plans", href: " " }))).toEqual([
+      "link-name:warning:flip0001",
+    ]);
+    expect(audit(flip({ buttonText: "See plans", href: "javascript:alert(1)" }))).toEqual([
+      "link-name:warning:flip0001",
+    ]);
+    expect(audit(flip({ backText: "", buttonText: "See plans" }))).toEqual([
+      "link-name:warning:flip0001",
+    ]);
+  });
+
   test("a countdown without a title warns", () => {
     const countdown = (title?: string) => ({
       id: "cdwn0001",

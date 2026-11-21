@@ -142,7 +142,8 @@ whole box opens it through its title, so screen readers hear one link instead of
 A card with a front and a back that turns over on hover, when keyboard focus reaches the back's
 link, or with its **Turn over** tick box on touch screens, all without script. Pick the direction
 it turns. Screen readers read both faces, and visitors who prefer reduced motion see the faces swap
-without the turn.
+without the turn. The back's button shows only once it has a **Button link**; the accessibility
+check warns about button text without one.
 
 ## Animated headline
 

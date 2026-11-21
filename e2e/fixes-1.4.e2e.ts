@@ -9,6 +9,7 @@ import {
 } from "./support/api.ts";
 import { loadDraft, publishStyles, removeColorsNamed, saveDesign } from "./support/design.ts";
 import { unique } from "./support/helpers.ts";
+import { uploadEmvbPixel } from "./support/media.ts";
 
 // 1.4 fixes and hardening (PLAN_1.4 B and D), each on a published page in a real browser.
 
@@ -85,6 +86,58 @@ test("an arrow icon points the other way on a right-to-left page, a star doesn't
   expect(await transform("Forward")).toBe("none");
 });
 
+/**
+ * Runs in the page: mirrored means the x axis is flipped (a negative 2D determinant), at any
+ * angle. An animation is paused three quarters through: a spin that replaced the mirror instead
+ * of adding to it has turned it back by then (its implicit start is the mirror).
+ */
+const mirrored = (svg: SVGElement | HTMLElement) => {
+  for (const animation of svg.getAnimations()) {
+    animation.pause();
+    animation.currentTime = 3000;
+  }
+  const m = new DOMMatrix(getComputedStyle(svg).transform);
+  return m.a * m.d - m.b * m.c < 0;
+};
+
+test("a Button's arrow and a spinning arrow icon stay mirrored on a right-to-left page (W-1079)", async ({
+  page,
+  request,
+}) => {
+  const slug = `fixes-${unique()}`;
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "boxr0001",
+          type: "div-block",
+          props: {},
+          dir: "rtl",
+          children: [
+            { id: "butn0001", type: "button", props: { text: "Next step", iconId: "arrow-right" } },
+            {
+              ...icon("icon0001", "arrow-right", "Spinning next"),
+              style: { motion: { icon: { type: "spin", duration: 4000, loop: true } } },
+            },
+          ],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "RTL button and spin", layout, slug);
+  await publishPage(request, id);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(`/${slug}`);
+  expect(await page.locator(".emvb-button svg").evaluate(mirrored)).toBe(true);
+  const spinner = page.getByRole("img", { name: "Spinning next" });
+  expect(await spinner.evaluate((svg) => svg.getAnimations().length)).toBe(1);
+  expect(await spinner.evaluate(mirrored)).toBe(true);
+});
+
 test("a popup with an address rule opens only on addresses that have it (W-1081)", async ({
   page,
   request,
@@ -120,6 +173,67 @@ test("a popup with an address rule opens only on addresses that have it (W-1081)
     await expect(dialog).toBeHidden();
     await page.goto(`/${slug}?promo=${tag}`);
     await expect(dialog).toBeVisible();
+  } finally {
+    // A published popup for the whole site would sit on every later spec's pages.
+    await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${popupId}`);
+  }
+});
+
+test("a Hotspots picture in a popup and on the page: each marker opens its own note (W-1077)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique();
+  const title = `Spots ${tag}`;
+  const media = await uploadEmvbPixel(request);
+  const spots = (marker: string) => ({
+    id: "spot0001",
+    type: "hotspots",
+    props: { src: media.url, alt: "A test picture", width: 1200, height: 600 },
+    children: [
+      {
+        id: "hspt0001",
+        type: "hotspot",
+        props: { title: marker, text: `${marker} note`, x: 50, y: 50 },
+      },
+    ],
+  });
+  const layoutWith = (marker: string) => ({
+    schemaVersion: 18,
+    root: { id: "root0001", type: "container", props: {}, children: [spots(marker)] },
+  });
+  const popupId = await createThemePart(request, {
+    title,
+    partType: "popup",
+    slug: `spots-${tag}`,
+    layout: layoutWith("Popup wheel"),
+    triggers: {
+      schemaVersion: 1,
+      open: [{ type: "page_load" }],
+      advanced: { urlParams: [{ name: "spots", value: tag }] },
+    },
+  });
+  try {
+    await publishThemePart(request, popupId);
+    const slug = `fixes-${unique()}`;
+    await publishPage(
+      request,
+      await createPage(request, "Spots page", layoutWith("Page wheel"), slug),
+    );
+    await page.goto(`/${slug}?spots=${tag}`);
+    // A popup without a heading is named "Popup"; this one is the dialog holding its marker.
+    const dialog = page
+      .getByRole("dialog")
+      .filter({ has: page.getByRole("button", { name: "Popup wheel" }) });
+    await expect(dialog).toBeVisible();
+    const duplicates = await page.evaluate(() => {
+      const ids = [...document.querySelectorAll("[id]")].map((el) => el.id);
+      return ids.filter((id, i) => ids.indexOf(id) !== i);
+    });
+    expect(duplicates).toEqual([]);
+    await dialog.getByRole("button", { name: "Popup wheel" }).click();
+    await expect(dialog.getByText("Popup wheel note")).toBeVisible();
+    await expect(page.getByText("Page wheel note")).toBeHidden();
   } finally {
     // A published popup for the whole site would sit on every later spec's pages.
     await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${popupId}`);
@@ -268,4 +382,89 @@ test("a colour's dark value follows the system, and a Theme toggle switches and 
   } finally {
     await removeColorsNamed(request, name);
   }
+});
+
+const px = (value: number) => ({ value, unit: "px" });
+
+test("a Spacer's phone height applies in a column, and in a row on a phone (W-1062)", async ({
+  page,
+  request,
+}) => {
+  const slug = `fixes-${unique()}`;
+  const spacer = (id: string) => ({
+    id,
+    type: "spacer",
+    props: { height: px(96) },
+    devices: { mobile: { height: px(8) } },
+  });
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        spacer("spac0001"),
+        {
+          id: "cont0001",
+          type: "container",
+          props: {},
+          style: { flexDirection: "row", gap: px(0) },
+          children: [spacer("spac0002")],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Spacer devices", layout, slug);
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto(`/${slug}`);
+  const column = await page.locator(".emvb-e-spac0001").boundingBox();
+  expect(Math.round(column?.height ?? 0)).toBe(8);
+  const row = await page.locator(".emvb-e-spac0002").boundingBox();
+  expect(Math.round(row?.width ?? 0)).toBe(8);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect
+    .poll(async () =>
+      Math.round((await page.locator(".emvb-e-spac0001").boundingBox())?.height ?? 0),
+    )
+    .toBe(96);
+  const wide = await page.locator(".emvb-e-spac0002").boundingBox();
+  expect(Math.round(wide?.width ?? 0)).toBe(96);
+});
+
+const linkButton = (id: string, text: string, extra: Record<string, unknown> = {}) => ({
+  id,
+  type: "button",
+  props: { text, href: "#top" },
+  ...extra,
+});
+
+test("dismissing an Alert skips a button hidden on phones, so focus doesn't fall to the page (W-1054)", async ({
+  page,
+  request,
+}) => {
+  const slug = `fixes-${unique()}`;
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "alrt0001",
+          type: "alert",
+          props: { variant: "info", text: "Heads up.", dismissible: true },
+        },
+        linkButton("butn0001", "Desktop only", { hiddenOn: ["mobile"] }),
+        linkButton("butn0002", "Everywhere"),
+      ],
+    },
+  };
+  await publishPage(request, await createPage(request, "Alert hidden next", layout, slug));
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto(`/${slug}`);
+  await page.getByRole("button", { name: "Dismiss" }).press("Enter");
+  await expect(page.getByRole("link", { name: "Everywhere" })).toBeFocused();
 });

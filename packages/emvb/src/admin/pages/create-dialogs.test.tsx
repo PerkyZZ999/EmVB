@@ -143,7 +143,7 @@ for (const dialog of dialogs) {
       await mount(dialog.render(fetcher));
       await type("Title", "Keep focus");
       const button = document.querySelector<HTMLButtonElement>('button[type="submit"]');
-      button?.focus();
+      await act(async () => button?.focus());
       await act(async () => button?.click());
       expect(creates).toBe(1);
       expect(button?.disabled).toBe(false);
@@ -196,7 +196,9 @@ for (const dialog of dialogs) {
       expect(document.activeElement).toBe(input("Title") ?? null);
       expect(input("Title")?.getAttribute("aria-invalid")).toBe("true");
       await type("Title", "Taken");
-      (document.querySelector('button[type="submit"]') as HTMLButtonElement).focus();
+      await act(async () =>
+        (document.querySelector('button[type="submit"]') as HTMLButtonElement).focus(),
+      );
       await submit();
       await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
       expect(document.activeElement).toBe(input("Slug") ?? null);

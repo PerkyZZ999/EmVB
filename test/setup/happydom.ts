@@ -1,5 +1,5 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { expect } from "bun:test";
+import { afterEach, expect } from "bun:test";
 
 // Component tests run against the admin URL shape that plugin pages see in the browser.
 // W-850: happy-dom 21 stops loading iframe pages by default (an SSRF guard for untrusted HTML), so
@@ -25,6 +25,41 @@ console.warn = (...args: unknown[]) => {
     throw new Error(first.split("\n")[0]);
   realWarn(...args);
 };
+
+// W-1061: React's act() warnings ("An update to X inside a test was not wrapped in act(...)")
+// mean a test checked the page before an update it caused had rendered, so it can pass on stale
+// markup. The unit run printed hundreds; now each one is noted and fails the test it happened in,
+// once the test ends (throwing inside React's update would break the component under test).
+const ACT_WARNING =
+  /not wrapped in act\(|not configured to support act\(|act\(async \(\) => \.\.\.\) without await|`act` call was not awaited/;
+const actWarnings: string[] = [];
+// oxlint-disable-next-line no-console -- the preload wraps console.error on purpose.
+const realError = console.error;
+// oxlint-disable-next-line no-console -- see above.
+console.error = (...args: unknown[]) => {
+  const first = args[0];
+  if (typeof first === "string" && ACT_WARNING.test(first)) {
+    const line = (first.split("\n")[0] ?? first).replace(/\.$/, "");
+    actWarnings.push(line.replace(/%s/, String(args[1] ?? "")));
+  }
+  realError(...args);
+};
+
+/** The act() warnings noted since the last call, emptied. */
+export function takeActWarnings(): string[] {
+  return actWarnings.splice(0);
+}
+
+/** Throws when act() warnings were noted since the last check; the preload runs it after each test. */
+export function failOnActWarnings(): void {
+  const found = takeActWarnings();
+  if (found.length > 0)
+    throw new Error(
+      `React act() warning (W-1061): ${[...new Set(found)].join("; ")}. Wrap the update in act() or await settle() before checking the page.`,
+    );
+}
+
+afterEach(failOnActWarnings);
 
 // A failing matcher prints its values, and a happy-dom node reaches the whole window and React
 // fiber graph: one failed `expect(element).toBeNull()` printed gigabytes and got the desktop

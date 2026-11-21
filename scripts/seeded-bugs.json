@@ -21366,8 +21366,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "    if (!tail.current) return serial(() => write(latest.current.rev));",
-          "replace": "    if (tail.current || !tail.current) return write(latest.current.rev);"
+          "search": "    if (!tail.current) return serial(() => write(revNow()));",
+          "replace": "    if (tail.current || !tail.current) return write(revNow());"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -21380,7 +21380,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "      return write(prev ?? latest.current.rev);",
+          "search": "      return write(prev ?? revNow());",
           "replace": "      return write(\"r1\");"
         }
       ],
@@ -48719,8 +48719,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "        const rev = at ? await settle(prev) : (prev ?? latest.current.rev);",
-          "replace": "        const rev = prev ?? latest.current.rev;"
+          "search": "        const rev = at ? await settle(prev) : (prev ?? revNow());",
+          "replace": "        const rev = prev ?? revNow();"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -50355,7 +50355,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "      const justSaved = last !== null && last.rev === prev && last.version === version;",
+          "search": "      const justSaved = last !== null && last.rev === rev && last.version === version;",
           "replace": "      const justSaved = false;"
         }
       ],
@@ -50397,8 +50397,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/alerts.ts",
-          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\"),",
-          "replace": "      !el.closest(\"[hidden]\"),"
+          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\") &&",
+          "replace": "      !el.closest(\"[hidden]\") &&"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
@@ -50411,8 +50411,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/alerts.ts",
-          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\"),",
-          "replace": "      !el.closest(\"[hidden]\"),"
+          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\") &&",
+          "replace": "      !el.closest(\"[hidden]\") &&"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1054"],
@@ -50655,13 +50655,13 @@
       "description": "A Spacer in a row adds no gap again.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
-          "search": "        declarations.push({ property: \"flex-basis\", value: height });\n",
-          "replace": "        void height;\n"
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "  if (desktop) lists.desktop.push({ property: \"flex-basis\", value: desktop });\n",
+          "replace": "  void desktop;\n"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
-      "expect": "\\(fail\\).*spacer is a single aria-hidden div"
+      "command": ["bun", "test", "./packages/emvb/src/core/render/spacer-basis.test.ts"],
+      "expect": "\\(fail\\).*in a row the basis is the height"
     },
     {
       "id": "W-1062/spacer-basis-beats-width",
@@ -50669,9 +50669,9 @@
       "description": "A Spacer's basis overrides the width it was given.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
-          "search": "      if (height && sized?.width === undefined && sized?.flexBasis === undefined)\n",
-          "replace": "      if (height)\n"
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "    parentRow(level) && !sized(level) ? lastValue(chain(level), \"height\") : undefined;\n",
+          "replace": "    parentRow(level) ? lastValue(chain(level), \"height\") : undefined;\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
@@ -50683,9 +50683,9 @@
       "description": "A Spacer in a row on a published page adds no gap.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
-          "search": "        declarations.push({ property: \"flex-basis\", value: height });\n",
-          "replace": "        void height;\n"
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "  if (desktop) lists.desktop.push({ property: \"flex-basis\", value: desktop });\n",
+          "replace": "  void desktop;\n"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1062"],
@@ -50743,8 +50743,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": ".emvb-icon-dir:dir(rtl){transform:scaleX(-1)}",
-          "replace": ""
+          "search": "{animation:none}}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}",
+          "replace": "{animation:none}}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
@@ -51404,6 +51404,350 @@
       ],
       "command": ["bun", "test", "scripts/ci-e2e.test.ts"],
       "expect": "\\(fail\\).*EmDash 1.4 and the latest"
+    },
+    {
+      "id": "W-1062/basis-in-columns",
+      "requirement": "W-1062",
+      "description": "A Spacer gets its height as flex-basis in a column too, so a device's own height no longer applies.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "    return typeof direction === \"string\" && ROW_DIRECTIONS.has(direction);\n",
+          "replace": "    return true;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/spacer-basis.test.ts"],
+      "expect": "\\(fail\\).*in a column it has no basis"
+    },
+    {
+      "id": "W-1062/basis-ignores-device-height",
+      "requirement": "W-1062",
+      "description": "A Spacer's basis in a row stays its desktop height on every device.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "  const chain = (level: Level) => [lists.desktop, ...CASCADE[level].map((d) => lists[d])];\n",
+          "replace": "  const chain = (_level: Level) => [lists.desktop];\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/spacer-basis.test.ts"],
+      "expect": "\\(fail\\).*in a row the basis is the height, per device"
+    },
+    {
+      "id": "W-1062/basis-in-columns-compat",
+      "requirement": "W-1062",
+      "description": "Column Spacers get a flex-basis again, changing released pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "    return typeof direction === \"string\" && ROW_DIRECTIONS.has(direction);\n",
+          "replace": "    return true;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat/compat.test.ts"],
+      "expect": "\\(fail\\).*v18-1.4-spacer-device-heights"
+    },
+    {
+      "id": "W-1062/basis-in-columns-e2e",
+      "requirement": "W-1062",
+      "description": "A Spacer in a column keeps its desktop height on a phone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/spacer-basis.ts",
+          "search": "    return typeof direction === \"string\" && ROW_DIRECTIONS.has(direction);\n",
+          "replace": "    return true;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/fixes-1.4.e2e.ts",
+        "--project=node",
+        "-g",
+        "phone height"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\]"
+    },
+    {
+      "id": "W-1054/focus-out-of-tab-order",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert focuses a link taken out of the Tab order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      el.tabIndex >= 0 &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*skips an element taken out of the Tab order"
+    },
+    {
+      "id": "W-1054/focus-inert",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert focuses a link inside an inert region.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "\"[hidden], [inert], [aria-hidden='true']\"",
+          "replace": "\"[hidden], [aria-hidden='true']\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*skips an element inside an inert region"
+    },
+    {
+      "id": "W-1054/focus-aria-hidden",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert focuses a link hidden from assistive tech.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "\"[hidden], [inert], [aria-hidden='true']\"",
+          "replace": "\"[hidden], [inert]\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*skips an element hidden from assistive tech"
+    },
+    {
+      "id": "W-1054/focus-css-hidden",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert focuses a link that is display:none on this device, so focus falls to the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      rendered(el),\n",
+          "replace": "      true,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*skips an element hidden by CSS"
+    },
+    {
+      "id": "W-1054/focus-css-hidden-e2e",
+      "requirement": "W-1054",
+      "description": "On a phone, dismissing an Alert before an element hidden on mobile sends focus to the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      rendered(el),\n",
+          "replace": "      true,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/fixes-1.4.e2e.ts",
+        "--project=node",
+        "-g",
+        "hidden on phones"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\]"
+    },
+    {
+      "id": "W-1052/stale-rev-after-queue",
+      "requirement": "W-1052",
+      "description": "Once the write queue empties, the next write takes the revision from React state, which an awaited save hasn't updated yet, and conflicts with itself.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "    return last && last.from === stateRev ? last.to : stateRev;\n",
+          "replace": "    return last ? stateRev : stateRev;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*Publish right after an awaited save"
+    },
+    {
+      "id": "W-1052/publish-rev-forgotten",
+      "requirement": "W-1052",
+      "description": "A save right after an awaited publish sends the revision from before the publish.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "        dispatch({ type: \"published\", rev: result.rev });\n        wrote(result.rev);\n",
+          "replace": "        dispatch({ type: \"published\", rev: result.rev });\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*a save right after an awaited publish"
+    },
+    {
+      "id": "W-1079/button-arrow-not-marked",
+      "requirement": "W-1079",
+      "description": "A Button's arrow icon isn't marked as directional, so it doesn't mirror on a right-to-left page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  if (node.props.iconId && isDirectionalIcon(node.props.iconId)) {\n",
+          "replace": "  if (node.props.iconId === \"\") {\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*Button's arrow icon is marked"
+    },
+    {
+      "id": "W-1079/button-rtl-rule-missing",
+      "requirement": "W-1079",
+      "description": "The Button's CSS has no mirror rule, so its marked arrow still doesn't flip.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-button-icon--lg{width:1.5em;height:1.5em}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}",
+          "replace": ".emvb-button-icon--lg{width:1.5em;height:1.5em}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*Button's arrow icon is marked"
+    },
+    {
+      "id": "W-1079/animation-drops-mirror",
+      "requirement": "W-1079",
+      "description": "A spin or pulse replaces the mirror transform instead of adding to it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-icon svg.emvb-icon-dir{animation-composition:add}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*spinning or pulsing arrow keeps its mirror"
+    },
+    {
+      "id": "W-1079/animation-drops-mirror-e2e",
+      "requirement": "W-1079",
+      "description": "A spinning arrow icon on a right-to-left page points the wrong way while it spins.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-icon svg.emvb-icon-dir{animation-composition:add}",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/fixes-1.4.e2e.ts",
+        "--project=node",
+        "-g",
+        "spinning arrow"
+      ],
+      "expect": "\u2718.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1077/hotspot-ids-shared",
+      "requirement": "W-1077",
+      "description": "A Hotspot's note keeps its plain id in a header or a repeated synced section, so two notes share an id and a marker opens the wrong one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (type === \"hotspot\" && id) return finish(node, uniqueField(built, `emvb-hotspot-${id}`));\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*Hotspots in a header and on the page"
+    },
+    {
+      "id": "W-1077/popovertarget-not-renamed",
+      "requirement": "W-1077",
+      "description": "A renamed Hotspot note keeps the marker's old popovertarget, so the copy's marker opens the first copy's note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  \"aria-describedby\",\n  \"popovertarget\",\n] as const;",
+          "replace": "  \"aria-describedby\",\n] as const;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*each marker opens its own note"
+    },
+    {
+      "id": "W-1077/hotspot-ids-shared-e2e",
+      "requirement": "W-1077",
+      "description": "A Hotspots picture in a popup and on the page share note ids, so a marker can open the other copy's note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (type === \"hotspot\" && id) return finish(node, uniqueField(built, `emvb-hotspot-${id}`));\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1077"],
+      "expect": "\u2718.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1076/flip-unlinked-button",
+      "requirement": "W-1076",
+      "description": "A flip box with button text but no usable link loses its button, and the accessibility check says nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      if (spoken(props[\"buttonText\"]) && (!href || !sanitizeHref(href))) {\n",
+          "replace": "      if (spoken(props[\"buttonText\"]) && !href) {\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*back button has no usable link"
+    },
+    {
+      "id": "W-1076/flip-unlinked-button-missing",
+      "requirement": "W-1076",
+      "description": "The flip box's unlinked-button warning is gone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      if (spoken(props[\"buttonText\"]) && (!href || !sanitizeHref(href))) {\n",
+          "replace": "      if (href === \"never\") {\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*back button has no usable link"
+    },
+    {
+      "id": "W-1061/act-warnings-ignored",
+      "requirement": "W-1061",
+      "description": "React act() warnings are printed but never noted, so a test that checks stale markup passes.",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "  if (typeof first === \"string\" && ACT_WARNING.test(first)) {\n",
+          "replace": "  if (typeof first === \"string\" && ACT_WARNING.test(\"\")) {\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/setup/happydom.test.ts"],
+      "expect": "\\(fail\\).*act\\(\\) warning is noted"
+    },
+    {
+      "id": "W-1061/act-warnings-dont-fail",
+      "requirement": "W-1061",
+      "description": "Noted act() warnings no longer fail the test they happened in.",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "  if (found.length > 0)\n",
+          "replace": "  if (found.length < 0)\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/setup/happydom.test.ts"],
+      "expect": "\\(fail\\).*throws on a noted warning"
     }
   ]
 }

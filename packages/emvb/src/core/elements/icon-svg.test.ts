@@ -162,4 +162,43 @@ describe("directional icons mirror on right-to-left pages (W-1079)", () => {
     expect(out.html.match(/emvb-icon-dir/g)?.length).toBe(1);
     expect(out.css).toContain(".emvb-icon-dir:dir(rtl){transform:scaleX(-1)}");
   });
+
+  test("a Button's arrow icon is marked and mirrored under :dir(rtl) too, a star isn't", () => {
+    const button = (id: string, iconId: string) =>
+      ({ id, type: "button", props: { text: "Go", iconId } }) as unknown as LayoutNode;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [button("butn0001", "arrow-right"), button("butn0002", "star")],
+      },
+    } as Layout;
+    const out = renderPage(layout, emptyDesign());
+    expect(out.html.match(/emvb-icon-dir/g)?.length).toBe(1);
+    expect(out.css).toContain(".emvb-icon-dir:dir(rtl){transform:scaleX(-1)}");
+  });
+
+  test("a spinning or pulsing arrow keeps its mirror: the keyframes add to it", () => {
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "icon0001",
+            type: "icon",
+            props: { iconId: "arrow-right", title: "Next" },
+            style: { motion: { icon: { type: "spin", duration: 1000, loop: true } } },
+          },
+        ],
+      },
+    } as unknown as Layout;
+    const out = renderPage(layout, emptyDesign());
+    expect(out.css).toContain("--emvb-icon-animation:emvb-icon-spin");
+    expect(out.css).toContain(".emvb-icon svg.emvb-icon-dir{animation-composition:add}");
+  });
 });

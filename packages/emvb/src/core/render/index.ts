@@ -56,6 +56,7 @@ import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
 import { renderForm, withFieldOptions } from "./form.ts";
 import { renderLoop } from "./loop.ts";
 import { renderPagination } from "./pagination.ts";
+import { pushSpacerBasis } from "./spacer-basis.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
@@ -196,7 +197,14 @@ function originHash(origin: string): string {
 /** Form fields whose control carries an `emvb-field-<id>` HTML id (W-187). */
 const FIELD_TYPES = new Set<string>(FORM_FIELD_TYPES.filter((type) => type !== "submit"));
 
-const ID_ATTRS = ["id", "for", "aria-controls", "aria-labelledby", "aria-describedby"] as const;
+const ID_ATTRS = [
+  "id",
+  "for",
+  "aria-controls",
+  "aria-labelledby",
+  "aria-describedby",
+  "popovertarget",
+] as const;
 
 /** Rewrites `base` (or `base-…`) to `next` in the id and id-reference attributes of a subtree. */
 function renameIds(vnode: VNode, base: string, next: string): VNode {
@@ -339,6 +347,7 @@ export function renderPage(
   // W-799: each grid child's grid, so a span or start line that doesn't fit a device's columns
   // can be clamped there.
   const gridOf = new Map<string, LayoutNode>();
+  const parentOf = new WeakMap<LayoutNode, LayoutNode>();
   someNode(layout.root, (current) => {
     if (current.type === "grid")
       for (const child of nodeChildren(current)) gridOf.set(child.id, current);
@@ -402,6 +411,7 @@ export function renderPage(
     id: string | undefined,
     nodeId: string,
     ruleId: string | undefined,
+    parent?: LayoutNode,
   ): Record<string, string> => {
     const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${cssTypeName(node.type)}`];
     for (const classId of node.classes ?? []) {
@@ -467,11 +477,6 @@ export function renderPage(
     if (node.type === "spacer") {
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
-      // W-1062: in a flex box the basis is the size along its direction, so in a row the Spacer
-      // makes a gap as wide as it is tall. Its own width or basis, if set, wins.
-      const sized = node.style as { width?: unknown; flexBasis?: unknown } | undefined;
-      if (height && sized?.width === undefined && sized?.flexBasis === undefined)
-        declarations.push({ property: "flex-basis", value: height });
     }
     if (node.type === "layout-section") {
       // The inner box's width (W-156): full width, or a length; unset keeps the 1140 px default.
@@ -531,6 +536,15 @@ export function renderPage(
       declarations.push(...placeAt(place.desktop));
       if (place.tablet.length > 0) tablet.declarations.unshift(...placeAt(place.tablet));
       if (place.mobile.length > 0) mobile.declarations.unshift(...placeAt(place.mobile));
+    }
+    if (node.type === "spacer") {
+      pushSpacerBasis(node, parent, design.classes, {
+        desktop: declarations,
+        wide: wide.declarations,
+        laptop: laptop.declarations,
+        tablet: tablet.declarations,
+        mobile: mobile.declarations,
+      });
     }
     const queryStyle = node.query ? styleDeclarations(node.query.style) : undefined;
     for (const key of queryStyle?.rejected ?? []) {
@@ -702,7 +716,9 @@ export function renderPage(
     const runtime = nodeRuntime(node as LayoutNode);
     if (runtime) runtimes.add(runtime);
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
-    const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
+    // W-1062: a Spacer's size follows its parent's direction.
+    for (const child of nodeChildren(node)) parentOf.set(child, node);
+    const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId, parentOf.get(stored));
     // W-1070: hides on scroll down with the opt-in sticky script (any element type).
     if (hidesOnScroll(node as LayoutNode)) {
       attrs["data-emvb-sticky-hide"] = "";
@@ -787,7 +803,11 @@ export function renderPage(
       ctx.definitions,
       ctx.formId,
     );
-    return finish(node, FIELD_TYPES.has(type) && id ? uniqueField(built, controlId(id)) : built);
+    if (FIELD_TYPES.has(type) && id) return finish(node, uniqueField(built, controlId(id)));
+    // W-1077: a Hotspot's note is a popover found by id; a header, footer or popup copy, or a
+    // repeat, gets its own id, as form fields and Tabs do.
+    if (type === "hotspot" && id) return finish(node, uniqueField(built, `emvb-hotspot-${id}`));
+    return finish(node, built);
   }
 
   /** W-249: a field rendered again (synced section, loop item) moves its control to a new id. */

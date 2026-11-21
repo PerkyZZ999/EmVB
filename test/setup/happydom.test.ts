@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { holdsDomNode } from "./happydom.ts";
+import { failOnActWarnings, holdsDomNode, takeActWarnings } from "./happydom.ts";
 
 test("the happy-dom preload provides a DOM at the plugin admin URL", () => {
   const el = document.createElement("div");
@@ -104,5 +104,29 @@ describe("Kumo's unnamed-field warning fails the test (W-1061)", () => {
     const before = console.warn;
     expect(failure(() => console.warn("[Kumo Input]: variant is deprecated"))).toBe("passed");
     expect(console.warn === before).toBe(true);
+  });
+});
+
+// oxlint-disable no-console -- these tests call the console.error the preload wraps.
+describe("React act() warnings fail the test (W-1061)", () => {
+  test("an act() warning is noted for the end of the test; other errors only print", () => {
+    console.error(
+      "An update to %s inside a test was not wrapped in act(...).\n\nWhen testing, code that causes React state updates should be wrapped into act(...):",
+      "Panel",
+    );
+    console.error("Something else went wrong");
+    // Taken here so this test's own end passes; the preload's afterEach throws on any left.
+    expect(takeActWarnings()).toEqual([
+      "An update to Panel inside a test was not wrapped in act(...)",
+    ]);
+    expect(takeActWarnings()).toEqual([]);
+  });
+
+  test("the check after each test throws on a noted warning, naming the component", () => {
+    console.error("An update to %s inside a test was not wrapped in act(...).", "Toast");
+    expect(failure(() => failOnActWarnings())).toStartWith(
+      "React act() warning (W-1061): An update to Toast inside a test was not wrapped in act(...).",
+    );
+    expect(failure(() => failOnActWarnings())).toBe("passed");
   });
 });

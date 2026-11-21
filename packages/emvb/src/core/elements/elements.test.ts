@@ -39,7 +39,7 @@ describe("element renderers (W-016, R-011)", () => {
     expect(el?.tagName).toBe("DIV");
     expect(el?.getAttribute("aria-hidden")).toBe("true");
     expect(el?.children.length).toBe(0);
-    expect(css).toContain(".emvb-e-spac0001{height:24px;flex-basis:24px}");
+    expect(css).toContain(".emvb-e-spac0001{height:24px}");
   });
 
   test("a spacer's basis makes it a gap in a row too; its own width wins (W-1062)", () => {
@@ -47,7 +47,17 @@ describe("element renderers (W-016, R-011)", () => {
       ...defaultElement("spacer", "spac0002"),
       style: { width: { value: 8, unit: "px" } },
     };
-    const { css } = renderPage(page(sized as LayoutNode), design);
+    const row: Layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: { flexDirection: "row" },
+        children: [sized as LayoutNode],
+      },
+    };
+    const { css } = renderPage(row, design);
     expect(css.includes("flex-basis")).toBe(false);
     expect(css).toContain("height:24px");
   });

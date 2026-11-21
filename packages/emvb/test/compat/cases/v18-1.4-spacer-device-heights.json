@@ -1,0 +1,126 @@
+{
+  "source": "Synthetic, for the W-1062 fix: Spacers in columns with per-device heights. Expected output rendered by the code before W-1062 (d2616676^), when a column Spacer had no flex-basis.",
+  "design": {
+    "schemaVersion": 17,
+    "variables": {
+      "colors": [
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#14161a"
+        }
+      ]
+    }
+  },
+  "layout": {
+    "schemaVersion": 18,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "children": [
+        {
+          "id": "text0001",
+          "type": "text",
+          "props": {
+            "text": "Above"
+          }
+        },
+        {
+          "id": "spac0001",
+          "type": "spacer",
+          "props": {
+            "height": {
+              "value": 96,
+              "unit": "px"
+            }
+          },
+          "devices": {
+            "tablet": {
+              "height": {
+                "value": 40,
+                "unit": "px"
+              }
+            },
+            "mobile": {
+              "height": {
+                "value": 8,
+                "unit": "px"
+              }
+            }
+          }
+        },
+        {
+          "id": "text0002",
+          "type": "text",
+          "props": {
+            "text": "Between"
+          }
+        },
+        {
+          "id": "spac0002",
+          "type": "spacer",
+          "props": {
+            "height": {
+              "value": 64,
+              "unit": "px"
+            }
+          },
+          "style": {
+            "width": {
+              "value": 200,
+              "unit": "px"
+            }
+          },
+          "devices": {
+            "laptop": {
+              "height": {
+                "value": 48,
+                "unit": "px"
+              }
+            }
+          }
+        },
+        {
+          "id": "cont0001",
+          "type": "container",
+          "props": {},
+          "style": {
+            "flexDirection": "column",
+            "gap": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "spac0003",
+              "type": "spacer",
+              "props": {
+                "height": {
+                  "value": 120,
+                  "unit": "px"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "height": {
+                    "value": 2,
+                    "unit": "rem"
+                  }
+                }
+              }
+            },
+            {
+              "id": "text0003",
+              "type": "text",
+              "props": {
+                "text": "Below"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

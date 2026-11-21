@@ -625,6 +625,17 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
             "This flip box's back is empty, so turning it over shows nothing. Add a back title, text or button.",
         });
       }
+      // The back's button is a link: with no address it can use, the page leaves it out.
+      const href = typeof props["href"] === "string" ? props["href"].trim() : "";
+      if (spoken(props["buttonText"]) && (!href || !sanitizeHref(href))) {
+        add({
+          nodeId: node.id,
+          rule: "link-name",
+          severity: "warning",
+          message:
+            "This flip box's button has no link it can use, so the page leaves the button out. Add a button link, or clear the button text.",
+        });
+      }
     }
     // W-1076: "Ends 1 Dec 2026" alone doesn't say what ends.
     if (node.type === "countdown" && !spoken(props["title"]) && !node.bind) {

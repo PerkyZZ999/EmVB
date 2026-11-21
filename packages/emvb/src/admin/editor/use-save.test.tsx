@@ -389,4 +389,29 @@ describe("the editor's own writes never conflict with each other (W-1052)", () =
     expect(log).toEqual(["PUT draft r1 → r2", "POST publish r2 → r3"]);
     expect([published, live.state?.rev]).toEqual([true, "r3"]);
   });
+
+  test("Publish right after an awaited save, before a re-render, uses the save's revision", async () => {
+    const { fetcher, log } = revisioned(Promise.resolve());
+    await start(fetcher, state());
+    const published = await run(async () => {
+      await hook().save();
+      // Let the queue empty, as it does when the user presses Publish a moment later.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      return hook().publish();
+    });
+    expect(log).toEqual(["PUT draft r1 → r2", "POST publish r2 → r3"]);
+    expect([published, live.hook?.conflict]).toEqual([true, false]);
+  });
+
+  test("a save right after an awaited publish, with new edits, uses the publish's revision", async () => {
+    const { fetcher, log } = revisioned(Promise.resolve());
+    await start(fetcher, state({}, { version: 1, savedVersion: 1 }));
+    const saved = await run(async () => {
+      await hook().publish();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      return hook().save();
+    });
+    expect(log).toEqual(["POST publish r1 → r2", "PUT draft r2 → r3"]);
+    expect([saved, live.hook?.conflict]).toEqual(["r3", false]);
+  });
 });

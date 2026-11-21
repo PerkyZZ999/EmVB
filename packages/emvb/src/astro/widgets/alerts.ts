@@ -7,17 +7,24 @@
 const FOCUSABLE =
   "a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1']), summary, iframe";
 
+const rendered = (el: HTMLElement): boolean =>
+  typeof el.checkVisibility === "function"
+    ? el.checkVisibility({ visibilityProperty: true })
+    : el.getClientRects().length > 0;
+
 /**
  * The first element after `from` that Tab reaches, else the last one before it. Elements taken out
  * of the Tab order (`tabindex="-1"`, such as the radios behind enhanced Tabs) or hidden from
- * assistive tech don't count (W-1054).
+ * assistive tech don't count (W-1054), nor do ones without a box (an element hidden on this
+ * device is display:none), which focus() can't reach: focus fell to <body>.
  */
 function neighbour(from: Element): HTMLElement | null {
   const all = [...from.ownerDocument.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
     (el) =>
       !from.contains(el) &&
       el.tabIndex >= 0 &&
-      !el.closest("[hidden], [inert], [aria-hidden='true']"),
+      !el.closest("[hidden], [inert], [aria-hidden='true']") &&
+      rendered(el),
   );
   const after = all.find(
     (el) => from.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING,

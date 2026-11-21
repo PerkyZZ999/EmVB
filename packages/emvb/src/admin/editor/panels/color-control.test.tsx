@@ -551,7 +551,7 @@ test("W-818: closing the new-variable form by Cancel or Create puts focus back o
   const cancel = [...view.host.querySelectorAll<HTMLButtonElement>("button")].find(
     (b) => b.textContent?.trim() === "Cancel",
   );
-  cancel?.focus();
+  await act(async () => cancel?.focus());
   await view.click("Cancel");
   expect(newButton()).toBeTruthy();
   expect(document.activeElement === newButton()).toBe(true);
@@ -577,7 +577,7 @@ test("W-820: a refused name or value focuses that field and marks it invalid", a
   expect(value.hasAttribute("aria-invalid")).toBe(false);
   await view.type("Variable name", "Accent");
   await view.type("Value", "#12");
-  name.focus();
+  await act(async () => name.focus());
   await view.click("Create variable");
   expect(document.activeElement === view.field("Value")).toBe(true);
   expect(view.field("Value").getAttribute("aria-invalid")).toBe("true");
@@ -620,7 +620,7 @@ test("W-822: while creating, the form keeps focus and Cancel or Escape doesn't c
     const form = view.host.querySelector('[data-emvb-form="new-variable"]');
     const buttons = [...(form?.querySelectorAll<HTMLButtonElement>("button") ?? [])];
     const create = buttons.find((b) => b.textContent === "Create variable");
-    create?.focus();
+    await act(async () => create?.focus());
     await act(async () => create?.click());
     expect(buttons.map((b) => b.disabled)).toEqual([false, false]);
     expect([...(form?.querySelectorAll("input") ?? [])].map((f) => f.disabled)).toEqual([

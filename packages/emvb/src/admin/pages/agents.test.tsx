@@ -314,7 +314,7 @@ test("W-814: a switch stays enabled while saving, so keyboard focus stays on it"
   await settle();
   await settle();
   const master = host.querySelector<HTMLElement>('[role="switch"]');
-  master?.focus();
+  await act(async () => master?.focus());
   await act(async () => master?.click());
   await settle();
   expect(host.querySelector("[data-emvb-agents-save]")?.textContent ?? null).toBe("Saving…");

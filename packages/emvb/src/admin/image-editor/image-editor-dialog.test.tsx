@@ -451,7 +451,7 @@ describe("image editor in photocn's layout (W-483)", () => {
       document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.textContent;
     change({ canUndo: true, edited: true });
     await settle();
-    q<HTMLButtonElement>("[data-emvb-image-undo]")?.focus();
+    await act(async () => q<HTMLButtonElement>("[data-emvb-image-undo]")?.focus());
     await click("[data-emvb-image-undo]");
     change({ canUndo: false, canRedo: true });
     await settle();
@@ -462,7 +462,7 @@ describe("image editor in photocn's layout (W-483)", () => {
     await settle();
     await wait();
     expect(name()).toBe("Undo");
-    q<HTMLButtonElement>("[data-emvb-image-reset]")?.focus();
+    await act(async () => q<HTMLButtonElement>("[data-emvb-image-reset]")?.focus());
     await click("[data-emvb-image-reset]");
     change({ edited: false });
     await settle();
@@ -860,8 +860,8 @@ describe("tone tools in photocn's panels (W-484)", () => {
     expect(points()[2]?.getAttribute("aria-valuetext")).toBe("input 128, output 128");
     expect(q("[data-emvb-image-panel-reset]")?.hasAttribute("disabled")).toBe(true);
     const mid = points()[2];
-    (mid as unknown as HTMLElement).focus();
     await act(async () => {
+      (mid as unknown as HTMLElement).focus();
       mid?.dispatchEvent(new FocusEvent("focus"));
     });
     await settle();

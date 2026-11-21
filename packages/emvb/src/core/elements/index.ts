@@ -36,7 +36,7 @@ import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 import type { ElementDefinition } from "./definition.ts";
-import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
+import { ICON_STROKE_WIDTHS, iconGlyph, isDirectionalIcon } from "./icon-svg.ts";
 export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
 import { searchForm, themeToggle } from "./site.ts";
@@ -317,7 +317,7 @@ const link: ElementDefinition<LinkNode> = {
 const button: ElementDefinition<ButtonNode> = {
   baseCss:
     // The look sits in :where() so site tag defaults, classes and local styles all win (W-148).
-    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;gap:0.5em;overflow-wrap:anywhere;text-align:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}:where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}.emvb-button-icon{display:inline-flex;flex:none}.emvb-button-icon svg{width:100%;height:100%;display:block}.emvb-button-icon--sm{width:1em;height:1em}.emvb-button-icon--md{width:1.25em;height:1.25em}.emvb-button-icon--lg{width:1.5em;height:1.5em}",
+    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;gap:0.5em;overflow-wrap:anywhere;text-align:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}:where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}.emvb-button-icon{display:inline-flex;flex:none}.emvb-button-icon svg{width:100%;height:100%;display:block}.emvb-button-icon--sm{width:1em;height:1em}.emvb-button-icon--md{width:1.25em;height:1.25em}.emvb-button-icon--lg{width:1.5em;height:1.5em}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}",
   defaults: () => ({ type: "button", props: { text: "Button" } }),
   descriptor: {
     type: "button",
@@ -405,6 +405,10 @@ function buttonChildren(node: ButtonNode): (VNode | string)[] {
           children: [],
         })),
   };
+  // W-1079: an arrow points forward on a right-to-left page too, as on an Icon.
+  if (node.props.iconId && isDirectionalIcon(node.props.iconId)) {
+    svg.attrs.class = svg.attrs.class ? `${svg.attrs.class} emvb-icon-dir` : "emvb-icon-dir";
+  }
   const size = node.props.iconSize ?? "md";
   const icon: VNode = {
     tag: "span",
@@ -645,12 +649,15 @@ const icon: ElementDefinition<IconNode> = {
     // W-237: the glyph reads the wrapper's icon custom properties (rotate, flip, shadow, loop,
     // stroke); unset they change nothing. The svg inherits the wrapper's transition for hover.
     // W-803: an icon larger than its box (512 px on a phone) shrinks to fit, keeping its shape.
+    // W-1079: the right-to-left mirror is a transform, and the spin and pulse keyframes set
+    // transform too; `add` composes them onto the mirror instead of dropping it while animating
+    // (`scale` already holds the Flip setting, so the mirror can't go there).
     ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;max-width:100%;color:inherit}.emvb-icon svg{display:block;max-width:100%;rotate:var(--emvb-icon-rotate,0deg);scale:var(--emvb-icon-flip,1 1);filter:var(--emvb-icon-shadow,none);animation:var(--emvb-icon-animation,none);transition:inherit}" +
     ICON_STROKE_WIDTHS.map(
       (width) =>
         `.emvb-icon-sw${width.replace(".", "_")}{stroke-width:var(--emvb-icon-stroke,${width})}`,
     ).join("") +
-    "@keyframes emvb-icon-spin{to{transform:rotate(360deg)}}@keyframes emvb-icon-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    "@keyframes emvb-icon-spin{to{transform:rotate(360deg)}}@keyframes emvb-icon-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}.emvb-icon svg.emvb-icon-dir{animation-composition:add}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "icon",
     props: { iconId: "star", title: "Star", decorative: false, size: 24 },

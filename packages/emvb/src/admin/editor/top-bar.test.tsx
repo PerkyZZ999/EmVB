@@ -175,10 +175,10 @@ for (const busy of ["save", "publish"] as const) {
     const save = view.button("Save draft");
     const publish = view.button("Publish");
     expect([save.disabled, publish.disabled]).toEqual([false, false]);
-    save.focus();
+    await act(async () => save.focus());
     await view.click("Save draft");
     expect(document.activeElement).toBe(save);
-    publish.focus();
+    await act(async () => publish.focus());
     await view.click("Publish");
     expect(document.activeElement).toBe(publish);
     expect(view.calls).toEqual([]);
@@ -198,7 +198,7 @@ test("W-828: a save in flight keeps Revert focusable and ignores the press; idle
   const revert = view.button("Revert to published");
   expect(revert.disabled).toBe(false);
   expect(revert.getAttribute("aria-disabled")).toBe("true");
-  revert.focus();
+  await act(async () => revert.focus());
   await view.click("Revert to published");
   expect(document.activeElement).toBe(revert);
   expect(view.calls).toEqual([]);

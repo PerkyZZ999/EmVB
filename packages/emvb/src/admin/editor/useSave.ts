@@ -111,6 +111,18 @@ export function useSave(
 
   // The last write's revision and version, known before the re-render puts them in `state`.
   const savedNow = React.useRef<{ rev: string; version: number } | null>(null);
+  // W-1052: the revision the editor's last write (save, publish, schedule) left, and the one
+  // `state` held then. Until a re-render (or a reload) changes `state.rev`, this one is current:
+  // `await save()` then `publish()` in one event sent the old revision and conflicted with itself.
+  const lastRev = React.useRef<{ from: string | null; to: string } | null>(null);
+  const revNow = React.useCallback((): string | null => {
+    const last = lastRev.current;
+    const stateRev = latest.current.rev;
+    return last && last.from === stateRev ? last.to : stateRev;
+  }, []);
+  const wrote = React.useCallback((rev: string) => {
+    lastRev.current = { from: latest.current.rev, to: rev };
+  }, []);
   const write = React.useCallback(
     async (rev: string | null): Promise<string | null> => {
       const current = latest.current;
@@ -153,6 +165,7 @@ export function useSave(
             : await savePage(fetcher, current.id, current.page, rev);
         dispatch({ type: "saved", rev: next, version: current.version });
         savedNow.current = { rev: next, version: current.version };
+        wrote(next);
         setStatus({ kind: "saved" });
         return next;
       } catch (error) {
@@ -165,7 +178,7 @@ export function useSave(
         return null;
       }
     },
-    [fetcher, dispatch, collection],
+    [fetcher, dispatch, collection, wrote],
   );
 
   // W-199, W-836, W-1052: the editor's own writes (save, overwrite, publish, schedule) run one at
@@ -195,15 +208,15 @@ export function useSave(
   );
   const save = React.useCallback((): Promise<string | null> => {
     if (queued.current) return queued.current;
-    if (!tail.current) return serial(() => write(latest.current.rev));
+    if (!tail.current) return serial(() => write(revNow()));
     // The state may not have re-rendered yet, so take the new revision from the write before.
     const after = serial((prev) => {
       queued.current = null;
-      return write(prev ?? latest.current.rev);
+      return write(prev ?? revNow());
     });
     queued.current = after;
     return after;
-  }, [serial, write]);
+  }, [serial, write, revNow]);
 
   /** Conflict → Overwrite: take the stored revision and save over it. */
   const overwrite = React.useCallback(async () => {
@@ -224,14 +237,14 @@ export function useSave(
     async (prev: string | null | undefined): Promise<string | null | false> => {
       // W-199: the save before this one failed, so its edits aren't stored; don't publish.
       if (prev === null) return false;
-      const rev = prev ?? latest.current.rev;
+      const rev = prev ?? revNow();
       const { version, savedVersion } = latest.current;
       const last = savedNow.current;
-      const justSaved = last !== null && last.rev === prev && last.version === version;
+      const justSaved = last !== null && last.rev === rev && last.version === version;
       if (version === savedVersion || justSaved) return rev;
       return (await write(rev)) ?? false;
     },
-    [write],
+    [write, revNow],
   );
 
   const publish = React.useCallback(async (): Promise<boolean> => {
@@ -245,6 +258,7 @@ export function useSave(
             ? await publishThemePart(fetcher, latest.current.id, rev)
             : await publishPage(fetcher, latest.current.id, rev);
         dispatch({ type: "published", rev: result.rev });
+        wrote(result.rev);
         setStatus({ kind: "saved" });
         published = true;
         return result.rev;
@@ -255,7 +269,7 @@ export function useSave(
       }
     });
     return published;
-  }, [fetcher, dispatch, serial, settle, collection]);
+  }, [fetcher, dispatch, serial, settle, collection, wrote]);
 
   /**
    * W-1027: has EmDash publish the saved draft at `at` (unsaved edits are saved first), or with
@@ -265,7 +279,7 @@ export function useSave(
     async (at: Date | null): Promise<string | null> => {
       let message: string | null = null;
       await serial(async (prev) => {
-        const rev = at ? await settle(prev) : (prev ?? latest.current.rev);
+        const rev = at ? await settle(prev) : (prev ?? revNow());
         if (rev === false) {
           message = "Your changes couldn't be saved, so nothing was scheduled.";
           return null;
@@ -284,6 +298,7 @@ export function useSave(
             status: result.status,
             at: result.scheduledAt,
           });
+          wrote(result.rev);
           setStatus({ kind: "saved" });
           return result.rev;
         } catch (error) {
@@ -298,7 +313,7 @@ export function useSave(
       });
       return message;
     },
-    [fetcher, dispatch, serial, settle, collection],
+    [fetcher, dispatch, serial, settle, collection, revNow, wrote],
   );
 
   return {

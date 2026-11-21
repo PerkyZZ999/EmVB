@@ -292,3 +292,41 @@ describe("W-789 loop entries are a list", () => {
     expect(html).not.toContain('role="listitem"');
   });
 });
+
+describe("Hotspot notes keep unique ids in theme parts and repeats (W-1077)", () => {
+  const spots = {
+    id: "spot0001",
+    type: "hotspots",
+    props: { src: "/media/car.jpg", alt: "A car" },
+    children: [{ id: "hspt0001", type: "hotspot", props: { title: "Wheel", x: 20, y: 30 } }],
+  } as LayoutNode;
+  const targets = (dom: HTMLElement) =>
+    [...dom.querySelectorAll("[popovertarget]")].map((el) => el.getAttribute("popovertarget"));
+
+  test("the same Hotspots in a header and on the page: the header's note gets the part suffix", () => {
+    const onPage = renderPage(page(spots), design, { scope: "page" }).html;
+    const inHeader = renderPage(page(spots), design, { scope: "header", partIds: true }).html;
+    const dom = parse(onPage + inHeader);
+    const ids = [...dom.querySelectorAll("[id]")].map((el) => el.id);
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+    expect(parse(onPage).querySelector(".emvb-hotspot-note")?.id).toBe("emvb-hotspot-hspt0001");
+    const header = parse(inHeader);
+    const note = header.querySelector(".emvb-hotspot-note")?.id ?? "";
+    expect(note).toMatch(/^emvb-hotspot-hspt0001-t\w+$/);
+    expect(targets(header)).toEqual([note]);
+  });
+
+  test("a synced section with Hotspots placed twice: each marker opens its own note", () => {
+    const html = renderPage(
+      page(
+        { id: "sec00001", type: "part-ref", props: { partId: "p1" }, children: [] } as LayoutNode,
+        { id: "sec00002", type: "part-ref", props: { partId: "p1" }, children: [] } as LayoutNode,
+      ),
+      design,
+      { dynamic: { sectionTemplates: { p1: page(spots) } } },
+    ).html;
+    const dom = parse(html);
+    expect(targets(dom)).toEqual(["emvb-hotspot-hspt0001", "emvb-hotspot-hspt0001-r2"]);
+    for (const target of targets(dom)) expect(dom.querySelector(`#${target}`)).not.toBeNull();
+  });
+});
