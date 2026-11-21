@@ -17,11 +17,11 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 1.4.0 (see the [changelog](CHANGELOG.md)). It adds the design system and site-wide features: light and dark Site styles with a Theme toggle, custom fonts served from your own site, starter templates, a mega menu, off-canvas panels, sticky header effects, a Search form, forms in steps, and import from WordPress and HTML. Everything is additive: 1.x pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). Public pages load no script unless an element opts in. See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 1.4.1 (see the [changelog](CHANGELOG.md)). It fixes the 16 issues reported on GitHub (#25 to #40): extension elements, agent tools, site-wide Button styles, Post image, rich-text export per language, Elementor forms, and a `visitorCookie` option to hold the returning-visitor cookie back for consent. 1.4.0 added the design system and site-wide features: light and dark Site styles with a Theme toggle, custom fonts served from your own site, starter templates, a mega menu, off-canvas panels, sticky header effects, a Search form, forms in steps, and import from WordPress and HTML. Everything is additive: 1.x pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). Public pages load no script unless an element opts in. See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4 and 1.5.** EmVB 1.4.0 is built and tested against EmDash 1.5.0 and tested on EmDash 1.4.0 (CI runs both; every release is installed on a stock 1.4.0 and 1.5.0 site). Its peer range is `emdash` >=1.4.0 <2.
+- **EmDash 1.4 and 1.5.** EmVB 1.4.1 is built and tested against EmDash 1.5.0 and tested on EmDash 1.4.0 (CI runs both; every release is installed on a stock 1.4.0 and 1.5.0 site). Its peer range is `emdash` >=1.4.0 <2.
 - **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7 (7.4.8 since 2026-11-09, also verified).
 - **React 19**, `@cloudflare/kumo` 2.6.0 (EmDash 1.4) or 2.15.0 (EmDash 1.5) and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` for forms: 0.2.13 on EmDash 1.5, 0.2.9 to 0.2.12 on EmDash 1.4 (each pins its EmDash's Kumo).
