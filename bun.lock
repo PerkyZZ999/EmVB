@@ -66,9 +66,9 @@
     },
     "packages/emvb": {
       "name": "@perkyzz/emvb",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "dependencies": {
-        "@perkyzz/emvb-icons": "1.4.0",
+        "@perkyzz/emvb-icons": "1.4.1",
         "photocn": "0.1.2",
         "zod": ">=4.5.4 <5",
       },
@@ -99,11 +99,11 @@
     },
     "packages/emvb-icons": {
       "name": "@perkyzz/emvb-icons",
-      "version": "1.4.0",
+      "version": "1.4.1",
     },
     "packages/emvb-mcp": {
       "name": "@perkyzz/emvb-mcp",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "bin": {
         "emvb-mcp": "dist/cli.mjs",
       },
@@ -112,7 +112,7 @@
         "@modelcontextprotocol/server": "2.4.0",
       },
       "devDependencies": {
-        "@perkyzz/emvb": "1.4.0",
+        "@perkyzz/emvb": "1.4.1",
         "zod": "~4.5.4",
       },
     },
