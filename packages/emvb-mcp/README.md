@@ -39,7 +39,7 @@ The token: EmDash → **API tokens**, scope `mcp:tools:emvb`, for a user who is 
 above**. Never give an agent an admin token. Each token may make 300 reads and 60 changes a minute
 and 10 publishes an hour; over that, tools return `RATE_LIMITED` with how long to wait.
 
-Besides the 26 tools (28 with `--allow-publish`), the bridge serves the layout and style schemas,
+Besides the 28 tools (30 with `--allow-publish`), the bridge serves the layout and style schemas,
 element and site style resources, each page's draft and accessibility findings, five prompts
 (`build_landing_page`, `fix_accessibility`, `restyle_site`, `review_page`, `draft_whole_page`) and the
 `emvb-page-builder` skill with its references (also in `skill/`).
