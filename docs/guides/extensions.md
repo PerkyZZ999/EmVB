@@ -17,6 +17,11 @@ emvb({ canvasStyles: ["/site.css"], extensions: [hello] });
 Its elements appear in the editor's **Add** panel and its panels in the left panel. Pages store
 them as `ext:<package>/<name>`.
 
+An extension may bring its own stylesheet and a small script. EmVB adds them only to pages that
+show one of its elements (the stylesheet also to the editor canvas), and the HTML export copies
+them. The script is the extension's own code: check that the package handles keyboard use, screen
+readers and reduced motion, because EmVB's accessibility check can't see inside it.
+
 ## Remove one
 
 Pages keep the extension's elements. Without the extension they show a short placeholder in the

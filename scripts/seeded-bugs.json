@@ -41656,8 +41656,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/render-ext.ts",
-          "search": "if (!found) {\n    return extensionPlaceholderVNode(type, id, mode);\n  }",
-          "replace": "if (!found) {\n    if (mode === \"public\") return { tag: \"div\", attrs: { class: \"emvb-ext\" }, children: [] };\n    return extensionPlaceholderVNode(type, id, mode);\n  }"
+          "search": "if (!safe || safe.length === 0) {\n    return extensionPlaceholderVNode(type, id, mode);\n  }",
+          "replace": "if (!safe || safe.length === 0) {\n    if (mode === \"public\") return { tag: \"div\", attrs: { class: \"emvb-ext\" }, children: [] };\n    return extensionPlaceholderVNode(type, id, mode);\n  }"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -41670,8 +41670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "  // Drop style/attributes from extension output: only props + children of built-ins.\n  // (Extensions style through the host element's own style on the wrapper.)\n  return {\n    id,\n    type: node.type,\n    props: { ...(node.props as Record<string, unknown>) },\n    ...(children ? { children } : {}),\n  };",
-          "replace": "  return {\n    id,\n    type: node.type,\n    props: { ...(node.props as Record<string, unknown>) },\n    ...(node.style !== undefined ? { style: node.style } : {}),\n    ...(children ? { children } : {}),\n  };"
+          "search": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n",
+          "replace": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -47735,8 +47735,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/export/site.ts",
-          "search": "    for (const name of new Set(all.flatMap((r) => r.runtimes))) used.push(name);\n",
-          "replace": ""
+          "search": "      if (!name.startsWith(\"ext:\")) {\n        used.push(name as keyof typeof RUNTIME_FILES);\n        continue;\n      }\n",
+          "replace": "      if (!name.startsWith(\"ext:\")) continue;\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
@@ -53002,6 +53002,249 @@
         "custom font files are export media"
       ],
       "expect": "\\(fail\\).*custom font files are export media"
+    },
+    {
+      "id": "W-1086/emvb-prefix",
+      "requirement": "W-1086",
+      "description": "An extension class prefix may start with emvb.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "  if (prefix.startsWith(\"emvb\")) return \"the class prefix may not start with emvb\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*prefixes that could clash"
+    },
+    {
+      "id": "W-1086/unlisted-classes",
+      "requirement": "W-1086",
+      "description": "Extension output keeps class names that are not on its allowlist.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "typeof name === \"string\" && allow.has(name) && !out.includes(name)",
+          "replace": "typeof name === \"string\" && !out.includes(name)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*only allowlisted names are kept"
+    },
+    {
+      "id": "W-1086/free-text-class-names",
+      "requirement": "W-1086",
+      "description": "The allowlist accepts names with spaces, quotes or markup.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    CLASS_NAME.test(name) &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*names with spaces, quotes, markup"
+    },
+    {
+      "id": "W-1086/classes-not-rendered",
+      "requirement": "W-1086",
+      "description": "Extension classes never reach the rendered element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (extClasses) attrs.class = [attrs.class, ...extClasses].filter(Boolean).join(\" \");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*rendered as extra class names"
+    },
+    {
+      "id": "W-1086/css-breaks-out",
+      "requirement": "W-1086",
+      "description": "An extension stylesheet may contain </style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "  if (/<\\/style/i.test(css)) return \"the stylesheet contains </style\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*text that could leave its element"
+    },
+    {
+      "id": "W-1086/runtime-breaks-out",
+      "requirement": "W-1086",
+      "description": "An extension runtime may contain </script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "/<\\/script|<script|<!--/i.test(code)",
+          "replace": "/<!--/i.test(code)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*text that could leave its element"
+    },
+    {
+      "id": "W-1086/assets-on-placeholder",
+      "requirement": "W-1086",
+      "description": "A page whose extension element shows the placeholder still gets the stylesheet and runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "  if (!safe || safe.length === 0) {\n    return extensionPlaceholderVNode(type, id, mode);\n  }\n  rendered?.(parsed.pkg);\n",
+          "replace": "  rendered?.(parsed.pkg);\n  if (!safe || safe.length === 0) {\n    return extensionPlaceholderVNode(type, id, mode);\n  }\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*can't render gets neither"
+    },
+    {
+      "id": "W-1086/export-no-runtime",
+      "requirement": "W-1086",
+      "description": "The HTML export links an extension runtime it never copies.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "  for (const [pkg, code] of extensionRuntimes)\n    files.push({ path: `assets/ext/${pkg}.js`, data: code });\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*copies the runtime once"
+    },
+    {
+      "id": "W-1086/runtime-twice",
+      "requirement": "W-1086",
+      "description": "An extension runtime is written again for each theme part in the same response.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/extension-runtimes.ts",
+          "search": "if (!code || done.has(id)) continue;",
+          "replace": "if (!code) continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/extension-runtimes.test.ts"],
+      "expect": "\\(fail\\).*once per request"
+    },
+    {
+      "id": "W-1086/asset-outside-package",
+      "requirement": "W-1086",
+      "description": "An extension css path may leave its package.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "  if (!file.startsWith(root + path.sep)) {",
+          "replace": "  if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*refuses URLs, absolute paths"
+    },
+    {
+      "id": "W-1086/asset-url",
+      "requirement": "W-1086",
+      "description": "An extension css may be a URL or absolute path.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "  if (!RELATIVE.test(declared)) {",
+          "replace": "  if (declared === \"\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*refuses URLs, absolute paths"
+    },
+    {
+      "id": "W-1086/route-drops-classes",
+      "requirement": "W-1086",
+      "description": "The editor render route loses the output's classes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "nodes ? withExtensionClasses(nodes) : null",
+          "replace": "nodes ?? null"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/extension-render-route.test.ts"],
+      "expect": "\\(fail\\).*allowlisted classes"
+    },
+    {
+      "id": "W-1086/no-public-runtime",
+      "requirement": "W-1086",
+      "description": "Public pages never load an extension's runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "  extensionScripts.map(({ id, code }) => (",
+          "replace": "  extensionScripts.slice(0, 0).map(({ id, code }) => ("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/extensions.e2e.ts",
+        "--project=node",
+        "-g",
+        "reach only the pages"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1086/not-bundled",
+      "requirement": "W-1086",
+      "description": "Extensions are not bundled into the Worker build, so Cloudflare shows placeholders.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "    entrypoint: build.entrypoint ?? PACKAGE_NAME,",
+          "replace": "    entrypoint: PACKAGE_NAME,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/extensions.e2e.ts",
+        "--project=cloudflare",
+        "-g",
+        "reach only the pages"
+      ],
+      "expect": "✘.*\\[cloudflare\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1086/canvas-placeholder",
+      "requirement": "W-1086",
+      "description": "The editor canvas ignores the server's extension output.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "            previewDevice: device,\n            extensionOutputs,\n",
+          "replace": "            previewDevice: device,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/extensions.e2e.ts",
+        "--project=node",
+        "-g",
+        "editor canvas shows"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

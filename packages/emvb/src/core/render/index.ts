@@ -16,7 +16,7 @@ import {
   scopeWrapperCss,
 } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
-import { nodeRuntime, type WidgetRuntime } from "../elements/widgets.ts";
+import { nodeRuntime, type PageRuntime } from "../elements/widgets.ts";
 import { hotspotPlace, shareLinkVNode } from "../elements/marketing.ts";
 import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
@@ -64,9 +64,12 @@ import { renderTabs } from "./tabs.ts";
 import { designHasDark, THEME_BOOT_SCRIPT } from "./theme-boot.ts";
 import { serialize, type VNode } from "./vnode.ts";
 import {
+  extensionAssets,
+  extensionClassesOf,
   isExtensionType,
   renderExtensionNode,
   EXTENSION_PLACEHOLDER_CSS,
+  type ExtensionOutputs,
 } from "../extensions/index.ts";
 import { classStylesInListOrder, resolveCascade } from "../design/cascade.ts";
 import { applyBindings, hasBindings, type BindingData } from "../data/bindings.ts";
@@ -97,7 +100,7 @@ export type RenderResult = {
    * W-1025: the opt-in widget scripts the page's elements asked for, sorted; empty for most
    * pages. `EmVBPage` loads them; a theme part's go to `EmVBWidgetRuntimes`.
    */
-  runtimes: WidgetRuntime[];
+  runtimes: PageRuntime[];
   /** The site's text direction when set in Site styles, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
   warnings: RenderWarning[];
@@ -331,6 +334,11 @@ export function renderPage(
     partIds?: boolean;
     /** The page's language, e.g. "fr-CA": Post Dates are written in it (W-688). */
     lang?: string;
+    /**
+     * W-1086: extension outputs the server rendered, for the admin, which has no extension code
+     * (the editor canvas and the HTML export). The server renders with the live extensions.
+     */
+    extensionOutputs?: ExtensionOutputs;
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
@@ -385,7 +393,9 @@ export function renderPage(
   // W-253: runtimes follow what renders, including synced section and loop item contents,
   // which the page's own layout doesn't hold.
   const rendered = { form: false, tabs: false, menuDropdown: false };
-  const runtimes = new Set<WidgetRuntime>();
+  const runtimes = new Set<PageRuntime>();
+  // W-1086: the extensions whose elements rendered, for their stylesheet and runtime.
+  const extensionsUsed = new Set<string>();
   let sectionBudget = MAX_SECTION_ELEMENTS;
   const ctx: RenderContext = {
     takeSectionBudget: (nodes) => {
@@ -716,10 +726,15 @@ export function renderPage(
       // W-927: extension elements render via the Extensions API, or a placeholder when missing.
       if (isExtensionType(type)) {
         usedTypes.add("ext");
-        return renderExtensionNode(node, mode === "editor" ? "editor" : "public", (nodes) =>
-          nodes
-            .map((child) => visit(child, false, dynamic))
-            .filter((child): child is VNode => child !== undefined),
+        return renderExtensionNode(
+          node,
+          mode === "editor" ? "editor" : "public",
+          (nodes) =>
+            nodes
+              .map((child) => visit(child, false, dynamic))
+              .filter((child): child is VNode => child !== undefined),
+          opts.extensionOutputs,
+          (pkg) => extensionsUsed.add(pkg),
         );
       }
       warnings.push({ nodeId, code: "unknown-type", detail: type });
@@ -740,6 +755,9 @@ export function renderPage(
     // W-1062: a Spacer's size follows its parent's direction.
     for (const child of nodeChildren(node)) parentOf.set(child, node);
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId, parentOf.get(stored));
+    // W-1086: allowlisted classes an extension's render() put on its output node.
+    const extClasses = extensionClassesOf(stored);
+    if (extClasses) attrs.class = [attrs.class, ...extClasses].filter(Boolean).join(" ");
     // W-1070: hides on scroll down with the opt-in sticky script (any element type).
     if (hidesOnScroll(node as LayoutNode)) {
       attrs["data-emvb-sticky-hide"] = "";
@@ -916,11 +934,21 @@ export function renderPage(
         detail: error.message,
       }),
   });
+  // W-1086: each extension stylesheet once, unscoped (it styles its own prefixed classes), before
+  // the print rules so the theme parts' shared sheet still finds them at the end.
+  const extensionCss = [...extensionsUsed]
+    .toSorted()
+    .flatMap((pkg) => {
+      const assets = extensionAssets(pkg);
+      if (assets?.runtime) runtimes.add(`ext:${pkg}`);
+      return assets?.css ? [`/* ${pkg} */\n${assets.css}\n`] : [];
+    })
+    .join("");
   return {
     vnode,
     // W-1067: a public page of a site with dark colours puts back the visitor's choice first.
     html: mode === "public" && designHasDark(design) ? THEME_BOOT_SCRIPT + html : html,
-    css: (scope ? scopeWrapperCss() + scopeCss(css, scope) : css) + printCss(),
+    css: (scope ? scopeWrapperCss() + scopeCss(css, scope) : css) + extensionCss + printCss(),
     needsFormsRuntime: rendered.form || layoutHasForm(layout),
     needsTabsRuntime: rendered.tabs || layoutHasTabs(layout),
     needsMenuRuntime: rendered.menuDropdown || layoutHasMenuDropdown(layout),

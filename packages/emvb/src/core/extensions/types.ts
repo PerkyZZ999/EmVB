@@ -59,6 +59,23 @@ export type ExtensionField = Pick<
   "key" | "kind" | "label" | "options" | "message" | "optional" | "max" | "min"
 >;
 
+/**
+ * W-1086: a node an extension's render() returns. Built-in node fields, plus `extClasses`: class
+ * names from the extension's own `classes.allow` list. Names not on the list are dropped. This is
+ * render output only; it is never stored in a layout.
+ */
+export type ExtensionOutputNode = LayoutNode & { extClasses?: readonly string[] };
+
+/**
+ * W-1086: the static class allowlist an extension declares. Every name starts with `prefix`
+ * (lowercase letters, digits and hyphens, ending in `-`, never `emvb…`), so extension classes
+ * can't clash with EmVB's `emvb-*` classes or a site's own design classes.
+ */
+export type ExtensionClasses = {
+  prefix: string;
+  allow: readonly string[];
+};
+
 /** Context passed to an element render function (read-only source values). */
 export type ExtensionRenderContext = {
   /** Resolved values from this extension's sources, keyed by source name then field. */
@@ -80,7 +97,7 @@ export type ExtensionElement = {
   render: (
     props: Record<string, unknown>,
     ctx: ExtensionRenderContext,
-  ) => LayoutNode | readonly LayoutNode[];
+  ) => ExtensionOutputNode | readonly ExtensionOutputNode[];
 };
 
 /**
@@ -118,6 +135,32 @@ export type EmVBExtension = {
   elements?: readonly ExtensionElement[];
   panels?: readonly ExtensionPanel[];
   sources?: readonly ExtensionSource[];
+  /**
+   * W-1086: the module that exports this extension, as `import.meta.url`. EmVB bundles it into
+   * the site's server build (Cloudflare Workers and production builds included), and resolves
+   * `css` and `runtime` against it at build time.
+   */
+  module?: string;
+  /** W-1086: class names render() may put on its nodes through `extClasses`. */
+  classes?: ExtensionClasses;
+  /**
+   * W-1086: a stylesheet in the extension's own package, relative to `module` (`"./hello.css"`).
+   * Read once at build time; written on pages (and in the editor canvas) that render one of the
+   * extension's elements.
+   */
+  css?: string;
+  /**
+   * W-1086: a self-contained browser script in the extension's own package, relative to
+   * `module` (`"./runtime.js"`): no `import` or `export`. Read once at build time; loaded only on
+   * public pages that render one of the extension's elements, never in the admin.
+   */
+  runtime?: string;
+};
+
+/** W-1086: the file contents EmVB read at build time for `css` and `runtime`. */
+export type ExtensionAssets = {
+  css?: string;
+  runtime?: string;
 };
 
 /**
@@ -156,4 +199,8 @@ export type ExtensionManifest = {
   elements: readonly ExtensionElementManifest[];
   panels: readonly ExtensionPanelManifest[];
   sources: readonly ExtensionSourceManifest[];
+  /** W-1086: the checked class allowlist; absent when the extension declares none. */
+  classes?: ExtensionClasses;
+  /** W-1086: stylesheet and runtime text read at build time; absent when there are none. */
+  assets?: ExtensionAssets;
 };

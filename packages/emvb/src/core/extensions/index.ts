@@ -11,7 +11,11 @@ export {
   type ExtensionPanelManifest,
   type ExtensionSourceManifest,
   type ExtensionRenderContext,
+  type ExtensionClasses,
+  type ExtensionAssets,
+  type ExtensionOutputNode,
 } from "./types.ts";
+export { extensionCssIssue, extensionRuntimeIssue } from "./classes.ts";
 export {
   isExtensionType,
   parseExtensionType,
@@ -35,7 +39,17 @@ export {
   liveElement,
   clearExtensions,
   manifestsFromOptions,
+  rememberExtensionAssets,
+  rememberExtensionManifests,
+  registerBundledExtensions,
+  extensionAssets,
 } from "./registry.ts";
-export { safeExtensionOutput } from "./safe-nodes.ts";
-export { syncSourceValues, renderExtensionNode } from "./render-ext.ts";
+export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
+export {
+  syncSourceValues,
+  renderExtensionNode,
+  extensionOutputKey,
+  liveExtensionOutput,
+  type ExtensionOutputs,
+} from "./render-ext.ts";
 export { defineExtension } from "./define.ts";

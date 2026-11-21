@@ -9,7 +9,7 @@ import {
   type Layout,
   type ThemeDynamicData,
 } from "../core/index.ts";
-import type { WidgetRuntime } from "../core/elements/widgets.ts";
+import type { PageRuntime } from "../core/elements/widgets.ts";
 import { PLUGIN_ID } from "../constants.ts";
 
 export type RenderedPage = {
@@ -22,7 +22,7 @@ export type RenderedPage = {
    * W-1025: the opt-in widget scripts this page needs (a dismissible Alert…). `EmVBPage` loads
    * them itself; set only when there is one.
    */
-  runtimes?: WidgetRuntime[];
+  runtimes?: PageRuntime[];
   /** The site's text direction when set, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
   /** W-971: the element types whose base rules `css` holds, for `sharedPartCss`. */

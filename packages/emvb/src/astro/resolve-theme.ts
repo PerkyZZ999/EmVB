@@ -37,7 +37,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { readLayout, renderStored, type RenderedPage } from "./render.ts";
-import type { WidgetRuntime } from "../core/elements/widgets.ts";
+import type { PageRuntime } from "../core/elements/widgets.ts";
 import { designFor, formsFor, layoutFor, partsFor } from "./render-session.ts";
 import type { HostVisitor, VisitorAstro } from "./visitor.ts";
 import { bindingDataFor } from "./request-data.ts";
@@ -103,7 +103,7 @@ export type ResolvedThemeParts = {
    * W-1025: the opt-in widget scripts the winning parts need; set only when there is one. Mount
    * `<EmVBWidgetRuntimes names={theme.runtimes} />` from `@perkyzz/emvb/astro/widgets`.
    */
-  runtimes?: WidgetRuntime[];
+  runtimes?: PageRuntime[];
   /**
    * True for an archive page past the last one (`/posts/page/9` with no posts there). Hosts
    * answer 404 (W-221). Page 1 with no posts is not a 404.
@@ -418,7 +418,7 @@ async function buildDynamicForContent(
 }
 
 /** W-1025: every widget runtime the rendered parts need, once each, or nothing. */
-function partRuntimes(rendered: readonly RenderedPage[]): { runtimes?: WidgetRuntime[] } {
+function partRuntimes(rendered: readonly RenderedPage[]): { runtimes?: PageRuntime[] } {
   const names = [...new Set(rendered.flatMap((page) => page.runtimes ?? []))].toSorted();
   return names.length > 0 ? { runtimes: names } : {};
 }

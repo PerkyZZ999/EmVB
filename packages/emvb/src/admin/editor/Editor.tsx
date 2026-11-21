@@ -63,6 +63,7 @@ import {
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { partDraftLabel, usePartTemplates } from "./section-templates.ts";
 import { useCollectionPreviews, withPartLayouts } from "./collection-previews.ts";
+import { useExtensionOutputs } from "../extension-outputs.ts";
 import { useEditorPresence } from "./presence.ts";
 import { useCoDesign } from "./useCoDesign.ts";
 import { useRemoteChange } from "./remote-change.ts";
@@ -287,6 +288,8 @@ function EditorApp({
     [state.page.layout, sectionTemplates, loopTemplates],
   );
   const collections = useCollectionPreviews(previewLayout, fetcher);
+  // W-1086: extension elements render on the server, which has their code; the canvas shows that.
+  const extensionOutputs = useExtensionOutputs(coDesign.ghost?.layout ?? previewLayout, fetcher);
   // W-930: while previewing a proposal the canvas shows its ghost, never the editor's layout changed.
   const canvasLayout = coDesign.ghost?.layout ?? state.page.layout;
   const rendered = React.useMemo(
@@ -305,6 +308,7 @@ function EditorApp({
               collections,
             },
             previewDevice: device,
+            extensionOutputs,
           })
         : null,
     [
@@ -316,6 +320,8 @@ function EditorApp({
       live.site,
       live.params,
       collections,
+      extensionOutputs,
+      extensionManifests,
     ],
   );
   // W-911: field mode previews the unsaved layout with the public renderer, in a sandboxed frame.
@@ -334,6 +340,7 @@ function EditorApp({
         collections,
       },
       previewDevice,
+      extensionOutputs,
     });
     return previewDocument({
       html: result.html,

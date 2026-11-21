@@ -13,12 +13,15 @@ import EmVBMapRuntime from "./EmVBMapRuntime.astro";
 import EmVBShareRuntime from "./EmVBShareRuntime.astro";
 import EmVBStickyRuntime from "./EmVBStickyRuntime.astro";
 import EmVBThemeRuntime from "./EmVBThemeRuntime.astro";
+import { extensionRuntimeScripts } from "./extension-runtimes.ts";
 
 interface Props {
   names?: readonly string[] | undefined;
 }
 
 const names = new Set(Astro.props.names ?? []);
+// W-1086: extension runtimes (`ext:<package>`), inline, each once per response.
+const extensionScripts = extensionRuntimeScripts(Astro.request, Astro.props.names ?? []);
 ---
 
 {names.has("alerts") && <EmVBAlertsRuntime />}
@@ -31,3 +34,8 @@ const names = new Set(Astro.props.names ?? []);
 {names.has("share") && <EmVBShareRuntime />}
 {names.has("sticky") && <EmVBStickyRuntime />}
 {names.has("theme") && <EmVBThemeRuntime />}
+{
+  extensionScripts.map(({ id, code }) => (
+    <script type="module" is:inline data-emvb-ext-runtime={id} set:html={code} />
+  ))
+}

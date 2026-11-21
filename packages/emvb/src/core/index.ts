@@ -648,6 +648,8 @@ export {
   extensionPlaceholderLabel,
   extensionPlaceholderVNode,
   normalizeExtension,
+  extensionOutputKey,
+  rememberExtensionManifests,
   type EmVBExtension,
   type ExtensionManifest,
   type ExtensionElement,

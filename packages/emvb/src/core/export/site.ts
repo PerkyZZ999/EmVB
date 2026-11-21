@@ -37,6 +37,7 @@ import {
 } from "../index.ts";
 import { someNode } from "../tree-ops.ts";
 import { EXPORT_RUNTIMES } from "./runtimes.generated.ts";
+import { extensionAssets, type ExtensionOutputs } from "../extensions/index.ts";
 import type { ZipEntry } from "./zip.ts";
 
 /** A published page as the content API returns it. */
@@ -320,6 +321,8 @@ export function buildSiteExport(input: {
   lang?: string;
   /** Exported on (ISO date), for the report. */
   date?: string;
+  /** W-1086: extension outputs the server rendered (the admin has no extension code). */
+  extensionOutputs?: ExtensionOutputs;
 }): SiteExport {
   const lang = input.lang ?? "en";
   const parts = new Map<string, Part>();
@@ -337,6 +340,11 @@ export function buildSiteExport(input: {
   const report: ExportReport = { pages: [], skipped: [], snapshots: [], media: [] };
   const media = new Set<string>();
   const runtimes = new Set<keyof typeof RUNTIME_FILES>();
+  // W-1086: extension runtimes the pages use, copied as `assets/ext/<package>.js`.
+  const extensionRuntimes = new Map<string, string>();
+  const extensionOutputs = input.extensionOutputs
+    ? { extensionOutputs: input.extensionOutputs }
+    : {};
   const taken = new Set<string>();
 
   const renderPart = (part: Part, scopeOnly = false) => {
@@ -345,6 +353,7 @@ export function buildSiteExport(input: {
       scope: part.id,
       partIds: true,
       lang,
+      ...extensionOutputs,
     });
     if (scopeOnly) return result;
     const ownLandmark = /<(?:header|footer)[\s>]/.test(result.html);
@@ -386,6 +395,7 @@ export function buildSiteExport(input: {
       dynamic: templatesFor(layout, parts),
       scope: page.id,
       lang,
+      ...extensionOutputs,
     });
     const headerPart = partOf(header);
     const footerPart = partOf(footer);
@@ -429,12 +439,23 @@ export function buildSiteExport(input: {
       .filter(Boolean)
       .join("\n");
     const used: (keyof typeof RUNTIME_FILES)[] = [];
+    const usedExtensions: string[] = [];
     if (popupRenders.length > 0) used.push("popups");
     if (floatRenders.length > 0) used.push("floats");
     if (all.some((r) => r.needsTabsRuntime)) used.push("tabs");
     if (all.some((r) => r.needsMenuRuntime)) used.push("menu");
     // W-1025: the widget runtimes a page asked for.
-    for (const name of new Set(all.flatMap((r) => r.runtimes))) used.push(name);
+    for (const name of new Set(all.flatMap((r) => r.runtimes))) {
+      if (!name.startsWith("ext:")) {
+        used.push(name as keyof typeof RUNTIME_FILES);
+        continue;
+      }
+      const pkg = name.slice(4);
+      const code = extensionAssets(pkg)?.runtime;
+      if (!code) continue;
+      extensionRuntimes.set(pkg, code);
+      usedExtensions.push(`assets/ext/${pkg}.js`);
+    }
     for (const name of used) runtimes.add(name);
 
     files.push(
@@ -447,7 +468,9 @@ export function buildSiteExport(input: {
           ...(input.design.direction ? { dir: input.design.direction } : {}),
           css: "style.css",
           body: html,
-          scripts: used.map((name) => `../${RUNTIME_FILES[name]}`),
+          scripts: [...used.map((name) => RUNTIME_FILES[name]), ...usedExtensions].map(
+            (file) => `../${file}`,
+          ),
         }),
       },
       { path: `${folder}/style.css`, data: `${css}\n` },
@@ -465,6 +488,8 @@ export function buildSiteExport(input: {
 
   for (const name of runtimes)
     files.push({ path: RUNTIME_FILES[name], data: EXPORT_RUNTIMES[name] });
+  for (const [pkg, code] of extensionRuntimes)
+    files.push({ path: `assets/ext/${pkg}.js`, data: code });
   report.media = [...media].toSorted();
   files.push(
     {

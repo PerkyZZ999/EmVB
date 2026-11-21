@@ -137,6 +137,12 @@ export type WidgetRuntime =
   | "sticky"
   | "theme";
 
+/**
+ * W-1086: a page's opt-in scripts: the widgets' own, and `ext:<package>` for an extension whose
+ * elements render on the page and that ships a runtime.
+ */
+export type PageRuntime = WidgetRuntime | `ext:${string}`;
+
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
   // W-1067: the Theme toggle is nothing without its script.

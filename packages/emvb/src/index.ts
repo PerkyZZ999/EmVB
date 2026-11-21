@@ -4,10 +4,12 @@ import { canvasCollectionSlugs } from "./core/canvas-collections.ts";
 import { canvasStyleUrls } from "./core/canvas-styles.ts";
 import { loopCollectionSlugs } from "./core/loop-collections.ts";
 import {
+  listedExtensionManifests,
   rememberExtensions,
   type EmVBExtension,
   type ExtensionManifest,
 } from "./core/extensions/index.ts";
+import { prepareExtensionBuild } from "./extension-build.ts";
 import { createPlugin } from "./server/plugin.ts";
 
 /** Options a host site passes to `emvb()` in astro.config. */
@@ -26,7 +28,8 @@ export type EmVBOptions = {
   /**
    * Build-time Extensions API v1 packages (W-927, D-066). Only the site owner adds these.
    * Live render/resolve functions are kept in-process; a serializable manifest is what
-   * EmDash passes into `createPlugin`.
+   * EmDash passes into `createPlugin`. W-1086: an extension that names its `module` is bundled
+   * into the server build, and its `css` and `runtime` files are read here, at build time.
    */
   extensions?: EmVBExtension[];
   /**
@@ -48,12 +51,20 @@ export type EmVBOptions = {
 export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
-  const extensions = rememberExtensions(options.extensions);
+  const accepted = rememberExtensions(options.extensions);
+  const build = accepted.length > 0 ? prepareExtensionBuild(accepted) : { warnings: [] };
+  for (const warning of build.warnings) {
+    // oxlint-disable-next-line no-console -- build-time notice for the site owner (W-1086)
+    console.warn(`[emvb] extension ${warning}`);
+  }
+  const ids = new Set(accepted.map((m) => m.id));
+  const extensions = listedExtensionManifests().filter((m) => ids.has(m.id));
   return {
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
     format: "native",
-    entrypoint: PACKAGE_NAME,
+    // W-1086: the generated entry re-exports createPlugin after registering the extensions.
+    entrypoint: build.entrypoint ?? PACKAGE_NAME,
     adminEntry: ADMIN_ENTRY,
     options: {
       ...(canvasStyles.length > 0 ? { canvasStyles } : {}),
@@ -73,6 +84,9 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
 // that repeated it was dropped in 1.2 (W-1011).
 export { createPlugin };
 
+/** W-1086: used by the server entry `emvb()` generates for extensions; not for site code. */
+export { registerBundledExtensions } from "./core/extensions/index.ts";
+
 export type { EmVBExtension, ExtensionManifest };
 export {
   defineExtension,
@@ -82,4 +96,6 @@ export {
   type ExtensionSource,
   type ExtensionPropSchema,
   type ExtensionField,
+  type ExtensionClasses,
+  type ExtensionOutputNode,
 } from "./core/extensions/index.ts";

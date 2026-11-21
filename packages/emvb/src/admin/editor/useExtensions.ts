@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PLUGIN_ID } from "../../constants.ts";
-import type { ExtensionManifest } from "../../core/index.ts";
+import { rememberExtensionManifests, type ExtensionManifest } from "../../core/index.ts";
 import { requestJson, type Fetcher } from "../api.ts";
 import { setAdminExtensionManifests } from "./extension-manifests.ts";
 
@@ -27,6 +27,8 @@ export function useExtensionManifests(fetcher: Fetcher): readonly ExtensionManif
           ok.push(m);
         }
         setAdminExtensionManifests(ok);
+        // W-1086: class allowlists and stylesheets for the canvas renderer.
+        rememberExtensionManifests(ok);
         setLoaded(ok);
       })
       .catch(() => undefined);

@@ -2,6 +2,7 @@
  * Validate and turn a live EmVBExtension into a manifest + kept live object (W-927).
  */
 
+import { normalizeClasses } from "./classes.ts";
 import { extensionIdIssue, extensionNameIssue, extensionType } from "./namespace.ts";
 import { isAllowedExtensionFieldKind, schemaDefaults } from "./schema.ts";
 import type {
@@ -118,6 +119,15 @@ export function normalizeExtension(input: unknown): NormalizedExtension | undefi
   const livePanels = panelsIn.filter((p) => panels.some((m) => m.name === p.name));
   const liveSources = sourcesIn.filter((s) => sources.some((m) => m.name === s.name));
 
+  // W-1086: additive keys. The class allowlist is checked here; `module`, `css` and `runtime` are
+  // read by the integration at build time (see extension-build.ts), never at request time.
+  const classes = normalizeClasses(ext.classes);
+  const strings = Object.fromEntries(
+    (["module", "css", "runtime"] as const)
+      .filter((key) => typeof ext[key] === "string" && ext[key].length <= 2048)
+      .map((key) => [key, ext[key]]),
+  );
+
   const live: EmVBExtension = {
     extensionApi: EXTENSION_API_VERSION,
     id: ext.id,
@@ -125,6 +135,8 @@ export function normalizeExtension(input: unknown): NormalizedExtension | undefi
     elements: liveElements,
     panels: livePanels,
     sources: liveSources,
+    ...strings,
+    ...(classes ? { classes } : {}),
   };
 
   return {
@@ -136,6 +148,7 @@ export function normalizeExtension(input: unknown): NormalizedExtension | undefi
       elements,
       panels,
       sources,
+      ...(classes ? { classes } : {}),
     },
   };
 }

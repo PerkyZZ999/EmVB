@@ -1,0 +1,24 @@
+/* emvb-ext-hello (W-1086): styles only its own hello- classes. */
+.hello-card {
+  border: 2px solid #6d28d9;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.hello-title {
+  color: #5b21b6;
+  margin: 0;
+}
+
+/* The wave plays once, only for visitors who haven't asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .hello-wave[data-hello-wave="on"] {
+    animation: hello-wave 600ms ease-in-out 1;
+  }
+}
+
+@keyframes hello-wave {
+  50% {
+    transform: rotate(-2deg);
+  }
+}

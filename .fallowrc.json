@@ -1,7 +1,12 @@
 {
   "$schema": "https://fallow.tools/schema.json",
   "entry": ["demos/*/src/live.config.ts", "scripts/seed-probe.ts"],
-  "ignorePatterns": ["site/**", "demos/*/public/**"],
+  "ignorePatterns": [
+    "site/**",
+    "demos/*/public/**",
+    "examples/emvb-ext-hello/src/hello.css",
+    "examples/emvb-ext-hello/src/hello-runtime.js"
+  ],
   "ignoreDependencies": [
     "@fortawesome/fontawesome-free",
     "@tabler/icons",

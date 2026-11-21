@@ -5,7 +5,7 @@
 
 import type { LayoutNode } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
-import { liveElement, liveExtension } from "./registry.ts";
+import { extensionClassAllowlist, liveElement, liveExtension } from "./registry.ts";
 import { validateExtensionProps } from "./schema.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { extensionPlaceholderVNode } from "./placeholder.ts";
@@ -65,6 +65,57 @@ export function syncSourceValues(pkg: string): Record<string, Record<string, str
 
 export type VisitChildren = (nodes: LayoutNode[]) => VNode[];
 
+const propsOf = (node: { props?: unknown }): Record<string, unknown> =>
+  node.props && typeof node.props === "object" && !Array.isArray(node.props)
+    ? (node.props as Record<string, unknown>)
+    : {};
+
+/** Stable JSON: object keys sorted, so equal props give equal keys. */
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, v]) => v !== undefined)
+      .toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableJson(v)}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+/**
+ * W-1086: the key of one extension element's output: its type and props. The admin has no
+ * extension code, so the editor canvas and the HTML export ask the server for outputs by key.
+ */
+export function extensionOutputKey(node: { type: string; props?: unknown }): string {
+  return `${node.type}\n${stableJson(propsOf(node))}`;
+}
+
+/** Raw render output per `extensionOutputKey`, rendered by the server for the admin. */
+export type ExtensionOutputs = ReadonlyMap<string, unknown>;
+
+/**
+ * Run the live render() of a stored extension element and check its output. Undefined when the
+ * extension is missing here, render throws, or nothing legal is left.
+ */
+export function liveExtensionOutput(node: {
+  type: string;
+  props?: unknown;
+}): LayoutNode[] | undefined {
+  const parsed = parseExtensionType(node.type);
+  const found = parsed ? liveElement(node.type) : undefined;
+  if (!parsed || !found) return undefined;
+  const checked = validateExtensionProps(found.manifest.schema, propsOf(node));
+  const ctx: ExtensionRenderContext = { sources: syncSourceValues(parsed.pkg) };
+  let raw: unknown;
+  try {
+    raw = found.element.render(checked.props, ctx);
+  } catch {
+    return undefined;
+  }
+  const safe = safeExtensionOutput(raw, Math.random, extensionClassAllowlist(parsed.pkg));
+  return safe.length > 0 ? safe : undefined;
+}
+
 /**
  * Build the VNode for a stored extension element. Always returns a node (placeholder
  * on failure) so siblings keep rendering.
@@ -73,6 +124,10 @@ export function renderExtensionNode(
   node: LayoutNode,
   mode: ExtensionRenderMode,
   visitChildren: VisitChildren,
+  /** W-1086: server-rendered outputs (the admin's canvas and export), by `extensionOutputKey`. */
+  outputs?: ExtensionOutputs,
+  /** W-1086: told the package id whenever one of its elements renders. */
+  rendered?: (pkg: string) => void,
 ): VNode {
   const id = typeof node.id === "string" ? node.id : undefined;
   const type = node.type;
@@ -81,29 +136,19 @@ export function renderExtensionNode(
     return extensionPlaceholderVNode(type, id, mode);
   }
 
-  const found = liveElement(type);
-  if (!found) {
+  let safe = liveExtensionOutput(node);
+  if (!safe && !liveElement(type) && outputs?.has(extensionOutputKey(node))) {
+    // The server's output is checked again here, with the allowlist the admin was sent.
+    safe = safeExtensionOutput(
+      outputs.get(extensionOutputKey(node)),
+      Math.random,
+      extensionClassAllowlist(parsed.pkg),
+    );
+  }
+  if (!safe || safe.length === 0) {
     return extensionPlaceholderVNode(type, id, mode);
   }
-
-  const storedProps =
-    node.props && typeof node.props === "object" && !Array.isArray(node.props)
-      ? (node.props as Record<string, unknown>)
-      : {};
-  const checked = validateExtensionProps(found.manifest.schema, storedProps);
-  const ctx: ExtensionRenderContext = { sources: syncSourceValues(parsed.pkg) };
-
-  let raw: unknown;
-  try {
-    raw = found.element.render(checked.props, ctx);
-  } catch {
-    return extensionPlaceholderVNode(type, id, mode);
-  }
-
-  const safe = safeExtensionOutput(raw);
-  if (safe.length === 0) {
-    return extensionPlaceholderVNode(type, id, mode);
-  }
+  rendered?.(parsed.pkg);
 
   const children = visitChildren(safe);
   return {

@@ -4,6 +4,7 @@ import { d1, r2 } from "@emdash-cms/cloudflare";
 import { defineConfig } from "astro/config";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
 import { emvb } from "@perkyzz/emvb";
+import hello from "emvb-ext-hello";
 import emdash from "emdash/astro";
 
 /** W-1035: e2e runs give the demo a fresh folder for local D1 and R2 (default .wrangler/state). */
@@ -28,7 +29,11 @@ export default defineConfig({
       mcp: true,
       database: d1({ binding: "DB", session: "auto" }),
       storage: r2({ binding: "MEDIA" }),
-      plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"] })],
+      plugins: [
+        formsPlugin(),
+        // W-1086: the sample extension is bundled into the Worker through its `module`.
+        emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"], extensions: [hello] }),
+      ],
     }),
   ],
   // W-935 (D-068): English at /, French at /fr/. prefixDefaultLocale stays false: EmDash's admin

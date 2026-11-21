@@ -6,6 +6,11 @@ import {
   type SiteExport,
 } from "../core/export/site.ts";
 import { zipFiles } from "../core/export/zip.ts";
+import {
+  extensionNodesIn,
+  fetchExtensionOutputs,
+  loadExtensionManifests,
+} from "./extension-outputs.ts";
 import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../constants.ts";
 import { listAllItems, type Fetcher } from "./api.ts";
 import { titleOf, type ContentItem } from "./content-item.ts";
@@ -223,9 +228,21 @@ export async function exportSite(
   },
 ): Promise<ExportResult> {
   const data = await loadExportData(fetcher, options.onlyPageId, options.source);
+  // W-1086: extension elements render on the server (the admin has no extension code); their
+  // stylesheets go into each page's style.css and their runtimes into assets/ext/.
+  const extensionNodes = extensionNodesIn([
+    ...data.pages.map((p) => p.layout),
+    ...data.parts.map((p) => p.layout),
+  ]);
+  let extensionOutputs: Map<string, unknown> | undefined;
+  if (extensionNodes.length > 0) {
+    await loadExtensionManifests(fetcher);
+    extensionOutputs = await fetchExtensionOutputs(fetcher, extensionNodes);
+  }
   let site = buildSiteExport({
     ...data,
     ...(options.date ? { date: options.date } : {}),
+    ...(extensionOutputs ? { extensionOutputs } : {}),
   });
   let copied = 0;
   let failed = 0;

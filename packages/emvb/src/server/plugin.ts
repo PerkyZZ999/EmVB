@@ -36,6 +36,7 @@ import {
 import { canvasStyleUrls } from "../core/canvas-styles.ts";
 import { canvasCollectionSlugs, setCanvasCollections } from "../core/canvas-collections.ts";
 import { manifestsFromOptions } from "../core/extensions/index.ts";
+import { extensionRenderRoute } from "./extension-routes.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
 
@@ -136,6 +137,7 @@ export function createPlugin(
           extensions,
         }),
       },
+      "editor/extensions/render": extensionRenderRoute,
       design: designRoute,
       "design/draft": designDraftRoute,
       "design/save": designSaveRoute,
