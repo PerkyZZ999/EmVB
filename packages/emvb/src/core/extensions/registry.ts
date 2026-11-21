@@ -101,6 +101,21 @@ export function extensionAssets(id: string): ExtensionAssets | undefined {
   return store().assets?.get(id);
 }
 
+/**
+ * W-1086: the stylesheets of extensions `ids` (each once, by id), as one sheet. Pages and theme
+ * parts that render apart (`renderPage` with `separateExtensionCss`) collect the ids they used
+ * and write this once per document.
+ */
+export function extensionStylesheets(ids: Iterable<string>): string {
+  return [...new Set(ids)]
+    .toSorted()
+    .flatMap((id) => {
+      const css = extensionAssets(id)?.css;
+      return css ? [`/* ${id} */\n${css}\n`] : [];
+    })
+    .join("");
+}
+
 /** W-1086: the class allowlist of extension `id` (empty when it declares none). */
 export function extensionClassAllowlist(id: string): ReadonlySet<string> | undefined {
   return store().allow?.get(id);
@@ -174,14 +189,23 @@ export function manifestsFromOptions(input: unknown): ExtensionManifest[] {
     const { id, assets } = item as { id?: unknown; assets?: unknown };
     if (typeof id === "string" && assets !== undefined) rememberExtensionAssets(id, assets);
   }
-  // Prefer live registry order; fall back to whatever was serialized.
-  const live = listedExtensionManifests();
-  if (live.length > 0) return live;
+  // W-1086: a Worker or production server has live code only for the extensions the generated
+  // entry bundled (those that name their `module`). Every other extension still has its serialized
+  // manifest, so merge by id: the live manifest wins, the serialized one fills the gaps.
+  const live = new Map(listedExtensionManifests().map((m) => [m.id, m]));
   const out: ExtensionManifest[] = [];
+  const seen = new Set<string>();
   for (const item of input) {
     if (!item || typeof item !== "object") continue;
     const m = item as ExtensionManifest;
-    if (m.extensionApi !== 1 || typeof m.id !== "string") continue;
+    if (m.extensionApi !== 1 || typeof m.id !== "string" || !Array.isArray(m.elements)) continue;
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+    const own = live.get(m.id);
+    if (own) {
+      out.push(own);
+      continue;
+    }
     const { assets: _assets, ...rest } = m;
     const classes = normalizeClasses(m.classes);
     const manifest = { ...rest, ...(classes ? { classes } : {}) };
@@ -189,5 +213,6 @@ export function manifestsFromOptions(input: unknown): ExtensionManifest[] {
     const assets = extensionAssets(m.id);
     out.push(assets ? { ...manifest, assets } : manifest);
   }
+  for (const [id, manifest] of live) if (!seen.has(id)) out.push(manifest);
   return out;
 }

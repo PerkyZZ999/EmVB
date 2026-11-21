@@ -6,11 +6,20 @@ import type { ContentPort } from "./content-port.ts";
 import {
   defaultConditionsFor,
   defaultTriggers,
+  emptyDesign,
   POPUP_CHROME_CSS,
   type LayoutNode,
   type ThemePartType,
 } from "../core/index.ts";
 import { resolveThemePartsWith } from "./resolve-theme.ts";
+import {
+  clearExtensions,
+  defineExtension,
+  rememberExtensionAssets,
+  rememberExtensions,
+} from "../core/extensions/index.ts";
+import { renderStored } from "./render.ts";
+import { extensionStylesToWrite } from "./extension-styles.ts";
 import { themeContextFrom } from "./theme-context.ts";
 
 // These cases send Cloudflare's country header, as the edge does (S-10, W-999: trusted on
@@ -712,5 +721,58 @@ describe("Language switcher in a header (W-937)", () => {
     expect(withLinks.header?.html).toContain('href="/fr/a-propos" hreflang="fr"');
     const without = await resolveThemeParts(astro("/about"));
     expect(without.header?.html).not.toContain("hreflang");
+  });
+});
+
+describe("extension stylesheets in a response (W-1086)", () => {
+  const KIT_CSS = ".kit-card{outline:1px solid}";
+  const tile = (id: string): LayoutNode =>
+    ({ id, type: "ext:emvb-ext-kit/tile", props: {} }) as LayoutNode;
+  beforeEach(() => {
+    clearExtensions();
+    rememberExtensions([
+      defineExtension({
+        id: "emvb-ext-kit",
+        classes: { prefix: "kit-", allow: ["kit-card"] },
+        elements: [
+          {
+            name: "tile",
+            label: "Tile",
+            schema: { type: "object", properties: {} },
+            fields: [],
+            render: () => ({
+              id: "tile0001",
+              type: "heading",
+              props: { text: "Tile", level: 2 },
+              extClasses: ["kit-card"],
+            }),
+          },
+        ],
+      }),
+    ]);
+    rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });
+  });
+  afterAll(() => clearExtensions());
+
+  test("header, footer and page each with the element ship its stylesheet once", async () => {
+    themeEntries = [
+      part("HEAD0001", "header", [tile("ext00001")]),
+      part("FOOT0001", "footer", [tile("ext00002")]),
+    ];
+    const request = new Request("http://site.test/about");
+    const resolved = await resolveThemeParts({ ...astro("/about"), request });
+    const count = (text: string) => text.split(KIT_CSS).length - 1;
+    expect(count(resolved.css)).toBe(1);
+    // Each part's own css stays whole.
+    expect(count(resolved.header?.css ?? "")).toBe(1);
+    const page = renderStored(layout(tile("ext00003")), emptyDesign(), "page0001");
+    expect(page.extensions).toEqual(["emvb-ext-kit"]);
+    expect(count(page.css)).toBe(0);
+    // EmVBPage in the same response: the theme parts' sheet has it already.
+    expect(extensionStylesToWrite(request, page.extensions)).toBe("");
+    // A response without theme parts writes it with the page, once.
+    const alone = new Request("http://site.test/about");
+    expect(count(extensionStylesToWrite(alone, page.extensions))).toBe(1);
+    expect(extensionStylesToWrite(alone, page.extensions)).toBe("");
   });
 });

@@ -27,6 +27,11 @@ export type RenderedPage = {
   dir?: "ltr" | "rtl" | "auto";
   /** W-971: the element types whose base rules `css` holds, for `sharedPartCss`. */
   baseTypes?: string[];
+  /**
+   * W-1086: the extensions whose elements rendered. Their stylesheets are not in `css`:
+   * `EmVBPage` and the theme parts' `css` write each once per response.
+   */
+  extensions?: string[];
 };
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
@@ -109,6 +114,7 @@ export function renderStored(
       scope: pageId,
       ...(partIds ? { partIds } : {}),
       ...(lang ? { lang } : {}),
+      separateExtensionCss: true,
     });
   } catch (error) {
     // S-02: a layout that can't render leaves the page empty instead of failing the request.
@@ -119,8 +125,16 @@ export function renderStored(
     });
     return empty;
   }
-  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes, runtimes } =
-    result;
+  const {
+    html,
+    css,
+    needsFormsRuntime,
+    needsTabsRuntime,
+    needsMenuRuntime,
+    baseTypes,
+    runtimes,
+    extensions,
+  } = result;
   for (const warning of result.warnings) {
     if (warning.code !== "refused-markup") continue;
     // oxlint-disable-next-line no-console
@@ -133,6 +147,7 @@ export function renderStored(
     needsTabsRuntime,
     needsMenuRuntime,
     ...(runtimes.length > 0 ? { runtimes } : {}),
+    ...(extensions.length > 0 ? { extensions } : {}),
     ...(design.direction ? { dir: design.direction } : {}),
     baseTypes,
   };

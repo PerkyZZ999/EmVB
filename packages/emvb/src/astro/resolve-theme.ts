@@ -37,6 +37,8 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { readLayout, renderStored, type RenderedPage } from "./render.ts";
+import { noteExtensionStyles } from "./extension-styles.ts";
+import { extensionStylesheets } from "../core/extensions/index.ts";
 import type { PageRuntime } from "../core/elements/widgets.ts";
 import { designFor, formsFor, layoutFor, partsFor } from "./render-session.ts";
 import type { HostVisitor, VisitorAstro } from "./visitor.ts";
@@ -612,7 +614,8 @@ export async function resolveThemePartsWith(
     const html = page.html
       ? `<${tag} class="emvb-theme-${stored.partType}" data-emvb-theme-part="${partId}">${page.html}</${tag}>`
       : "";
-    return { html, css: page.css };
+    // W-1086: a part's own css stays whole; the shared `css` below writes extension sheets once.
+    return { html, css: page.css + extensionStylesheets(page.extensions ?? []) };
   };
 
   /** Synced sections and loop items a part uses, for every part type (W-200). */
@@ -754,6 +757,10 @@ export async function resolveThemePartsWith(
     return sheet ? [sheet] : [];
   });
   const cssParts = [sharedPartCss(ordered)];
+  // W-1086: each extension stylesheet once for all the parts; the page in this response skips them.
+  const extensionIds = [...new Set(rendered.flatMap((page) => page.extensions ?? []))].toSorted();
+  cssParts.push(extensionStylesheets(extensionIds));
+  noteExtensionStyles(astro.request, extensionIds);
   if (popups.length > 0) cssParts.push(POPUP_CHROME_CSS);
   if (floats.length > 0) cssParts.push(FLOAT_CHROME_CSS);
   const css = cssParts.filter(Boolean).join("\n");

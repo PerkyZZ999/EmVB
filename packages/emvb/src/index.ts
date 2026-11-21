@@ -9,7 +9,7 @@ import {
   type EmVBExtension,
   type ExtensionManifest,
 } from "./core/extensions/index.ts";
-import { prepareExtensionBuild } from "./extension-build.ts";
+import { astroCli, prepareExtensionBuild } from "./extension-build.ts";
 import { createPlugin } from "./server/plugin.ts";
 
 /** Options a host site passes to `emvb()` in astro.config. */
@@ -52,7 +52,13 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   const accepted = rememberExtensions(options.extensions);
-  const build = accepted.length > 0 ? prepareExtensionBuild(accepted) : { warnings: [] };
+  const build =
+    accepted.length > 0
+      ? prepareExtensionBuild(
+          accepted,
+          astroCli(process.argv, process.cwd(), process.env["NODE_ENV"]),
+        )
+      : { warnings: [] };
   for (const warning of build.warnings) {
     // oxlint-disable-next-line no-console -- build-time notice for the site owner (W-1086)
     console.warn(`[emvb] extension ${warning}`);

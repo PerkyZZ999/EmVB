@@ -37,7 +37,11 @@ import {
 } from "../index.ts";
 import { someNode } from "../tree-ops.ts";
 import { EXPORT_RUNTIMES } from "./runtimes.generated.ts";
-import { extensionAssets, type ExtensionOutputs } from "../extensions/index.ts";
+import {
+  extensionAssets,
+  extensionStylesheets,
+  type ExtensionOutputs,
+} from "../extensions/index.ts";
 import type { ZipEntry } from "./zip.ts";
 
 /** A published page as the content API returns it. */
@@ -342,9 +346,11 @@ export function buildSiteExport(input: {
   const runtimes = new Set<keyof typeof RUNTIME_FILES>();
   // W-1086: extension runtimes the pages use, copied as `assets/ext/<package>.js`.
   const extensionRuntimes = new Map<string, string>();
-  const extensionOutputs = input.extensionOutputs
-    ? { extensionOutputs: input.extensionOutputs }
-    : {};
+  // W-1086: each page's style.css writes every extension stylesheet once (see below).
+  const extensionOutputs = {
+    ...(input.extensionOutputs ? { extensionOutputs: input.extensionOutputs } : {}),
+    separateExtensionCss: true,
+  };
   const taken = new Set<string>();
 
   const renderPart = (part: Part, scopeOnly = false) => {
@@ -424,6 +430,7 @@ export function buildSiteExport(input: {
     );
     const css = [
       ...all.map((r) => r.css),
+      extensionStylesheets(all.flatMap((r) => r.extensions)),
       ...(popupRenders.length > 0 ? [POPUP_CHROME_CSS] : []),
       ...(floatRenders.length > 0 ? [FLOAT_CHROME_CSS] : []),
     ]

@@ -18,6 +18,7 @@ import {
   clearExtensions,
   extensionAssets,
   extensionClassAllowlist,
+  extensionStylesheets,
   listedExtensionManifests,
   manifestsFromOptions,
   registerBundledExtensions,
@@ -325,6 +326,73 @@ describe("bundled registration (W-1086)", () => {
       [{ default: kit() }, "emvb-ext-wrong-id"],
     ]);
     expect(listedExtensionManifests().map((m) => m.id)).toEqual(["emvb-ext-kit"]);
+  });
+
+  test("a Worker keeps the manifest of an extension without module next to a bundled one", () => {
+    // astro.config ran in another process: these are the serialized options EmDash passes.
+    const serialized = JSON.parse(
+      JSON.stringify([
+        {
+          extensionApi: 1,
+          id: "emvb-ext-plain",
+          elements: [{ type: "ext:emvb-ext-plain/note", name: "note", label: "Note" }],
+          panels: [],
+          sources: [],
+          classes: { prefix: "plain-", allow: ["plain-note"] },
+          assets: { css: ".plain-note{}" },
+        },
+        { ...normalizeExtension(kit())?.manifest, assets: { css: CSS } },
+      ]),
+    ) as unknown[];
+    // The generated server entry registered only the extension that names its module.
+    registerBundledExtensions([[{ default: kit() }, "emvb-ext-kit"]]);
+    const manifests = manifestsFromOptions(serialized);
+    expect(manifests.map((m) => m.id)).toEqual(["emvb-ext-plain", "emvb-ext-kit"]);
+    expect(manifests[0]?.elements.map((e) => e.type)).toEqual(["ext:emvb-ext-plain/note"]);
+    expect(manifests[0]?.assets).toEqual({ css: ".plain-note{}" });
+    expect(manifests[1]?.assets).toEqual({ css: CSS });
+    expect(extensionClassAllowlist("emvb-ext-plain")?.has("plain-note")).toBe(true);
+    // The live manifest wins for the bundled extension.
+    expect(manifests[1]?.elements.map((e) => e.type)).toEqual([TYPE]);
+  });
+});
+
+describe("each stylesheet once per document (W-1086)", () => {
+  test("renders that share a document leave their extension sheets to the assembler", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS, runtime: RUNTIME });
+    const apart = renderPage(page(button), emptyDesign(), {
+      scope: "page0001",
+      separateExtensionCss: true,
+    });
+    expect(apart.css).not.toContain(CSS);
+    expect(apart.extensions).toEqual(["emvb-ext-kit"]);
+    expect(apart.runtimes).toContain("ext:emvb-ext-kit");
+    expect(extensionStylesheets(["emvb-ext-kit", "emvb-ext-kit", "emvb-ext-none"])).toBe(
+      `/* emvb-ext-kit */\n${CSS}\n`,
+    );
+    expect(renderPage(page(heading), emptyDesign()).extensions).toEqual([]);
+  });
+
+  test("an export page with the element in header, footer and body has the sheet once", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS });
+    const entireSite = {
+      schemaVersion: 1,
+      rules: [{ id: "all", op: "include", group: "general", name: "entire_site", args: {} }],
+    };
+    const out = buildSiteExport({
+      design: emptyDesign(),
+      parts: [
+        { id: "hdr", title: "H", partType: "header", layout: page(button), conditions: entireSite },
+        { id: "ftr", title: "F", partType: "footer", layout: page(button), conditions: entireSite },
+      ],
+      pages: [{ id: "p1", title: "Shop", slug: "shop", layout: page(heading, button) }],
+    });
+    const css = out.files.find((f) => f.path === "shop/style.css")?.data;
+    const html = out.files.find((f) => f.path === "shop/index.html")?.data;
+    expect(typeof html === "string" && html.split("kit-btn-primary").length - 1).toBe(3);
+    expect(typeof css === "string" && css.split(CSS).length - 1).toBe(1);
   });
 });
 

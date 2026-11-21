@@ -51,11 +51,13 @@ export function extensionNodesIn(layouts: readonly unknown[]): ExtNode[] {
 
 /**
  * W-1086: the server-rendered output of each extension element, by `extensionOutputKey`. A
- * failed request leaves its elements out (they show the placeholder).
+ * failed request leaves its elements out (they show the placeholder). `answered`, when given,
+ * collects the key of every element the server answered, including those with no output.
  */
 export async function fetchExtensionOutputs(
   fetcher: Fetcher,
   nodes: readonly ExtNode[],
+  answered?: Set<string>,
 ): Promise<Map<string, unknown>> {
   const outputs = new Map<string, unknown>();
   for (let start = 0; start < nodes.length; start += BATCH) {
@@ -67,9 +69,9 @@ export async function fetchExtensionOutputs(
         { method: "POST", body: { nodes: nodes.slice(start, start + BATCH) } },
       );
       for (const item of body?.outputs ?? []) {
-        if (typeof item.key === "string" && Array.isArray(item.nodes)) {
-          outputs.set(item.key, item.nodes);
-        }
+        if (typeof item.key !== "string") continue;
+        answered?.add(item.key);
+        if (Array.isArray(item.nodes)) outputs.set(item.key, item.nodes);
       }
     } catch {
       // Leave this batch out.
@@ -102,9 +104,17 @@ export async function loadExtensionManifests(fetcher: Fetcher): Promise<Extensio
   }
 }
 
+/** Prop edits come one keystroke at a time; the canvas asks once they pause. */
+export const EXTENSION_OUTPUTS_DEBOUNCE_MS = 300;
+/** After a failed request the canvas asks again this much later, a few times in a row at most. */
+export const EXTENSION_OUTPUTS_RETRY_MS = 1000;
+const MAX_RETRIES = 3;
+
 /**
- * W-1086: extension outputs for the editor canvas. Asks the server for elements it hasn't seen
- * (a new element, or edited props) and keeps earlier answers.
+ * W-1086: extension outputs for the editor canvas. Once edits pause, asks the server for elements
+ * it hasn't answered (a new element, or edited props), keeps earlier answers for elements still
+ * on the page and drops the rest. Elements of a failed request are asked again a little later
+ * (a few times) and on the next change.
  */
 export function useExtensionOutputs(
   layout: unknown,
@@ -114,26 +124,56 @@ export function useExtensionOutputs(
   const key = nodes.map(extensionOutputKey).join("\u0000");
   const [outputs, setOutputs] = React.useState<ReadonlyMap<string, unknown>>(() => new Map());
   const asked = React.useRef(new Set<string>());
+  const onPage = React.useRef(new Set<string>());
+  const mounted = React.useRef(true);
+  // Bumped to ask again after a failed request; `failures` counts them in a row.
+  const [retry, setRetry] = React.useState(0);
+  const failures = React.useRef(0);
   React.useEffect(() => {
-    if (!key) return;
-    const seen = asked.current;
-    const wanted = nodes.filter((node) => !seen.has(extensionOutputKey(node)));
-    if (wanted.length === 0) return;
-    for (const node of wanted) seen.add(extensionOutputKey(node));
-    let cancelled = false;
-    let settled = false;
-    void fetchExtensionOutputs(fetcher, wanted).then((found) => {
-      settled = true;
-      if (cancelled || found.size === 0) return;
-      setOutputs((current) => new Map([...current, ...found]));
-    });
+    mounted.current = true;
     return () => {
-      cancelled = true;
-      // A request cut short may be asked again on the next change.
-      if (!settled) for (const node of wanted) seen.delete(extensionOutputKey(node));
+      mounted.current = false;
     };
+  }, []);
+  React.useEffect(() => {
+    const current = new Set(nodes.map(extensionOutputKey));
+    onPage.current = current;
+    const seen = asked.current;
+    // Outputs of elements no longer on the page are dropped (and asked again if they come back).
+    for (const seenKey of seen) if (!current.has(seenKey)) seen.delete(seenKey);
+    setOutputs((previous) => {
+      if ([...previous.keys()].every((k) => current.has(k))) return previous;
+      return new Map([...previous].filter(([k]) => current.has(k)));
+    });
+    if (current.size === 0) return;
+    const timer = setTimeout(() => {
+      const wanted = nodes.filter((node) => !seen.has(extensionOutputKey(node)));
+      if (wanted.length === 0) return;
+      for (const node of wanted) seen.add(extensionOutputKey(node));
+      const answered = new Set<string>();
+      void fetchExtensionOutputs(fetcher, wanted, answered).then((found) => {
+        // A failed batch: its elements are asked again later and on the next change.
+        let failed = false;
+        for (const node of wanted) {
+          const wantedKey = extensionOutputKey(node);
+          if (answered.has(wantedKey)) continue;
+          seen.delete(wantedKey);
+          failed = true;
+        }
+        failures.current = failed ? failures.current + 1 : 0;
+        if (failed && failures.current <= MAX_RETRIES) {
+          setTimeout(() => {
+            if (mounted.current) setRetry((n) => n + 1);
+          }, EXTENSION_OUTPUTS_RETRY_MS * failures.current);
+        }
+        const keep = [...found].filter(([k]) => onPage.current.has(k));
+        if (!mounted.current || keep.length === 0) return;
+        setOutputs((previous) => new Map([...previous, ...keep]));
+      });
+    }, EXTENSION_OUTPUTS_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
     // `key` stands for `nodes`.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, fetcher]);
+  }, [key, fetcher, retry]);
   return outputs;
 }

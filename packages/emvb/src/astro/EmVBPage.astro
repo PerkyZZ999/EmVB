@@ -1,6 +1,7 @@
 ---
 import type { RenderedPage } from "./render.ts";
 import EmVBWidgetRuntimes from "./widgets/EmVBWidgetRuntimes.astro";
+import { extensionStylesToWrite } from "./extension-styles.ts";
 
 /** The resolved meta of the page (EmDash's `getSeoMeta` result fits), for blank canvas mode. */
 interface PageMeta {
@@ -36,6 +37,8 @@ const { page, standalone = false, title = "", description, seo, lang } = Astro.p
 const docLang = [lang, Astro.currentLocale].find((tag) => tag && LANG_TAG.test(tag)) ?? "en";
 const ogTitle = seo?.ogTitle || title;
 const ogDescription = seo?.ogDescription ?? description;
+// W-1086: extension stylesheets the theme parts or an earlier page of this response didn't write.
+const css = page.css + extensionStylesToWrite(Astro.request, page.extensions);
 ---
 
 {
@@ -56,7 +59,7 @@ const ogDescription = seo?.ogDescription ?? description;
         {seo && (
           <meta name="twitter:card" content={seo.ogImage ? "summary_large_image" : "summary"} />
         )}
-        <style is:inline set:html={page.css} />
+        <style is:inline set:html={css} />
       </head>
       <body>
         <Fragment set:html={page.html} />
@@ -66,7 +69,7 @@ const ogDescription = seo?.ogDescription ?? description;
     </html>
   ) : (
     <>
-      <style is:inline set:html={page.css} />
+      <style is:inline set:html={css} />
       <Fragment set:html={page.html} />
       <EmVBWidgetRuntimes names={page.runtimes} />
       <slot />

@@ -999,8 +999,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/EmVBPage.astro",
-          "search": "    <>\n      <style is:inline set:html={page.css} />\n      <Fragment set:html={page.html} />",
-          "replace": "    <>\n      <style is:inline set:html={page.css} />\n      {page.html}"
+          "search": "    <>\n      <style is:inline set:html={css} />\n      <Fragment set:html={page.html} />",
+          "replace": "    <>\n      <style is:inline set:html={css} />\n      {page.html}"
         }
       ],
       "command": ["bun", "run", "test:astro"],
@@ -22627,8 +22627,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/render.ts",
-          "search": "    ...(runtimes.length > 0 ? { runtimes } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
-          "replace": "    ...(runtimes.length > 0 ? { runtimes } : {}),\n    baseTypes,\n  };"
+          "search": "    ...(extensions.length > 0 ? { extensions } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
+          "replace": "    ...(extensions.length > 0 ? { extensions } : {}),\n    baseTypes,\n  };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
@@ -54442,6 +54442,273 @@
         "whole page as one proposal"
       ],
       "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1086/live-hides-serialized",
+      "requirement": "W-1086",
+      "description": "On a Worker, the bundled extensions' live manifests replace the whole list, so an extension without module loses its manifest (palette, inspector, allowlist, assets).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/registry.ts",
+          "search": "  const live = new Map(listedExtensionManifests().map((m) => [m.id, m]));\n",
+          "replace": "  const live = new Map(listedExtensionManifests().map((m) => [m.id, m]));\n  if (live.size > 0) return [...live.values()];\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*without module next to a bundled one"
+    },
+    {
+      "id": "W-1086/build-entry-warns-only",
+      "requirement": "W-1086",
+      "description": "A production build whose extensions server entry can't be written only warns, then shows placeholders for every extension element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "  if (where.command === \"build\") {\n",
+          "replace": "  if (where.command === \"build\" && Math.random() > 2) {\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*a production build fails when the server entry"
+    },
+    {
+      "id": "W-1086/entry-bare-emvb",
+      "requirement": "W-1086",
+      "description": "The generated server entry imports EmVB by its bare package name, which resolves only from inside the site's node_modules.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "  const source = serverEntrySource(modules, emvbEntry(apis));\n",
+          "replace": "  const source = serverEntrySource(modules);\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*reads the package's css and runtime and writes the server entry"
+    },
+    {
+      "id": "W-1086/nameless-package-json",
+      "requirement": "W-1086",
+      "description": "The package lookup stops at a nested package.json without a name (dist/esm's {\"type\":\"module\"}), so the extension's module, css and runtime are refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "    if (name !== undefined) return { root: dir, name: name.replace(/^@[^/]+\\//, \"\") };\n",
+          "replace": "    if (name !== undefined) return { root: dir, name: name.replace(/^@[^/]+\\//, \"\") };\n    if (fs.existsSync(manifest)) return undefined;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*a package.json without a name"
+    },
+    {
+      "id": "W-1086/entry-path-unescaped",
+      "requirement": "W-1086",
+      "description": "A server entry path holding a quote or a line break goes to EmDash, which writes it unescaped into an import and breaks the build.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "  if (UNSAFE_ENTRY_PATH.test(file.replaceAll(\"\\\\\", \"/\"))) {\n",
+          "replace": "  if (UNSAFE_ENTRY_PATH.test(\"\")) {\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*refuses an entry path EmDash would write"
+    },
+    {
+      "id": "W-1086/stale-entries-kept",
+      "requirement": "W-1086",
+      "description": "Server entries from earlier extension lists and temp files from a crashed write pile up in node_modules/.emvb.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "    removeStaleEntries(apis, dir, path.basename(file));\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*removes stale entries"
+    },
+    {
+      "id": "W-1086/export-css-per-render",
+      "requirement": "W-1086",
+      "description": "An exported page's style.css doesn't write the extension stylesheets its page and theme part renders left out for it to write once.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "      extensionStylesheets(all.flatMap((r) => r.extensions)),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*in header, footer and body has the sheet once"
+    },
+    {
+      "id": "W-1086/theme-and-page-css-twice",
+      "requirement": "W-1086",
+      "description": "A page in a response whose theme parts already wrote an extension stylesheet writes it again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  noteExtensionStyles(astro.request, extensionIds);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*ship its stylesheet once"
+    },
+    {
+      "id": "W-1086/page-without-ext-css",
+      "requirement": "W-1086",
+      "description": "EmVBPage leaves out the stylesheet of the extensions its page rendered.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/EmVBPage.astro",
+          "search": "const css = page.css + extensionStylesToWrite(Astro.request, page.extensions);",
+          "replace": "const css = page.css + extensionStylesToWrite(Astro.request, []);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "--cwd",
+        "packages/emvb",
+        "test:astro",
+        "test/astro/emvb-page.vitest.ts"
+      ],
+      "expect": "W-1086"
+    },
+    {
+      "id": "W-1086/runtime-top-level-await",
+      "requirement": "W-1086",
+      "description": "A runtime with top-level await is accepted: it runs as a module on public pages but breaks the HTML export's classic script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/extension-build.ts",
+          "search": "        const issue = extensionRuntimeIssue(code) ?? classicScriptIssue(apis, code);\n",
+          "replace": "        const issue = extensionRuntimeIssue(code);\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/extension-build.test.ts"],
+      "expect": "\\(fail\\).*top-level await"
+    },
+    {
+      "id": "W-1086/canvas-failure-never-retried",
+      "requirement": "W-1086",
+      "description": "The editor canvas never asks again for extension elements whose render request failed, so they keep the placeholder.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/extension-outputs.ts",
+          "search": "          seen.delete(wantedKey);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/extension-outputs.test.ts"],
+      "expect": "\\(fail\\).*a failed request is asked again"
+    },
+    {
+      "id": "W-1086/canvas-no-debounce",
+      "requirement": "W-1086",
+      "description": "Every keystroke in an extension element's props sends a render request.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/extension-outputs.ts",
+          "search": "    }, EXTENSION_OUTPUTS_DEBOUNCE_MS);\n",
+          "replace": "    }, 0);\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/extension-outputs.test.ts"],
+      "expect": "\\(fail\\).*prop edits are asked for once they pause"
+    },
+    {
+      "id": "W-1086/canvas-outputs-grow",
+      "requirement": "W-1086",
+      "description": "The editor canvas keeps the output of every extension element it ever showed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/extension-outputs.ts",
+          "search": "      return new Map([...previous].filter(([k]) => current.has(k)));\n",
+          "replace": "      return previous;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/extension-outputs.test.ts"],
+      "expect": "\\(fail\\).*no longer on the page are dropped"
+    },
+    {
+      "id": "W-1086/route-props-depth",
+      "requirement": "W-1086",
+      "description": "The extension render route keys props of any depth, so deeply nested props overflow the stack.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "    if (item.depth >= MAX_PROPS_DEPTH) return false;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/extension-render-route.test.ts"],
+      "expect": "\\(fail\\).*refuses props too deep or too large"
+    },
+    {
+      "id": "W-1086/route-props-size",
+      "requirement": "W-1086",
+      "description": "The extension render route keys props of any size.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "const MAX_PROPS_BYTES = MAX_LAYOUT_BYTES;\n",
+          "replace": "const MAX_PROPS_BYTES = MAX_LAYOUT_BYTES * 100;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/extension-render-route.test.ts"],
+      "expect": "\\(fail\\).*refuses props too deep or too large"
+    },
+    {
+      "id": "W-1086/prod-not-bundled",
+      "requirement": "W-1086",
+      "description": "The Node production build doesn't get the generated extensions entry, so its pages show placeholders for extension elements.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "    entrypoint: build.entrypoint ?? PACKAGE_NAME,",
+          "replace": "    entrypoint: PACKAGE_NAME,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "e2e/extensions.prod.ts",
+        "--project=node-public",
+        "-g",
+        "renders the extension's element"
+      ],
+      "expect": "✘.*\\[node-public\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1086/prod-css-twice",
+      "requirement": "W-1086",
+      "description": "On a production build, a page whose header and body show an extension element ships its stylesheet twice.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  noteExtensionStyles(astro.request, extensionIds);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "e2e/extensions.prod.ts",
+        "--project=node-public",
+        "-g",
+        "renders the extension's element"
+      ],
+      "expect": "✘.*\\[node-public\\]",
       "env": {
         "CI": "1"
       }

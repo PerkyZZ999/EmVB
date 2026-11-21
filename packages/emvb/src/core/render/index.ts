@@ -66,6 +66,7 @@ import { serialize, type VNode } from "./vnode.ts";
 import {
   extensionAssets,
   extensionClassesOf,
+  extensionStylesheets,
   isExtensionType,
   renderExtensionNode,
   EXTENSION_PLACEHOLDER_CSS,
@@ -106,6 +107,11 @@ export type RenderResult = {
   warnings: RenderWarning[];
   /** W-971: the element types whose base rules this sheet holds (see `sharedPartCss`). */
   baseTypes: string[];
+  /**
+   * W-1086: the extensions whose elements rendered, sorted. With `separateExtensionCss` their
+   * stylesheets are not in `css`; write `extensionStylesheets(ids)` once per document instead.
+   */
+  extensions: string[];
 };
 
 const ID = /^[A-Za-z0-9_-]{4,24}$/;
@@ -339,6 +345,12 @@ export function renderPage(
      * (the editor canvas and the HTML export). The server renders with the live extensions.
      */
     extensionOutputs?: ExtensionOutputs;
+    /**
+     * W-1086: leave the extensions' stylesheets out of `css`. Callers that put several renders in
+     * one document (a page and its theme parts, an export page) write each stylesheet once from
+     * `extensions`.
+     */
+    separateExtensionCss?: boolean;
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
@@ -936,14 +948,9 @@ export function renderPage(
   });
   // W-1086: each extension stylesheet once, unscoped (it styles its own prefixed classes), before
   // the print rules so the theme parts' shared sheet still finds them at the end.
-  const extensionCss = [...extensionsUsed]
-    .toSorted()
-    .flatMap((pkg) => {
-      const assets = extensionAssets(pkg);
-      if (assets?.runtime) runtimes.add(`ext:${pkg}`);
-      return assets?.css ? [`/* ${pkg} */\n${assets.css}\n`] : [];
-    })
-    .join("");
+  const extensions = [...extensionsUsed].toSorted();
+  for (const pkg of extensions) if (extensionAssets(pkg)?.runtime) runtimes.add(`ext:${pkg}`);
+  const extensionCss = opts.separateExtensionCss ? "" : extensionStylesheets(extensions);
   return {
     vnode,
     // W-1067: a public page of a site with dark colours puts back the visitor's choice first.
@@ -956,6 +963,7 @@ export function renderPage(
     ...(design.direction ? { dir: design.direction } : {}),
     warnings,
     baseTypes: [...usedTypes],
+    extensions,
   };
 }
 

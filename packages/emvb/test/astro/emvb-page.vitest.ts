@@ -2,6 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { expect, test } from "vitest";
 import EmVBPage from "../../src/astro/EmVBPage.astro";
 import { renderPage, type DesignSystem } from "../../src/core/index.ts";
+import { clearExtensions, rememberExtensionAssets } from "../../src/core/extensions/index.ts";
 import { XSS_CORPUS } from "../fixtures/xss.ts";
 import { heading, s1Page } from "../fixtures/layouts.ts";
 
@@ -233,4 +234,16 @@ test("W-1047: Share buttons with the device's Share button load the share script
   });
   expect(output.match(/<script/g)).toHaveLength(1);
   expect(output).toContain("EmVBShareRuntime");
+});
+
+test("W-1086: an extension's stylesheet is written with the page, once per response", async () => {
+  clearExtensions();
+  rememberExtensionAssets("emvb-ext-kit", { css: ".kit-card{color:red}" });
+  const container = await AstroContainer.create();
+  const page = { ...pageOf(s1Page()), extensions: ["emvb-ext-kit"] };
+  const output = await container.renderToString(EmVBPage, { props: { page } });
+  expect(output).toBe(
+    `<style>${page.css}/* emvb-ext-kit */\n.kit-card{color:red}\n</style>${page.html}`,
+  );
+  clearExtensions();
 });

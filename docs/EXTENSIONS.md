@@ -87,11 +87,23 @@ export default defineExtension({
 
 The extension module's own `import.meta.url` (a local `file:` URL). EmDash bundles a plugin
 only through its entrypoint, so when an extension names its module, `emvb()` writes a small
-server entry at `<site>/node_modules/.emvb/server-entry-<hash>.ts` that imports the module,
-registers the extension and re-exports `createPlugin`. This is what makes extension elements
-render on Cloudflare Workers and on production builds, where `astro.config` never runs. Without
-`module`, an extension renders only in a Node dev server (as in 1.0–1.3). The module must sit in
-a package whose `package.json` name (without scope) equals the extension `id`.
+server entry at `<site>/node_modules/.emvb/server-entry-<hash>.ts` that imports the module and
+EmVB (both by absolute path), registers the extension and re-exports `createPlugin`. This is what
+makes extension elements render on Cloudflare Workers and on production builds, where
+`astro.config` never runs. Without `module`, an extension renders only in a Node dev server (as
+in 1.0–1.3); its manifest (Add panel, inspector, classes, stylesheet) still reaches production
+servers through the plugin options. The module must sit in a package whose `package.json` name
+(without scope) equals the extension `id`; `package.json` files without a name (such as
+`dist/esm/package.json` with only `"type": "module"`) are skipped when looking for it.
+
+- `<site>` is the folder passed to `astro --root`, else the folder the build runs in (EmDash gives
+  plugins no Astro hook, so `emvb()` reads the CLI's arguments).
+- The entry is written to a temporary file and renamed into place; older `server-entry-*` files
+  are removed.
+- **`astro build` fails** with an error naming the file when the entry can't be written (a
+  read-only `node_modules`, a site path with a quote, backslash or control character, which
+  EmDash would write unescaped into its import). Without the entry, every extension element
+  would render as a placeholder. `astro dev` only warns.
 
 ### `classes` and `extClasses`
 
@@ -119,25 +131,37 @@ a package whose `package.json` name (without scope) equals the extension `id`.
   runtime containing `<script`, `</script` or `<!--`, or a line starting with `import` or
   `export`, is refused.
 - The runtime must be a **self-contained browser script** (wrap it in an IIFE). Public pages
-  write it inline as `<script type="module">`; the HTML export copies it to
-  `assets/ext/<id>.js` and loads it with `<script defer>`. It must work in both (no imports, no
-  top-level `await`). Sites with a Content Security Policy must allow it, as for EmVB's own
+  write it inline as `<script type="module">` (deferred, strict); the HTML export copies it to
+  `assets/ext/<id>.js` and loads it with a classic `<script defer>`, like EmVB's own export
+  scripts, because browsers don't load module scripts from pages opened as `file:` URLs. It must
+  work in both: no imports or exports, no top-level `await`, no sloppy-mode-only syntax (`with`).
+  The build compiles it (never runs it) as a strict classic script and refuses it with a warning
+  when it doesn't parse. Sites with a Content Security Policy must allow it, as for EmVB's own
   inline page styles.
-- **Emitted only where used:** a public page gets the stylesheet (once, inside the page's EmVB
-  CSS) and the runtime (once per response, including theme parts) only when it renders at least
-  one of the extension's elements. A placeholder (missing extension, throwing render) emits
+- **Emitted only where used:** a public page gets the stylesheet and the runtime only when it, or
+  one of its theme parts, renders at least one of the extension's elements, and each **once per
+  response**: a page with the element in its header, footer and body ships the stylesheet once
+  (in the theme parts' `css` when a part uses it, else in `EmVBPage`'s style) and the runtime
+  once. A placeholder (missing extension, throwing render) emits
   neither. Pages without the extension's elements get no extra CSS and no extra script.
 - **Editor canvas:** the canvas iframe gets the stylesheet when it shows one of the extension's
   elements. The runtime never runs in the canvas (the canvas is sandboxed without scripts) or in
   the admin. Extension CSS never goes into the admin UI itself (D-067).
-- **HTML export:** the stylesheet is in each page's `style.css`, the runtime in `assets/ext/`.
+- **HTML export:** the stylesheet is in each page's `style.css` (once, however many of the page's
+  renders use it), the runtime in `assets/ext/`.
+- **Hosts:** render pages with `<EmVBPage>` and write the theme parts' `css`, as the host guide
+  does. The `css` that `resolveEmVBPage()` returns doesn't hold extension stylesheets (its
+  `extensions` lists the extensions the page rendered); `<EmVBPage>` writes them.
 
 ### Canvas and export output
 
 The admin bundle holds no extension code. The editor canvas and the HTML export ask the server
 (`POST /_emdash/api/plugins/emvb/editor/extensions/render`, editors and above) for each
 extension element's output by type and props, then check it again against the layout schema
-and the allowlist before rendering it.
+and the allowlist before rendering it. The route takes at most 100 elements per request and
+refuses props nested deeper than 24 levels or larger than 512 KB. The canvas asks once edits
+pause (300 ms), asks again after a failed request (up to three times, then on the next change),
+and forgets the output of elements no longer on the page.
 
 ### What the package is responsible for
 

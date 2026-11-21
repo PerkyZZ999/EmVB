@@ -43,6 +43,7 @@ export {
   rememberExtensionManifests,
   registerBundledExtensions,
   extensionAssets,
+  extensionStylesheets,
 } from "./registry.ts";
 export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
 export {
