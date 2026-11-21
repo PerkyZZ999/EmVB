@@ -42,7 +42,8 @@
     "bench:editor": "bun scripts/bench-editor.ts",
     "pack:smoke": "bun scripts/pack-smoke.ts",
     "check:upgrade": "bun scripts/upgrade-check.ts",
-    "icons:build": "bun scripts/build-icon-sets.ts"
+    "icons:build": "bun scripts/build-icon-sets.ts",
+    "compat:look": "bun scripts/compat-look.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

@@ -1,0 +1,4 @@
+{
+  "$comment": "W-1075: compat cases whose look changes on purpose (D-065: bug fixes and accessibility). Each entry names the exact new output (sha256 of html, newline, css, printed by bun run compat:look) and the work item; scripts/compat-look.test.ts drops none silently: an entry must match the current render.",
+  "changes": []
+}

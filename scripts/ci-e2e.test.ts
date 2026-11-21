@@ -8,7 +8,7 @@ type Job = {
   if?: string;
   env?: Record<string, string>;
   strategy?: { matrix?: Record<string, unknown[]> };
-  steps: { run?: string; uses?: string }[];
+  steps: { run?: string; uses?: string; with?: Record<string, unknown> }[];
 };
 const ci = Bun.YAML.parse(
   readFileSync(join(import.meta.dir, "../.github/workflows/ci.yml"), "utf8"),
@@ -33,4 +33,17 @@ test("W-1063: the whole e2e suite runs on release tags, on EmDash 1.4 and the la
   expect(runs(full)).toContain("bun run e2e:full");
   expect(full?.strategy?.matrix?.["emdash"]).toEqual(["1.4.0", "latest"]);
   expect(runs(full)).toContain("bun scripts/use-emdash.ts ${{ matrix.emdash }}");
+});
+
+test("W-1075: the compat corpus is compared by look on every run, against the base's files", () => {
+  const look = ci.jobs["compat-look"];
+  expect(look?.if).toBeUndefined();
+  expect(runs(look)).toContain("bun run compat:look --all");
+  expect(look?.env?.["EMVB_CHROMIUM"]).toBeTruthy();
+  expect(look?.env?.["EMVB_COMPAT_BASE"]).toContain("github.event.pull_request.base.sha");
+  expect(
+    look?.steps.find((s) => s.uses?.startsWith("actions/checkout"))?.with?.["fetch-depth"],
+  ).toBe(0);
+  const upload = look?.steps.find((s) => s.uses?.startsWith("actions/upload-artifact"));
+  expect(upload?.with?.["path"]).toBe("test-results/compat-look/");
 });

@@ -20,6 +20,7 @@ bun run e2e e2e/<area>.e2e.ts --project=node    # the e2e specs for what you tou
 ```
 
 - **e2e runs on its own data.** Each Playwright run starts the demo servers on a fresh data folder (`e2e/.data/run-…`, removed at the end), never on your `demos/node/data.db` or `demos/cloudflare/.wrangler`, so what you made in the demos can't change a result. `bun run e2e:prod` builds the node demo for that run's folder: run `bun run demo:node:build` again before using `demo:node:prod` yourself.
+- **Old pages must look the same (compat look check, W-1075).** If you change the renderer, run `bun run compat:look` (add `--base main` after updating expected files). It renders every page in `packages/emvb/test/compat` twice in one browser, from its stored expected HTML and CSS and from the current renderer, at 1440, 768 and 390 px, and compares the screenshots pixel by pixel (no stored screenshots, so your fonts don't matter). Pages whose output is unchanged byte for byte are skipped unless you pass `--all`. Differences are written to `test-results/compat-look/` (expected, actual and diff PNGs); CI runs it on every pull request against the base branch and uploads them on failure. A visible change is allowed only as a deliberate fix: add the entry the command prints to `packages/emvb/test/compat/look-changes.json` with its work item.
 - **Tests prove themselves.** Every new or changed test needs a seeded bug in `scripts/seeded-bugs.json` that makes it fail. Run it with `bun run seeded-bugs --only <id>`.
 
 ### Running seeded bugs fast

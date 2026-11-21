@@ -54236,6 +54236,110 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1075/heading-margin-look",
+      "requirement": "W-1075",
+      "description": "The renderer gives headings a bottom margin, so a stored page's headings move: the compat look check sees it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "\".emvb-heading{margin:0}",
+          "replace": "\".emvb-heading{margin:0 0 6px}"
+        }
+      ],
+      "command": ["bun", "scripts/compat-look.ts", "--case", "v15-demo-home"],
+      "expect": "look changed: v15-demo-home"
+    },
+    {
+      "id": "W-1075/tolerance-strict",
+      "requirement": "W-1075",
+      "description": "The comparison counts a difference equal to the tolerance as a changed pixel.",
+      "edits": [
+        {
+          "file": "scripts/compat-look/image.ts",
+          "search": "(actual.data[a + c] ?? 0)) <= tolerance;",
+          "replace": "(actual.data[a + c] ?? 0)) < tolerance;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/compat-look.test.ts", "-t", "within the tolerance"],
+      "expect": "\\(fail\\).*within the tolerance"
+    },
+    {
+      "id": "W-1075/png-average-filter",
+      "requirement": "W-1075",
+      "description": "The PNG reader undoes the Average row filter wrongly, so Chromium screenshots decode to the wrong pixels.",
+      "edits": [
+        {
+          "file": "scripts/compat-look/image.ts",
+          "search": "? (left + up) >> 1",
+          "replace": "? (left + up) >> 2"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/compat-look.test.ts", "-t", "every row filter"],
+      "expect": "\\(fail\\).*every row filter"
+    },
+    {
+      "id": "W-1075/approve-any-output",
+      "requirement": "W-1075",
+      "description": "A look-changes entry approves any output of its case, not the exact one it names.",
+      "edits": [
+        {
+          "file": "scripts/compat-look.ts",
+          "search": "change.case === name && change.output === hash",
+          "replace": "change.case === name"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/compat-look.test.ts", "-t", "approves only its case"],
+      "expect": "\\(fail\\).*approves only its case"
+    },
+    {
+      "id": "W-1075/style-unescaped",
+      "requirement": "W-1075",
+      "description": "Case CSS goes into the static page's style element as is, so it can close it.",
+      "edits": [
+        {
+          "file": "scripts/compat-look.ts",
+          "search": "${css.replaceAll(\"</style\", \"<\\\\/style\")}",
+          "replace": "${css}"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/compat-look.test.ts", "-t", "close its style element"],
+      "expect": "\\(fail\\).*close its style element"
+    },
+    {
+      "id": "W-1075/stale-look-change",
+      "requirement": "W-1075",
+      "description": "look-changes.json keeps an entry that no longer matches its case's render.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/compat/look-changes.json",
+          "search": "\"changes\": []",
+          "replace": "\"changes\": [{ \"case\": \"v15-demo-home\", \"output\": \"0000\", \"why\": \"W-1075: stale\" }]"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./scripts/compat-look.test.ts",
+        "-t",
+        "matches its case's current render"
+      ],
+      "expect": "\\(fail\\).*matches its case's current render"
+    },
+    {
+      "id": "W-1075/ci-shallow-clone",
+      "requirement": "W-1075",
+      "description": "The compat look job clones one commit, so the base's expected files can't be read.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "          fetch-depth: 0\n",
+          "replace": "          fetch-depth: 1\n"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/ci-e2e.test.ts", "-t", "compared by look"],
+      "expect": "\\(fail\\).*compared by look"
     }
   ]
 }
