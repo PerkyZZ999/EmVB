@@ -55024,6 +55024,46 @@
       ],
       "command": ["bun", "test", "scripts/release.test.ts", "-t", "W-1084"],
       "expect": "\\(fail\\).*W-1084"
+    },
+    {
+      "id": "W-1084/a11y-score-label-not-in-name",
+      "requirement": "W-317",
+      "description": "The A11y score button's accessible name no longer contains its visible \"A11y <score>\" (WCAG 2.5.3, Label in Name).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": "      aria-label={`A11y ${report.score}: accessibility score of 100, ${count} issue${count === 1 ? \"\" : \"s\"}`}",
+          "replace": "      aria-label={`Accessibility score ${report.score} of 100, ${count} issue${count === 1 ? \"\" : \"s\"}`}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/a11y-copilot.test.tsx",
+        "-t",
+        "live score"
+      ],
+      "expect": "\\(fail\\).*live score"
+    },
+    {
+      "id": "W-1084/zoom-label-not-in-name",
+      "requirement": "W-158",
+      "description": "The zoom button is named \"Fit to canvas (70%)\" while it shows \"Fit · 70%\" or \"100%\" (WCAG 2.5.3, Label in Name).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/DeviceBar.tsx",
+          "search": "          aria-label={`${zoomText(zoom, scale)}, fit to canvas`}",
+          "replace": "          aria-label={`Fit to canvas (${Math.round(scale * 100)}%)`}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/laptop-device.test.tsx",
+        "-t",
+        "W-1084"
+      ],
+      "expect": "\\(fail\\).*W-1084"
     }
   ]
 }

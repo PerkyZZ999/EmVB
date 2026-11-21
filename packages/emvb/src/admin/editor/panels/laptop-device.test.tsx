@@ -140,3 +140,28 @@ test("W-959: the Wide screen hide checkbox says it follows Desktop until set", a
     "follows Desktop",
   );
 });
+
+test("W-1084: the zoom button's name starts with its visible text (Label in Name)", async () => {
+  for (const zoom of ["fit", "actual"] as const) {
+    // oxlint-disable-next-line no-await-in-loop -- one mount per state
+    await mount(
+      <DeviceBar
+        device="desktop"
+        hidden={false}
+        canHide={false}
+        hideLabel="Hide on desktop"
+        onDevice={() => undefined}
+        onToggleHidden={() => undefined}
+        zoom={zoom}
+        scale={0.7}
+        onZoom={() => undefined}
+      />,
+    );
+    // oxlint-disable-next-line no-await-in-loop -- same
+    await settle();
+    const button = document.querySelector(".emvb-zoom");
+    const text = button?.textContent?.trim() ?? "-";
+    expect(text).toBe(zoom === "fit" ? "Fit · 70%" : "100%");
+    expect(button?.getAttribute("aria-label")).toBe(`${text}, fit to canvas`);
+  }
+});

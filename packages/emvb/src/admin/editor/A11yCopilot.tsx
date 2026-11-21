@@ -28,7 +28,9 @@ export function A11yScoreButton({ report, onOpen }: { report: A11yReport; onOpen
           ? "Accessibility: no issues found"
           : `Accessibility: ${count} issue${count === 1 ? "" : "s"}`
       }
-      aria-label={`Accessibility score ${report.score} of 100, ${count} issue${count === 1 ? "" : "s"}`}
+      // W-1084: the name starts with the visible "A11y <score>" (WCAG 2.5.3, Label in Name), so a
+      // voice-control user can say what they see.
+      aria-label={`A11y ${report.score}: accessibility score of 100, ${count} issue${count === 1 ? "" : "s"}`}
       onClick={onOpen}
     >
       A11y <b>{report.score}</b>

@@ -34,8 +34,10 @@ describe("accessibility co-pilot UI (W-317)", () => {
     expect(button?.textContent).toBe(`A11y ${report.score}`);
     expect(button?.getAttribute("data-band")).toBe("good");
     expect(button?.getAttribute("aria-label")).toBe(
-      `Accessibility score ${report.score} of 100, 2 issues`,
+      `A11y ${report.score}: accessibility score of 100, 2 issues`,
     );
+    // W-1084: Label in Name (WCAG 2.5.3): the name starts with the visible text.
+    expect(button?.getAttribute("aria-label")?.startsWith(button?.textContent ?? "-")).toBe(true);
   });
 
   test("one fix, or every fix at once, is applied as an edit", async () => {

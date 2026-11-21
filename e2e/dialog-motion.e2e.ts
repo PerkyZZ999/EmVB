@@ -139,7 +139,7 @@ for (const preference of ["no-preference", "reduce"] as const) {
           action === "palette"
             ? "Keyboard shortcuts"
             : action === "accessibility"
-              ? /^Accessibility score/
+              ? /^A11y \d+: accessibility score/
               : action,
         exact: true,
       });

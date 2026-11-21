@@ -26,6 +26,10 @@ const ICONS: Record<EditorDevice, Icon> = {
   mobile: DeviceMobileIcon,
 };
 
+/** The zoom button's text: the fitted scale, or 100% (W-158). */
+const zoomText = (zoom: "fit" | "actual", scale: number) =>
+  zoom === "fit" ? `Fit · ${Math.round(scale * 100)}%` : "100%";
+
 /** The device's icon (decorative) and its name, which stays the tab's accessible name (W-127). */
 function DeviceLabel({ device }: { device: EditorDevice }) {
   const DeviceIcon = ICONS[device];
@@ -103,11 +107,12 @@ export function DeviceBar({
           size="sm"
           className="emvb-zoom"
           aria-pressed={zoom === "fit"}
-          aria-label={`Fit to canvas (${Math.round(scale * 100)}%)`}
+          // W-1084: the name starts with the visible text (WCAG 2.5.3, Label in Name).
+          aria-label={`${zoomText(zoom, scale)}, fit to canvas`}
           title={zoom === "fit" ? "Scaled to fit. Show at 100%" : "At 100%. Scale to fit"}
           onClick={() => onZoom(zoom === "fit" ? "actual" : "fit")}
         >
-          {zoom === "fit" ? `Fit · ${Math.round(scale * 100)}%` : "100%"}
+          {zoomText(zoom, scale)}
         </Button>
       )}
     </div>

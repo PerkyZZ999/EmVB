@@ -38,7 +38,7 @@ test("the Desktop canvas lays the page out at 1280 px and scales it to fit, with
   const scale = Number(await stage.getAttribute("data-emvb-canvas-scale"));
   expect(scale).toBeLessThan(1);
   near((await frame.boundingBox())?.width ?? 0, 1280 * scale);
-  const zoom = overlay(page).getByRole("button", { name: /^Fit to canvas/ });
+  const zoom = overlay(page).getByRole("button", { name: /fit to canvas$/ });
   await expect(zoom).toHaveText(`Fit · ${Math.round(scale * 100)}%`);
   await expect(zoom).toHaveAttribute("aria-pressed", "true");
 
