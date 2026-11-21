@@ -91,6 +91,17 @@ unless `loop: true`. Normal-only, off for reduced motion. It has no 0.x key.
 Added in 1.4 (W-1067, additive, design): a colour variable may have `dark` (a hex): the colour
 when the visitor's system prefers dark and no Theme toggle chose light, and when one chose dark.
 
+Added in 1.4 (W-1072, additive, design): a font variable may have `family` (letters, digits,
+spaces, `_`, `.`, `-`; at most 60), `faces` (up to 60 of `{ weight: 1–1000, style: "normal" |
+"italic", src, unicodeRange? }`) and `source` (`"upload"` or `"google"`, for the editor). A page
+whose CSS uses the variable gets one `@font-face` per face (`font-display: swap`, WOFF2), before
+its other rules; `src` must be a path on the site (`/…`, not `//host` or any other origin, so a
+page never asks Google or another host for a font) and pass the media URL check plus a strict
+character allowlist, the family is
+written as an escaped CSS string, and `unicodeRange` must read as a `U+…` list. Faces without a
+`family` are not emitted. EmVB's own font files are served from
+`/_emdash/api/plugins/emvb/font?id=<16 hex>`.
+
 Added in 1.4 (W-1070, additive): `motion.sticky` is `{ distance?, background?, shadow?, padding?,
 hide? }` (at least one of the last four) or `{ type: "none" }`. Over the page's first `distance` px
 (10–2000, unset 120) the element takes `background` (a colour), a `shadow` and `padding` (top and

@@ -47,6 +47,8 @@ import {
   type Length,
 } from "./variable-values.ts";
 import { isCancelEscape, isCommitEnter } from "../ime.ts";
+import type { Fetcher } from "../../api.ts";
+import { FontFaces } from "./FontFaces.tsx";
 
 const VAR_TOKEN: Record<VariableKind, (id: string) => string> = {
   color: (id) => `--emvb-c-${id}`,
@@ -283,6 +285,7 @@ export function VariableSection({
   layout,
   onSave,
   onAskDelete,
+  fetcher,
 }: {
   title: string;
   kind: VariableKind;
@@ -290,6 +293,8 @@ export function VariableSection({
   layout: Layout | null;
   onSave: (design: DesignSystem) => Promise<boolean | void>;
   onAskDelete: (id: string, name: string) => void;
+  /** W-1072: with a fetcher, a font variable can get its own font files. */
+  fetcher?: Fetcher;
 }) {
   const noun = useEditedNoun();
   const listKey = LIST_KEY[kind];
@@ -343,6 +348,16 @@ export function VariableSection({
           const { dark: _old, ...light } = entry;
           return dark === undefined ? light : { ...light, dark };
         }),
+      },
+    });
+
+  // W-1072: a font variable with its custom faces, family and source.
+  const saveFont = (next: NonNullable<DesignSystem["variables"]["fonts"]>[number]) =>
+    onSave({
+      ...design,
+      variables: {
+        ...design.variables,
+        fonts: (design.variables.fonts ?? []).map((entry) => (entry.id === next.id ? next : entry)),
       },
     });
 
@@ -576,6 +591,19 @@ export function VariableSection({
                     token={token}
                     onCommit={(next) => saveValue(item.id, next)}
                   />
+                  {kind === "font" && fetcher && (
+                    <FontFaces
+                      font={
+                        (design.variables.fonts ?? []).find((font) => font.id === item.id) ?? {
+                          id: item.id,
+                          name: item.name,
+                          value: String(item.value),
+                        }
+                      }
+                      fetcher={fetcher}
+                      onSave={saveFont}
+                    />
+                  )}
                   {kind === "color" && (
                     <DarkValue
                       key={`dark:${(item as { dark?: string }).dark ?? ""}`}

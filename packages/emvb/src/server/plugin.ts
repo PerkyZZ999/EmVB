@@ -25,6 +25,7 @@ import {
   savedSectionsRoute,
 } from "./saved-sections.ts";
 import { iconDeleteRoute, iconRenameRoute, iconUploadRoute, iconsRoute } from "./icon-routes.ts";
+import { fontGoogleRoute, fontRoute, fontUploadRoute } from "./font-routes.ts";
 import { beforeSave } from "./hooks.ts";
 import {
   agentsRoute,
@@ -80,6 +81,8 @@ export function createPlugin(
     storage: {
       design: { indexes: [] },
       icons: { indexes: ["uploadedAt"] },
+      // W-1072: custom font files (EmDash's media library refuses font/woff2).
+      fonts: { indexes: ["uploadedAt"] },
       // D-057: agent changes and the site styles history.
       agentlog: { indexes: ["at", "pageId"] },
       designhistory: { indexes: ["at"] },
@@ -155,6 +158,10 @@ export function createPlugin(
       "icons/upload": iconUploadRoute,
       "icons/rename": iconRenameRoute,
       "icons/delete": iconDeleteRoute,
+      // W-1072: custom fonts. `font` is public: pages load the files from it.
+      font: fontRoute,
+      "fonts/upload": fontUploadRoute,
+      "fonts/google": fontGoogleRoute,
       // W-463: the Agents tab (admins only).
       agents: agentsRoute,
       "agents/save": agentsSaveRoute,

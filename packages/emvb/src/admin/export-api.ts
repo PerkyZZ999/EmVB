@@ -6,7 +6,7 @@ import {
   type SiteExport,
 } from "../core/export/site.ts";
 import { zipFiles } from "../core/export/zip.ts";
-import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
+import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../constants.ts";
 import { listAllItems, type Fetcher } from "./api.ts";
 import { titleOf, type ContentItem } from "./content-item.ts";
 import { loadDesign } from "./editor/useEditorData.ts";
@@ -136,15 +136,21 @@ export async function loadExportData(
 
 const MEDIA_LIBRARY = "/_emdash/api/media/file/";
 
+/** W-1072: where EmVB serves its custom font files (public, content-addressed). */
+const FONT_ROUTE_PATH = `/_emdash/api/plugins/${PLUGIN_ID}/font`;
+
 /**
  * Media this site serves itself (same origin), which the export can copy. S-06 (W-996): nothing
- * under /_emdash/ but the media library's files, so an API answer can't end up in the zip.
+ * under /_emdash/ but the media library's files and EmVB's font files, so an API answer can't end
+ * up in the zip.
  */
 export function copyableMedia(urls: readonly string[], origin: string): string[] {
   return urls.filter((url) => {
     try {
       const parsed = new URL(url, origin);
       if (parsed.origin !== origin) return false;
+      // W-1072: EmVB's public font files are copied too (fetched without the session cookie).
+      if (parsed.pathname === FONT_ROUTE_PATH) return /^\?id=[0-9a-f]{16}$/.test(parsed.search);
       return !parsed.pathname.startsWith("/_emdash/") || parsed.pathname.startsWith(MEDIA_LIBRARY);
     } catch {
       return false;

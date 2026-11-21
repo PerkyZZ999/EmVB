@@ -1,5 +1,6 @@
 import { cssTypeName } from "../schema/layout.ts";
 import { MARK_CSS } from "../text-marks.ts";
+import { fontFaceCss } from "./font-face.ts";
 import { DEFAULT_FLUID_RANGE, fluidClamp } from "../design/tokens.ts";
 import type { FluidRange, LengthVariable } from "../schema/design.ts";
 import type { DesignSystem } from "../schema/design.ts";
@@ -437,6 +438,8 @@ export function generateCss({
   // W-952: list marker colour and size, and numbered steps, only on pages that use them, so
   // every page saved before them keeps the exact CSS it had.
   return [
+    // W-1072: the custom fonts this sheet uses, first; nothing for a design without them.
+    fontFaceCss(fonts, sheet),
     sheet,
     sheet.includes("--emvb-marker-") ? LIST_MARKER_CSS : "",
     listSteps ? LIST_STEPS_CSS : "",

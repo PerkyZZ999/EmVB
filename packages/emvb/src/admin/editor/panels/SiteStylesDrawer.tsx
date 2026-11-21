@@ -26,6 +26,7 @@ import {
   type VariableKind,
 } from "../../../core/index.ts";
 import { BUTTON, SOLID_DESTRUCTIVE } from "../../ui.ts";
+import type { Fetcher } from "../../api.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
 import { isCancelEscape } from "../ime.ts";
@@ -51,6 +52,8 @@ type Props = {
   /** W-252: called with what a delete removes, before the page loses its uses. */
   onDeleted?: (deletion: Deletion) => void;
   onClose: () => void;
+  /** W-1072: lets font variables upload or download their own font files. */
+  fetcher?: Fetcher;
 };
 
 function exportDesign(design: DesignSystem) {
@@ -77,6 +80,7 @@ export function SiteStylesDrawer({
   onLayoutChange,
   onDeleted,
   onClose,
+  fetcher,
 }: Props) {
   const [tab, setTab] = React.useState<"variables" | "classes" | "defaults">("variables");
   const [error, setError] = React.useState<string | null>(null);
@@ -299,6 +303,7 @@ export function SiteStylesDrawer({
             design={design}
             layout={layout}
             onSave={save}
+            {...(fetcher ? { fetcher } : {})}
             onAskDelete={(id, name) =>
               setConfirm({ kind: "variable", variableKind: "font", id, name })
             }

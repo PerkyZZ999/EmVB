@@ -216,6 +216,14 @@ const SRCSET = /\ssrcset="([^"]+)"/g;
 const CSS_URL = /url\(\s*(?:"([^"]+)"|'([^']+)'|([^)'"\s]+))\s*\)/g;
 const MEDIA_EXT = /\.(?:avif|webp|png|jpe?g|gif|svg|ico|mp4|webm|ogg|mp3|pdf|woff2?)$/i;
 
+/** W-1072: EmVB's own font files (`/_emdash/api/plugins/emvb/font?id=<16 hex>`), copied as media. */
+const FONT_ROUTE = /^\/_emdash\/api\/plugins\/emvb\/font\?id=([0-9a-f]{16})$/;
+
+/** The font id of an EmVB font route URL, or null. */
+function fontRouteId(url: string): string | null {
+  return FONT_ROUTE.exec(url)?.[1] ?? null;
+}
+
 /** S-06: the URL's path alone, so `?x=.png` can't make an API URL look like a media file. */
 function pathOf(url: string): string {
   try {
@@ -241,7 +249,8 @@ export function mediaUrls(html: string, css: string): string[] {
     if (!url || url.startsWith("#") || url.startsWith("data:")) return;
     if (/^(?:mailto|tel|javascript):/i.test(url)) return;
     const path = pathOf(url);
-    const isMediaPath = path.startsWith("/_emdash/api/media/") || MEDIA_EXT.test(path);
+    const isMediaPath =
+      path.startsWith("/_emdash/api/media/") || MEDIA_EXT.test(path) || fontRouteId(url) !== null;
     if (isMediaPath) found.add(url);
   };
   for (const m of html.matchAll(ATTR_URL)) add(unescapeAttr(m[1] ?? ""));
@@ -531,7 +540,10 @@ function reportMarkdown(report: ExportReport, date?: string): string {
 /** A file name for a copied media URL: its last path segment, made safe and unique. */
 export function mediaFileName(url: string, taken: Set<string>): string {
   const path = url.split(/[?#]/)[0] ?? "";
-  const last = decodeURIComponentSafe(path.split("/").pop() ?? "");
+  const fontId = fontRouteId(url);
+  const last = fontId
+    ? `font-${fontId}.woff2`
+    : decodeURIComponentSafe(path.split("/").pop() ?? "");
   const clean =
     last
       .replace(/[^A-Za-z0-9._-]+/g, "-")

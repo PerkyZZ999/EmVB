@@ -32,11 +32,45 @@ export const ColorVariable = z.strictObject({
   dark: z.string().regex(HEX_COLOR, "Use a hex color such as #1a2b3c").optional(),
 });
 
+/**
+ * W-1072: a family name a custom font is declared under. The same characters as a quoted name in
+ * a font stack (letters, digits, spaces, `_`, `.`, `-`), so it can never close a CSS string.
+ */
+export const FONT_FAMILY_NAME = /^[\p{L}\p{N}](?:[\p{L}\p{N} _.-]{0,58}[\p{L}\p{N}_.-])?$/u;
+
+/** W-1072: one `unicode-range` list, such as `U+0000-00FF, U+0131`. */
+export const UNICODE_RANGE =
+  /^U\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?(?:, ?U\+[0-9A-Fa-f?]{1,6}(?:-[0-9A-Fa-f]{1,6})?)*$/;
+
+/**
+ * W-1072: one file of a custom font (a WOFF2), emitted as an `@font-face` rule when a page uses
+ * the variable. `src` is a path on the site (EmVB's font route for uploads and Google fonts), so a
+ * page never asks another host for a font.
+ */
+const FontFace = z.strictObject({
+  weight: z.number().int().min(1).max(1000),
+  style: z.enum(["normal", "italic"]),
+  src: z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^\/(?!\/)/, "Use a font file on this site (a path starting with /)"),
+  unicodeRange: z.string().max(1000).regex(UNICODE_RANGE, "Use a unicode-range list").optional(),
+});
+
 /** Font stack string — commas and quoted family names allowed; `generateCss` drops an unsafe one. */
 export const FontVariable = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
   value: z.string().min(1).max(200),
+  /**
+   * W-1072: the family the custom `faces` are declared under; `value` names it first. Both or
+   * neither: faces without a family are not emitted.
+   */
+  family: z.string().regex(FONT_FAMILY_NAME, "Use letters, digits, spaces, _ . or -").optional(),
+  faces: boundedArray(FontFace, 60).optional(),
+  /** W-1072: where the faces came from, for the editor. Unset: uploaded files. */
+  source: z.enum(["upload", "google"]).optional(),
 });
 
 /**
@@ -111,6 +145,7 @@ export const DesignSystem = z.strictObject({
 
 export type ColorVariable = z.infer<typeof ColorVariable>;
 export type FontVariable = z.infer<typeof FontVariable>;
+export type FontFace = z.infer<typeof FontFace>;
 export type LengthVariable = z.infer<typeof LengthVariable>;
 export type DesignSystem = z.infer<typeof DesignSystem>;
 

@@ -146,9 +146,35 @@ export {
   ColorVariable,
   emptyDesign,
   FontVariable,
+  FONT_FAMILY_NAME,
   LengthVariable,
   type DefaultStyleTag,
+  type FontFace,
 } from "./schema/design.ts";
+export { fontFaceRules } from "./css/font-face.ts";
+export {
+  base64ToBytes,
+  bytesToBase64,
+  FONT_FILE_LIMIT,
+  FONT_ID,
+  FONT_MAX_BYTES,
+  fontFileId,
+  fontFileProblem,
+  fontFileUrl,
+} from "./fonts/files.ts";
+export {
+  DEFAULT_GOOGLE_SUBSETS,
+  GOOGLE_CSS_HOST,
+  GOOGLE_FAMILY,
+  GOOGLE_FILE_HOST,
+  GOOGLE_FILES_PER_FACE,
+  GOOGLE_SUBSET,
+  GOOGLE_USER_AGENT,
+  GOOGLE_WEIGHTS,
+  googleCssUrl,
+  parseGoogleFontCss,
+  pickGoogleFaces,
+} from "./fonts/google.ts";
 export {
   MAX_VARIABLES,
   variableListFull,

@@ -82,6 +82,7 @@ export function SettingsPanel({
             })
           }
           onClose={onCloseSiteStyles}
+          fetcher={fetcher}
         />
       ) : selectedNode ? (
         <ElementPanel

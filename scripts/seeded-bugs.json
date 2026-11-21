@@ -52412,6 +52412,596 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/mega-menu.test.ts"],
       "expect": "\\(fail\\).*loads no menu script"
+    },
+    {
+      "id": "W-1072/no-font-face",
+      "requirement": "W-1072",
+      "description": "Pages get no @font-face rules for custom fonts.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    fontFaceCss(fonts, sheet),\n",
+          "replace": "    \"\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "a used font variable emits its faces"
+      ],
+      "expect": "\\(fail\\).*a used font variable emits its faces"
+    },
+    {
+      "id": "W-1072/unused-fonts-sent",
+      "requirement": "W-1072",
+      "description": "Every font variable's faces are sent, used or not.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/font-face.ts",
+          "search": "    if (!sheet.includes(`var(${name})`) && !sheet.includes(`var(${name},`)) return [];\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "an unused font variable sends no font"
+      ],
+      "expect": "\\(fail\\).*an unused font variable sends no font"
+    },
+    {
+      "id": "W-1072/font-face-scoped",
+      "requirement": "W-1072",
+      "description": "The scoping pass prefixes @font-face like a style rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "    } else if (prelude.startsWith(\"@\")) {",
+          "replace": "    } else if (prelude.startsWith(\"@keyframes\")) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "keeps the @font-face rule unprefixed"
+      ],
+      "expect": "\\(fail\\).*keeps the @font\\-face rule unprefixed"
+    },
+    {
+      "id": "W-1072/family-quote-unescaped",
+      "requirement": "W-1072",
+      "description": "A double quote in a family name is written as is.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/font-face.ts",
+          "search": "/^[\\p{L}\\p{N} _.-]$/u.test(ch)",
+          "replace": "/^[\\p{L}\\p{N} _.\"{}:;-]$/u.test(ch)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "family names are quoted"
+      ],
+      "expect": "\\(fail\\).*family names are quoted"
+    },
+    {
+      "id": "W-1072/src-unchecked",
+      "requirement": "W-1072",
+      "description": "Font file URLs skip the character allowlist.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/font-face.ts",
+          "search": "  return SRC_CHARS.test(url) ? url : undefined;",
+          "replace": "  return url;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "an unsafe family, URL or range is never written"
+      ],
+      "expect": "\\(fail\\).*an unsafe family, URL or range is never written"
+    },
+    {
+      "id": "W-1072/schema-family-any",
+      "requirement": "W-1072",
+      "description": "The design schema takes any family name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "  family: z.string().regex(FONT_FAMILY_NAME, \"Use letters, digits, spaces, _ . or -\").optional(),",
+          "replace": "  family: z.string().optional(),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "the design schema takes faces additively"
+      ],
+      "expect": "\\(fail\\).*the design schema takes faces additively"
+    },
+    {
+      "id": "W-1072/woff2-length-unchecked",
+      "requirement": "W-1072",
+      "description": "A truncated WOFF2 passes the header check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/files.ts",
+          "search": "    view.getUint32(8) === bytes.byteLength",
+          "replace": "    view.getUint32(8) > 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "only a real WOFF2 header passes"
+      ],
+      "expect": "\\(fail\\).*only a real WOFF2 header passes"
+    },
+    {
+      "id": "W-1072/size-cap-doubled",
+      "requirement": "W-1072",
+      "description": "The size cap lets fonts up to 2 MB through.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/files.ts",
+          "search": "  if (bytes.byteLength > FONT_MAX_BYTES) {",
+          "replace": "  if (bytes.byteLength > FONT_MAX_BYTES * 2) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "the size cap refuses a larger file"
+      ],
+      "expect": "\\(fail\\).*the size cap refuses a larger file"
+    },
+    {
+      "id": "W-1072/base64-drops-bytes",
+      "requirement": "W-1072",
+      "description": "Base64 encoding loses the last byte of every chunk.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/files.ts",
+          "search": "String.fromCharCode(...bytes.subarray(i, i + CHUNK))",
+          "replace": "String.fromCharCode(...bytes.subarray(i, i + CHUNK - 1))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "ids are content hashes and base64 round-trips"
+      ],
+      "expect": "\\(fail\\).*ids are content hashes and base64 round\\-trips"
+    },
+    {
+      "id": "W-1072/italic-url-normal",
+      "requirement": "W-1072",
+      "description": "Italic imports ask Google for the upright style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/google.ts",
+          "search": "`ital,wght@1,${weight}`",
+          "replace": "`ital,wght@0,${weight}`"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "the CSS API URL asks for one family"
+      ],
+      "expect": "\\(fail\\).*the CSS API URL asks for one family"
+    },
+    {
+      "id": "W-1072/subsets-ignored",
+      "requirement": "W-1072",
+      "description": "Every subset Google lists is downloaded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/google.ts",
+          "search": "(face.subset === undefined || wanted.subsets.includes(face.subset))",
+          "replace": "true"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "picked by subset"
+      ],
+      "expect": "\\(fail\\).*picked by subset"
+    },
+    {
+      "id": "W-1072/any-host",
+      "requirement": "W-1072",
+      "description": "Font files on any HTTPS host are accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/fonts/google.ts",
+          "search": "  if (url.protocol !== \"https:\" || url.hostname !== GOOGLE_FILE_HOST) return undefined;",
+          "replace": "  if (url.protocol !== \"https:\") return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/fonts/fonts.test.ts",
+        "-t",
+        "a file on any other host"
+      ],
+      "expect": "\\(fail\\).*a file on any other host"
+    },
+    {
+      "id": "W-1072/short-cache",
+      "requirement": "W-1072",
+      "description": "The font route is cached for a minute only.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "  cacheControl: \"public, max-age=31536000, immutable\",",
+          "replace": "  cacheControl: \"public, max-age=60\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "an editor uploads a WOFF2; anyone loads it"
+      ],
+      "expect": "\\(fail\\).*an editor uploads a WOFF2; anyone loads it"
+    },
+    {
+      "id": "W-1072/upload-unchecked",
+      "requirement": "W-1072",
+      "description": "The server stores any upload without checking it is WOFF2.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "  if (problem) throw new PluginRouteError(\"INVALID_FONT\", problem, 422);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "a font up to the size cap is stored"
+      ],
+      "expect": "\\(fail\\).*a font up to the size cap is stored"
+    },
+    {
+      "id": "W-1072/upload-public",
+      "requirement": "W-1072",
+      "description": "Anyone may upload fonts.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "  permission: \"content:edit_any\",\n  input: UploadInput,",
+          "replace": "  public: true,\n  input: UploadInput,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "uploads need an editor"
+      ],
+      "expect": "\\(fail\\).*uploads need an editor"
+    },
+    {
+      "id": "W-1072/google-urls-public",
+      "requirement": "W-1072",
+      "description": "Imported Google faces point at fonts.gstatic.com.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "      src = await downloadGoogleFile(deps, face.url, name);",
+          "replace": "      await downloadGoogleFile(deps, face.url, name);\n      src = face.url;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "the server fetches only Google's hosts"
+      ],
+      "expect": "\\(fail\\).*the server fetches only Google's hosts"
+    },
+    {
+      "id": "W-1072/redirect-read",
+      "requirement": "W-1072",
+      "description": "A redirect answer is read as the font file.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "  if (response.status !== 200) {\n    await response.body?.cancel();\n    throw new PluginRouteError(\"GOOGLE_FONTS\", \"Google Fonts didn't send a font file.\", 502);",
+          "replace": "  if (response.status >= 400) {\n    await response.body?.cancel();\n    throw new PluginRouteError(\"GOOGLE_FONTS\", \"Google Fonts didn't send a font file.\", 502);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "a redirect, an oversized or non-WOFF2 file"
+      ],
+      "expect": "\\(fail\\).*a redirect, an oversized or non\\-WOFF2 file"
+    },
+    {
+      "id": "W-1072/files-per-face-uncapped",
+      "requirement": "W-1072",
+      "description": "A family split into many files per weight is downloaded anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "  if (picked.length > GOOGLE_FILES_PER_FACE) {",
+          "replace": "  if (picked.length > GOOGLE_FILES_PER_FACE + 1) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/font-routes.test.ts",
+        "-t",
+        "an unknown family says so"
+      ],
+      "expect": "\\(fail\\).*an unknown family says so"
+    },
+    {
+      "id": "W-1072/upload-face-dropped",
+      "requirement": "W-1072",
+      "description": "An upload replaces every face with two copies of the new one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/FontFaces.tsx",
+          "search": "faces: mergeFaces(sameFamily ? faces : [], [face]),",
+          "replace": "faces: [face, face],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/font-faces.test.tsx",
+        "-t",
+        "uploading a WOFF2 names the family first"
+      ],
+      "expect": "\\(fail\\).*uploading a WOFF2 names the family first"
+    },
+    {
+      "id": "W-1072/browser-check-skipped",
+      "requirement": "W-1072",
+      "description": "The browser sends a file that isn't WOFF2.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/font-files-api.ts",
+          "search": "  if (problem) throw new Error(problem);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/font-faces.test.tsx",
+        "-t",
+        "a file that isn't WOFF2 is refused in the browser"
+      ],
+      "expect": "\\(fail\\).*a file that isn't WOFF2 is refused in the browser"
+    },
+    {
+      "id": "W-1072/latin-not-sent",
+      "requirement": "W-1072",
+      "description": "Google imports don't ask for the Latin subset.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/FontFaces.tsx",
+          "search": "subsets: [\"latin\", ...subsets],",
+          "replace": "subsets,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/font-faces.test.tsx",
+        "-t",
+        "a Google font is downloaded one weight and style at a time"
+      ],
+      "expect": "\\(fail\\).*a Google font is downloaded one weight and style at a time"
+    },
+    {
+      "id": "W-1072/empty-faces-kept",
+      "requirement": "W-1072",
+      "description": "Removing the last face keeps an empty custom font.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/FontFaces.tsx",
+          "search": "left.length > 0 ? { ...font, faces: left } : plain,",
+          "replace": "{ ...font, faces: left },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/font-faces.test.tsx",
+        "-t",
+        "removing the last face leaves a plain font stack"
+      ],
+      "expect": "\\(fail\\).*removing the last face leaves a plain font stack"
+    },
+    {
+      "id": "W-1072/family-twice",
+      "requirement": "W-1072",
+      "description": "The family is put first in the stack again and again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/FontFaces.tsx",
+          "search": "  if (firstFamily(stack) === family) return stack;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/font-faces.test.tsx",
+        "-t",
+        "the family goes first in the stack once"
+      ],
+      "expect": "\\(fail\\).*the family goes first in the stack once"
+    },
+    {
+      "id": "W-1072/no-font-face-e2e",
+      "requirement": "W-1072",
+      "description": "Public pages and the canvas get no @font-face rules.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    fontFaceCss(fonts, sheet),\n",
+          "replace": "    \"\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/custom-fonts.e2e.ts",
+        "--project=node",
+        "-g",
+        "uploaded WOFF2 font shows on the canvas"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1072/wrong-type-e2e",
+      "requirement": "W-1072",
+      "description": "The font route serves fonts as application/octet-stream.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/font-routes.ts",
+          "search": "      headers: { \"content-type\": \"font/woff2\", etag: `\"${id}\"` },",
+          "replace": "      headers: { \"content-type\": \"application/octet-stream\", etag: `\"${id}\"` },"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/custom-fonts.e2e.ts",
+        "--project=node",
+        "-g",
+        "round-trips through storage"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1072/third-party-src",
+      "requirement": "W-1072",
+      "description": "Font faces on another host (fonts.gstatic.com) are written into pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/font-face.ts",
+          "search": "  if (!url?.startsWith(\"/\") || url.startsWith(\"//\")) return undefined;\n",
+          "replace": "  if (!url) return undefined;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "a font on another host is never written"
+      ],
+      "expect": "\\(fail\\).*a font on another host is never written"
+    },
+    {
+      "id": "W-1072/schema-src-any",
+      "requirement": "W-1072",
+      "description": "The design schema accepts a font file on any host.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "    .regex(/^\\/(?!\\/)/, \"Use a font file on this site (a path starting with /)\"),\n",
+          "replace": "    .min(1),\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/font-face.test.ts",
+        "-t",
+        "the design schema takes faces additively"
+      ],
+      "expect": "\\(fail\\).*the design schema takes faces additively"
+    },
+    {
+      "id": "W-1072/export-font-skipped",
+      "requirement": "W-1072",
+      "description": "The HTML export leaves EmVB's font files behind.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "      if (parsed.pathname === FONT_ROUTE_PATH) return /^\\?id=[0-9a-f]{16}$/.test(parsed.search);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/export-api.test.ts",
+        "-t",
+        "EmVB's own font files are copied"
+      ],
+      "expect": "\\(fail\\).*EmVB's own font files are copied"
+    },
+    {
+      "id": "W-1072/export-font-unnamed",
+      "requirement": "W-1072",
+      "description": "Copied font files are saved as `font` with no extension.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "    ? `font-${fontId}.woff2`\n",
+          "replace": "    ? \"font\"\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/export/site.test.ts",
+        "-t",
+        "custom font files are export media"
+      ],
+      "expect": "\\(fail\\).*custom font files are export media"
     }
   ]
 }

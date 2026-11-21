@@ -45,7 +45,8 @@ Links between pages keep the paths they had on your site, so host the folders at
 or update the links.
 
 **Copy images and files** copies images, video, posters and CSS backgrounds (media-library files
-and image, video, audio, font or PDF files your site serves). Links, including links to a PDF,
+and image, video, audio, font or PDF files your site serves, including EmVB's custom font files
+since 1.4). Links, including links to a PDF,
 stay links to the live site (since 1.1.2).
 
 Entries in your own collections that have an EmVB layout export the same way (since 1.1):

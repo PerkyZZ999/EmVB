@@ -48,6 +48,11 @@ export const DOC_GROUPS: DocGroup[] = [
         summary: "About 15,000 open-source icons, plus your own uploads.",
       },
       {
+        slug: "custom-fonts",
+        title: "Custom fonts",
+        summary: "Your own WOFF2 files and Google fonts, served from your site.",
+      },
+      {
         slug: "image-editor",
         title: "Image editor",
         summary: "Crop, adjust, filter and save copies of library pictures.",

@@ -180,4 +180,12 @@ export const FEATURE_CSS = `
 .emvb-codesign-ask-form { display: grid; gap: 6px; }
 .emvb-codesign-ask-form .emvb-helper { margin: 0; }
 .emvb-codesign-preview { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 12px 0; padding: 8px 8px 8px 12px; border: 1px solid var(--color-kumo-line); border-radius: 10px; background: var(--color-kumo-tint); font-size: 13px; line-height: 18px; }
+/* W-1072: a font variable's own files (Site styles, Fonts). */
+.emvb-font-faces .emvb-bind-label { margin: 4px 0 0; }
+.emvb-font-face-list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.emvb-font-face-list > li { display: flex; align-items: center; gap: 6px; min-height: 28px; font-size: 13px; }
+.emvb-font-face-list > li > span:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-font-face-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.emvb-font-weights { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 0; border: 0; font-size: 12px; }
+.emvb-font-weights > legend { width: 100%; padding: 0; margin-bottom: 2px; }
 `;

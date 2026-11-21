@@ -215,6 +215,17 @@ test("copied media go in media/ and pages point there (W-963)", () => {
   );
 });
 
+test("W-1072: custom font files are export media, saved as .woff2", () => {
+  const font = "/_emdash/api/plugins/emvb/font?id=0123456789abcdef";
+  expect(
+    mediaUrls(
+      "",
+      `@font-face{font-family:"B";src:url("${font}") format("woff2")}.x{background:url(/_emdash/api/plugins/emvb/agents?.woff2)}`,
+    ),
+  ).toEqual([font]);
+  expect(mediaFileName(font, new Set())).toBe("font-0123456789abcdef.woff2");
+});
+
 test("media file names are safe and unique", () => {
   const taken = new Set<string>();
   expect(mediaFileName("/m/photo.jpg", taken)).toBe("photo.jpg");

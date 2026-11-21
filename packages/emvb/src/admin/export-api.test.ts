@@ -109,6 +109,20 @@ test("only this site's own media are copied", () => {
   ).toEqual(["/_emdash/api/media/file/a.png"]);
 });
 
+test("W-1072: EmVB's own font files are copied; other plugin routes are not", () => {
+  expect(
+    copyableMedia(
+      [
+        "/_emdash/api/plugins/emvb/font?id=0123456789abcdef",
+        "/_emdash/api/plugins/emvb/font?id=0123456789abcdef&x=1",
+        "/_emdash/api/plugins/emvb/fonts/upload",
+        "/_emdash/api/plugins/emvb/agents",
+      ],
+      "https://site.test",
+    ),
+  ).toEqual(["/_emdash/api/plugins/emvb/font?id=0123456789abcdef"]);
+});
+
 test("S-06 (W-996): a response that isn't media is not written into the zip", async () => {
   const result = await exportSite(fakeSite, {
     copyMedia: true,
