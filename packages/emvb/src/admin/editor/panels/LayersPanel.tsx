@@ -1,4 +1,4 @@
-import { CaretDownIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CaretRightIcon, DotsThreeIcon, ProhibitIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   firstChild,
@@ -21,6 +21,7 @@ import { ELEMENT_NAMES, elementIcon } from "../element-chrome.ts";
 import { editorCommands } from "../editor-commands.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
 import { StateDot } from "./settings/StateSwitcher.tsx";
+import { useLayersDrop, type LayersDropCallbacks } from "./use-layers-drop.ts";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 
 /**
@@ -199,11 +200,14 @@ export function layerPreview(node: LayoutNode): string | undefined {
 export function LayersPanel({
   layout,
   selectedId,
+  onDropNew,
+  onMoveTo,
   ...actions
 }: {
   layout: Layout | null;
   selectedId: string | null;
-} & LayerActions) {
+} & LayerActions &
+  LayersDropCallbacks) {
   const [collapsed, setCollapsed] = React.useState<Set<string>>(() => new Set());
   const [menuId, setMenuId] = React.useState<string | null>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
@@ -230,6 +234,29 @@ export function LayersPanel({
     [],
   );
   const toggle = React.useMemo(() => toggleIn(setCollapsed), []);
+  const expand = React.useCallback(
+    (id: string) =>
+      setCollapsed((current) => {
+        if (!current.has(id)) return current;
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      }),
+    [],
+  );
+  const items = layout ? rows(layout.root, 0, collapsed) : [];
+  const drag = useLayersDrop(
+    {
+      layout,
+      depths: new Map(items.map((row) => [row.node.id, row.depth])),
+      collapsed,
+      expand,
+      onDropNew,
+      onMoveTo,
+    },
+    layerIndent,
+    listRef,
+  );
 
   // W-612: an open row menu closes when a press lands outside it, focus leaves the panel's
   // window (a click in the canvas frame), or focus moves out of it (Tab).
@@ -279,11 +306,10 @@ export function LayersPanel({
   }, [selectedId]);
 
   if (!layout) return <p className="emvb-helper">This page is empty.</p>;
-
-  const items = rows(layout.root, 0, collapsed);
+  const shown = drag.shown;
 
   return (
-    <div className="emvb-panel-body" data-emvb-panel="layers">
+    <div className="emvb-panel-body emvb-layers-body" data-emvb-panel="layers" {...drag.handlers}>
       <ul
         ref={listRef}
         className="emvb-layers"
@@ -315,9 +341,29 @@ export function LayersPanel({
             actions={rowActions}
             hasClipboard={!!actions.clipboard}
             clip={menuId === node.id ? actions.clipboard : undefined}
+            dropMark={shown?.mark?.id === node.id ? shown.mark.kind : undefined}
           />
         ))}
       </ul>
+      {shown?.line && (
+        <div
+          className="emvb-layer-drop-line"
+          data-emvb-layer-drop-line=""
+          aria-hidden="true"
+          style={{ top: shown.line.top, insetInlineStart: shown.line.start }}
+        />
+      )}
+      {shown?.refusal && (
+        <div
+          className="emvb-invalid-label emvb-layer-drop-refusal"
+          data-emvb-layer-drop-refusal=""
+          aria-hidden="true"
+          style={{ top: shown.refusal.top, insetInlineStart: shown.refusal.start }}
+        >
+          <ProhibitIcon size={14} aria-hidden="true" />
+          <span>{shown.refusal.reason}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -344,6 +390,7 @@ const LayerRow = React.memo(function LayerRow({
   actions,
   hasClipboard,
   clip,
+  dropMark,
 }: {
   node: LayoutNode;
   depth: number;
@@ -358,6 +405,8 @@ const LayerRow = React.memo(function LayerRow({
   hasClipboard: boolean;
   /** The clipboard, passed only to the row whose menu is open so the other rows stay memoized. */
   clip: ClipboardActions | undefined;
+  /** W-1080: outlined as the drop's container, or as a refused drop. */
+  dropMark?: "inside" | "invalid";
 }) {
   const onToggle = () => toggleRow(node.id);
   const onMenu = (open: boolean) => menuRow(node.id, open);
@@ -446,7 +495,8 @@ const LayerRow = React.memo(function LayerRow({
       <div
         className="emvb-layer-row"
         data-emvb-layer={node.id}
-        style={{ paddingLeft: layerIndent(depth) }}
+        data-emvb-drop={dropMark}
+        style={{ paddingInlineStart: layerIndent(depth) }}
         onClick={() => actions.onSelect(node.id)}
       >
         {hasChildren ? (

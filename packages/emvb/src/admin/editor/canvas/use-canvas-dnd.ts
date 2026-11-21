@@ -13,16 +13,13 @@ import {
   dropContainer,
   dropIndex,
   edgeDrop,
-  EXISTING_ELEMENT_MIME,
   flowDirection,
   idAt,
-  NEW_ELEMENT_MIME,
   transferKinds,
   type Direction,
   type Rect,
 } from "../dnd/drop-target.ts";
-import { dragStash } from "../dnd/drag-stash.ts";
-import { newElement } from "../dnd/new-element.ts";
+import { draggedSource } from "../dnd/dragged-source.ts";
 import { useCanvasEvents } from "./canvas-events.ts";
 import { dropLineBox } from "./drop-line.ts";
 import type { Box, DropTarget, InvalidDrop } from "./SelectionOverlay.tsx";
@@ -59,22 +56,6 @@ const rectOf = (doc: Document, id: string): Rect | null => {
   const box = boxOf(doc, id);
   return box ? { top: box.top, left: box.left, width: box.width, height: box.height } : null;
 };
-
-/** What is being dragged over the canvas, or null while the browser still hides it. */
-function draggedSource(transfer: DataTransfer | null, existing: boolean): DragSource | null {
-  if (existing) {
-    // Chromium may omit getData until drop, so the session stash wins during dragover.
-    const id =
-      dragStash.id() ??
-      (transfer?.getData(EXISTING_ELEMENT_MIME) ||
-        (transfer as DataTransfer & { emvbId?: string }).emvbId ||
-        "");
-    return id ? { kind: "existing", id } : null;
-  }
-  const type = transfer?.getData(NEW_ELEMENT_MIME) || dragStash.type() || "";
-  const node = type ? newElement(type) : null;
-  return node ? { kind: "new", node } : null;
-}
 
 /** Drop line, invalid outline and the canvas drag listeners. */
 export function useCanvasDnD({

@@ -13,7 +13,7 @@ import {
   type LayoutNode,
 } from "../../core/index.ts";
 import { container, heading } from "../../../test/fixtures/layouts.ts";
-import type { EditorAction, EditorState } from "./store.ts";
+import { emptyHistory, historyReducer, type EditorAction, type EditorState } from "./store.ts";
 import { useNodeActions } from "./useNodeActions.ts";
 import { cleanup, mount as mountTree } from "../../../test/dom/mount.ts";
 
@@ -185,5 +185,51 @@ describe("useNodeActions add a Heading from the panel (W-946)", () => {
     });
     act(() => api.addFromPanel("heading"));
     expect(addedLevel(actions)).toBe(2);
+  });
+});
+
+describe("useNodeActions Layers drop (W-1080)", () => {
+  const nested: Layout = {
+    schemaVersion: 18,
+    root: container("root0001", [
+      heading("head0001", "A"),
+      container("box00001", [heading("head0002", "B")]),
+    ]) as Layout["root"],
+  };
+  const start = { ...state, page: { ...state.page, layout: nested } };
+
+  test("a move runs the canvas move, says where it landed, and undoes in one step", async () => {
+    const { api, actions, announced } = await mount(start);
+    act(() => api.layersDrop.move("head0001", "box00001", 1));
+    expect(actions).toEqual([
+      { type: "move-node", id: "head0001", parentId: "box00001", index: 1 },
+    ]);
+    expect(announced).toEqual(["Moved. Heading is 2 of 2 in Container."]);
+    const after = historyReducer(emptyHistory(start), actions[0] as EditorAction);
+    expect(after.present.selectedId).toBe("head0001");
+    expect(after.past.length).toBe(1);
+    const undone = historyReducer(after, { type: "undo" });
+    expect(undone.present.page.layout === nested).toBe(true);
+  });
+
+  test("a refused move is announced and dispatches nothing; a drop on its own spot is no edit", async () => {
+    const { api, actions, announced } = await mount(start);
+    act(() => api.layersDrop.move("box00001", "box00001", 0));
+    expect(announced).toEqual([REASONS.intoItself]);
+    act(() => api.layersDrop.move("head0001", "root0001", 1));
+    expect(actions).toEqual([]);
+    expect(announced.length).toBe(1);
+  });
+
+  test("an Add tile dropped on Layers is added and announced with its container", async () => {
+    const { api, actions, announced } = await mount(start);
+    act(() => api.layersDrop.add("heading", "root0001", 1));
+    const added = actions[0];
+    if (added?.type !== "add-node") throw new Error("expected add-node");
+    expect([added.node.type, added.parentId, added.index]).toEqual(["heading", "root0001", 1]);
+    expect(announced).toEqual(["Heading added inside Page"]);
+    act(() => api.layersDrop.add("accordion-item", "box00001", 0));
+    expect(actions.length).toBe(1);
+    expect(announced.at(-1)).toBe(REASONS.itemOutsideAccordion);
   });
 });

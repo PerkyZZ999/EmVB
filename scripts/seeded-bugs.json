@@ -36389,8 +36389,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "        style={{ paddingLeft: layerIndent(depth) }}",
-          "replace": "        style={{ paddingLeft: 8 + depth * 12 }}"
+          "search": "        style={{ paddingInlineStart: layerIndent(depth) }}",
+          "replace": "        style={{ paddingInlineStart: 8 + depth * 12 }}"
         }
       ],
       "command": [
@@ -53245,6 +53245,581 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1080/zones",
+      "requirement": "W-1080",
+      "description": "A container row drops before/after anywhere, never inside.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "  return part < 0.25 ? \"before\" : part > 0.75 ? \"after\" : \"inside\";",
+          "replace": "  return part < 0.5 ? \"before\" : \"after\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "splits in quarters"
+      ],
+      "expect": "\\(fail\\).*splits in quarters"
+    },
+    {
+      "id": "W-1080/depth-x",
+      "requirement": "W-1080",
+      "description": "The pointer has to be past an indent by a pixel to count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "x >= indent(depth + 1)",
+          "replace": "x > indent(depth + 1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "pointer's x picks"
+      ],
+      "expect": "\\(fail\\).*pointer's x picks"
+    },
+    {
+      "id": "W-1080/before-index",
+      "requirement": "W-1080",
+      "description": "A drop before a row lands after it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "{ parentId: at.parent.id, index: at.index, depth: row.depth, edge: \"top\" }",
+          "replace": "{ parentId: at.parent.id, index: at.index + 1, depth: row.depth, edge: \"top\" }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "before and after a row"
+      ],
+      "expect": "\\(fail\\).*before and after a row"
+    },
+    {
+      "id": "W-1080/inside-first",
+      "requirement": "W-1080",
+      "description": "A drop inside a container goes first instead of last.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "return { parentId: node.id, index: node.children.length, depth: row.depth + 1, edge: null };",
+          "replace": "return { parentId: node.id, index: 0, depth: row.depth + 1, edge: null };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "inside a container appends"
+      ],
+      "expect": "\\(fail\\).*inside a container appends"
+    },
+    {
+      "id": "W-1080/after-open",
+      "requirement": "W-1080",
+      "description": "After an open container goes after it, not first inside.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "  if (row.open && isParentNode(node) && node.children.length > 0) {",
+          "replace": "  if (false && row.open && isParentNode(node) && node.children.length > 0) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "after an open container"
+      ],
+      "expect": "\\(fail\\).*after an open container"
+    },
+    {
+      "id": "W-1080/outdent-any",
+      "requirement": "W-1080",
+      "description": "Moving left climbs out of a container from any child, not only the last.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "while (at && outdent > 0 && at.index === at.parent.children.length - 1) {",
+          "replace": "while (at && outdent > 0) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "after a last child"
+      ],
+      "expect": "\\(fail\\).*after a last child"
+    },
+    {
+      "id": "W-1080/into-itself",
+      "requirement": "W-1080",
+      "description": "Moves skip the canDrop check, so a container goes into itself.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "  if (!source) return { ok: true, place };",
+          "replace": "  if (!source || source.kind === \"existing\") return { ok: true, place };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "can't go into itself"
+      ],
+      "expect": "\\(fail\\).*can't go into itself"
+    },
+    {
+      "id": "W-1080/parent-refuses",
+      "requirement": "W-1080",
+      "description": "New elements skip the canDrop check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "  if (!source) return { ok: true, place };",
+          "replace": "  if (!source || source.kind === \"new\") return { ok: true, place };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "parent that refuses the child"
+      ],
+      "expect": "\\(fail\\).*parent that refuses the child"
+    },
+    {
+      "id": "W-1080/unknown-source",
+      "requirement": "W-1080",
+      "description": "An unknown source is refused instead of allowed provisionally.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "  if (!source) return { ok: true, place };",
+          "replace": "  if (!source) return { ok: false, reason: \"unknown\", place };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "unknown source is allowed"
+      ],
+      "expect": "\\(fail\\).*unknown source is allowed"
+    },
+    {
+      "id": "W-1080/scroll-clamp",
+      "requirement": "W-1080",
+      "description": "Auto-scroll speed has no cap past the edge.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/layer-drop.ts",
+          "search": "Math.ceil(max * Math.min(1, into / edge))",
+          "replace": "Math.ceil(max * (into / edge))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/layer-drop.test.ts",
+        "-t",
+        "scrolls up near the top"
+      ],
+      "expect": "\\(fail\\).*scrolls up near the top"
+    },
+    {
+      "id": "W-1080/no-line",
+      "requirement": "W-1080",
+      "description": "Layers never draws the drop line.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "      {shown?.line && (",
+          "replace": "      {false && shown?.line && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "between two rows draws the line"
+      ],
+      "expect": "\\(fail\\).*between two rows draws the line"
+    },
+    {
+      "id": "W-1080/no-inside-mark",
+      "requirement": "W-1080",
+      "description": "A drop inside a container no longer outlines its row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "      mark: place.edge === null ? { id: place.parentId, kind: \"inside\" } : null,",
+          "replace": "      mark: null,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "middle of a container row"
+      ],
+      "expect": "\\(fail\\).*middle of a container row"
+    },
+    {
+      "id": "W-1080/refused-effect",
+      "requirement": "W-1080",
+      "description": "A refused drop still shows the move cursor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "      event.dataTransfer.dropEffect = \"none\";",
+          "replace": "      event.dataTransfer.dropEffect = \"move\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "over its own child is refused"
+      ],
+      "expect": "\\(fail\\).*over its own child is refused"
+    },
+    {
+      "id": "W-1080/refused-drops",
+      "requirement": "W-1080",
+      "description": "A refused drop still runs the move.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "    if (!found.drop.ok) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "over its own child is refused"
+      ],
+      "expect": "\\(fail\\).*over its own child is refused"
+    },
+    {
+      "id": "W-1080/no-clear",
+      "requirement": "W-1080",
+      "description": "Entering something outside Layers keeps the stale drop line.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "      if (!(event.target instanceof Node) || !panel?.contains(event.target)) clear();",
+          "replace": "      if (!(event.target instanceof Node)) clear();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "leaving the list clears"
+      ],
+      "expect": "\\(fail\\).*leaving the list clears"
+    },
+    {
+      "id": "W-1080/no-expand",
+      "requirement": "W-1080",
+      "description": "A collapsed row never opens during a drag.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "            latest.current.expand(id);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "collapsed container opens"
+      ],
+      "expect": "\\(fail\\).*collapsed container opens"
+    },
+    {
+      "id": "W-1080/always-enabled",
+      "requirement": "W-1080",
+      "description": "Layers takes drops without drop callbacks.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "  const enabled = !!(live.onDropNew || live.onMoveTo);",
+          "replace": "  const enabled = true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "without drop callbacks"
+      ],
+      "expect": "\\(fail\\).*without drop callbacks"
+    },
+    {
+      "id": "W-1080/no-spring",
+      "requirement": "W-1080",
+      "description": "Hovering the Layers tab during a drag never opens Layers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "      changeTab(\"layers\");\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "hovering the tab switches"
+      ],
+      "expect": "\\(fail\\).*hovering the tab switches"
+    },
+    {
+      "id": "W-1080/no-held-add",
+      "requirement": "W-1080",
+      "description": "The Add panel unmounts when the tab springs open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "      {(showAdd || dragFromAdd) && (",
+          "replace": "      {showAdd && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "hovering the tab switches"
+      ],
+      "expect": "\\(fail\\).*hovering the tab switches"
+    },
+    {
+      "id": "W-1080/spring-sticks",
+      "requirement": "W-1080",
+      "description": "Entering another element doesn't cancel the tab switch.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "      if (!overLayersTab(event.target)) stopSpring();",
+          "replace": "      if (!event.target) stopSpring();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "entering anything else"
+      ],
+      "expect": "\\(fail\\).*entering anything else"
+    },
+    {
+      "id": "W-1080/move-silent",
+      "requirement": "W-1080",
+      "description": "A Layers move dispatches nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "      dispatch({ type: \"move-node\", id, parentId, index });\n      announce(movedTo(result.layout, id));",
+          "replace": "      announce(movedTo(result.layout, id));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/useNodeActions.test.tsx",
+        "-t",
+        "a move runs the canvas move"
+      ],
+      "expect": "\\(fail\\).*a move runs the canvas move"
+    },
+    {
+      "id": "W-1080/noop-move",
+      "requirement": "W-1080",
+      "description": "A drop on its own spot is announced as a move.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "      if (result.layout === layout) return;\n      dispatch({ type: \"move-node\"",
+          "replace": "      dispatch({ type: \"move-node\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/useNodeActions.test.tsx",
+        "-t",
+        "a refused move is announced"
+      ],
+      "expect": "\\(fail\\).*a refused move is announced"
+    },
+    {
+      "id": "W-1080/add-unchecked",
+      "requirement": "W-1080",
+      "description": "A refused Add drop is dispatched anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "      const allowed = canDrop(layout, { kind: \"new\", node }, parentId);",
+          "replace": "      const allowed = { ok: true, reason: \"\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/useNodeActions.test.tsx",
+        "-t",
+        "an Add tile dropped on Layers"
+      ],
+      "expect": "\\(fail\\).*an Add tile dropped on Layers"
+    },
+    {
+      "id": "W-1080/e2e-add",
+      "requirement": "W-1080",
+      "description": "The editor gives Layers no add-on-drop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    onDropNew={layersDrop.add}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/layers-drop.e2e.ts",
+        "--project=node",
+        "-g",
+        "an Add tile dragged over the Layers tab"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1080/e2e-move",
+      "requirement": "W-1080",
+      "description": "The editor gives Layers no move-on-drop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    onMoveTo={layersDrop.move}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/layers-drop.e2e.ts",
+        "--project=node",
+        "-g",
+        "a Layers row dragged onto a container row"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1080/e2e-refusal",
+      "requirement": "W-1080",
+      "description": "A refused Layers drop shows no reason.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "      {shown?.refusal && (",
+          "replace": "      {false && shown?.refusal && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/layers-drop.e2e.ts",
+        "--project=node",
+        "-g",
+        "a container dragged onto its own child row"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1080/rtl-depth",
+      "requirement": "W-1080",
+      "description": "Layers measures the drop depth from the left edge even in RTL.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/use-layers-drop.ts",
+          "search": "isRtl(row) ? rect.right - event.clientX : event.clientX - rect.left",
+          "replace": "event.clientX - rect.left"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "in RTL the pointer"
+      ],
+      "expect": "\\(fail\\).*in RTL the pointer"
+    },
+    {
+      "id": "W-1080/enter-ignored",
+      "requirement": "W-1080",
+      "description": "The Layers tab and rows ignore dragenter, so drags that send no dragover stream never switch tabs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "? { onDragEnter: springOver, onDragOver: springOver }",
+          "replace": "? { onDragOver: springOver }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-drop.test.tsx",
+        "-t",
+        "a dragenter on the tab alone"
+      ],
+      "expect": "\\(fail\\).*a dragenter on the tab alone"
     }
   ]
 }

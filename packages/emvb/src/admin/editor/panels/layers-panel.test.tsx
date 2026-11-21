@@ -653,6 +653,6 @@ test("UX-052: a row six levels deep is indented by layerIndent", async () => {
     />,
   );
   const row = document.querySelector<HTMLElement>('[data-emvb-layer="head0009"]');
-  expect(row?.style.paddingLeft ?? "no row").toBe(`${layerIndent(6)}px`);
+  expect(row?.style.paddingInlineStart ?? "no row").toBe(`${layerIndent(6)}px`);
   expect(layerIndent(6)).toBe(68);
 });

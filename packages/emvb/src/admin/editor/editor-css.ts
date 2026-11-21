@@ -100,6 +100,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-check > input { width: 16px; height: 16px; margin: 0; }
 @keyframes emvb-panel-enter { from { opacity: 0; } to { opacity: 1; } }
 .emvb-left-panel > [data-emvb-panel],
+.emvb-left-panel > .emvb-add-holder > [data-emvb-panel],
 .emvb-panel-right [data-emvb-tab],
 .emvb-site-styles-body { animation: emvb-panel-enter 150ms cubic-bezier(0, 0, 0.2, 1); }
 /* UX-010: a section's rows fade in as it opens (closing stays instant); the Site styles drawer slides in. */
@@ -177,7 +178,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-gradient-stop { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; box-shadow: inset 0 1px 0 var(--color-kumo-line); }
 .emvb-row-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .emvb-layers { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1px; }
-.emvb-layer-row { display: flex; align-items: center; gap: 6px; width: 100%; height: var(--emvb-control); padding-right: 4px; border-radius: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
+.emvb-layer-row { display: flex; align-items: center; gap: 6px; width: 100%; height: var(--emvb-control); padding-inline-end: 4px; border-radius: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
 .emvb-layer-select { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; height: var(--emvb-control); padding: 0 4px 0 0; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .emvb-layer-row:hover, .emvb-layer-row:hover .emvb-layer-select { background: var(--color-kumo-tint); }
 .emvb-layers:empty::after, .emvb-panel-body > .emvb-helper { color: var(--text-color-kumo-subtle); }
@@ -192,6 +193,13 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-layer-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-layer-preview { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
 .emvb-layer-select[aria-current="true"] .emvb-layer-preview { color: inherit; }
+/* W-1080: drops on Layers. The line tracks the pointer without easing, like the canvas drop line.
+   Indents, the line and the refusal use logical sides so Layers reads right to left in RTL. */
+.emvb-layers-body { position: relative; }
+.emvb-layer-drop-line { position: absolute; inset-inline-end: 4px; height: 2px; border-radius: 1px; background: var(--color-kumo-brand); box-shadow: 0 0 0 1px var(--color-kumo-base, #fff); pointer-events: none; z-index: 2; }
+.emvb-layer-row[data-emvb-drop="inside"] { box-shadow: inset 0 0 0 1px var(--color-kumo-brand); background: var(--color-kumo-tint); }
+.emvb-layer-row[data-emvb-drop="invalid"] { outline: 1px dashed var(--color-kumo-danger); outline-offset: -1px; cursor: not-allowed; }
+.emvb-layer-drop-refusal { inset-inline-end: 4px; height: auto; min-height: 24px; padding: 4px 6px; white-space: normal; }
 .emvb-canvas { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
 .emvb-device-bar { display: flex; flex: none; align-items: center; justify-content: center; gap: 12px; height: 36px; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-surface); }
 /* W-127: the segmented control hugs its three options; a fixed width left a gap on the right. */

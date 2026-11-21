@@ -4,6 +4,7 @@ import {
   addNode,
   addNodeNear,
   addSectionNear,
+  canDrop,
   duplicateNode,
   wrapNode,
   type WrapType,
@@ -12,6 +13,7 @@ import {
   LAYOUT_SCHEMA_VERSION,
   moveDown,
   moveIn,
+  moveNode,
   moveOut,
   newNodeId,
   moveUp,
@@ -265,7 +267,41 @@ export function useNodeActions({
     place(layout, withFreshIds(layout, node), `${node.editorLabel ?? "Section"} section`, true);
   };
 
+  /**
+   * W-1080: a drop on Layers runs the canvas's own add and move (one undo step), selects what
+   * landed and says where, as a keyboard move does. A refusal is announced.
+   */
+  const layersDrop = {
+    move: (id: string, parentId: string, index: number) => {
+      const layout = latest.current.page.layout;
+      if (!layout) return;
+      const result = moveNode(layout, id, parentId, index);
+      if (!result.ok) {
+        announce(result.reason);
+        return;
+      }
+      if (result.layout === layout) return;
+      dispatch({ type: "move-node", id, parentId, index });
+      announce(movedTo(result.layout, id));
+    },
+    add: (type: string, parentId: string, index: number) => {
+      const layout = latest.current.page.layout;
+      const node = newElement(type, undefined, adminExtensionDefaults(type));
+      if (!layout || !node) return;
+      const allowed = canDrop(layout, { kind: "new", node }, parentId);
+      if (!allowed.ok) {
+        announce(allowed.reason);
+        return;
+      }
+      dispatch({ type: "add-node", node, parentId, index });
+      const parent = findNode(layout, parentId);
+      const where = parentId === layout.root.id ? "Page" : ELEMENT_NAMES[parent?.type ?? ""];
+      announce(`${ELEMENT_NAMES[node.type] ?? "Element"} added inside ${where ?? "Container"}`);
+    },
+  };
+
   return {
+    layersDrop,
     deleteAsk,
     setDeleteAsk,
     canDelete,

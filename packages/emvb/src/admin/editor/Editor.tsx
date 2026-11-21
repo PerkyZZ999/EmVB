@@ -227,6 +227,7 @@ function EditorApp({
     wrap,
     addFromPanel,
     addRecipe,
+    layersDrop,
     items: itemActions,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
   // W-876: My sections and Save as section (D-060).
@@ -585,6 +586,8 @@ function EditorApp({
                     saved={saved}
                     onSaveSection={setSaveAsk}
                     {...(!host.field && collection === PAGES_COLLECTION ? { coDesign } : {})}
+                    onDropNew={layersDrop.add}
+                    onMoveTo={layersDrop.move}
                     onRename={(id, label) =>
                       dispatch({
                         type: "update-node",
