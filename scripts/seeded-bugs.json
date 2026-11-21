@@ -55010,6 +55010,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/public-hooks.test.ts", "-t", "W-1083"],
       "expect": "\\(fail\\).*W-1083"
+    },
+    {
+      "id": "W-1084/emdash-version-flagged",
+      "requirement": "W-1016",
+      "description": "The release check counts EmDash's own versions (EmDash 1.4.0 in use-emdash.ts) as a file the EmVB bump missed, so the gate fails on every EmVB release that shares EmDash's number.",
+      "edits": [
+        {
+          "file": "scripts/release.ts",
+          "search": "  return text.split(\"\\n\").some((line) => quoted.test(line) && !/emdash/i.test(line));",
+          "replace": "  return text.split(\"\\n\").some((line) => quoted.test(line));"
+        }
+      ],
+      "command": ["bun", "test", "scripts/release.test.ts", "-t", "W-1084"],
+      "expect": "\\(fail\\).*W-1084"
     }
   ]
 }

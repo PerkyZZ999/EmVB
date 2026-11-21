@@ -57,6 +57,16 @@ export const VERSIONED: { file: string; patterns: ((v: string) => string)[] }[] 
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 
+/**
+ * Whether `text` quotes `version` as a string (`"x.y.z"`, or `\"x.y.z\"` inside JSON), the way a
+ * file the bump missed would. Lines that name EmDash don't count: EmDash's own releases share
+ * EmVB's numbers (EmDash 1.4.0 and 1.5.0 in scripts/use-emdash.ts and the CI matrix, W-1084).
+ */
+export function quotesVersion(text: string, version: string): boolean {
+  const quoted = new RegExp(`\\\\?"${version.replaceAll(".", "\\.")}\\\\?"`);
+  return text.split("\n").some((line) => quoted.test(line) && !/emdash/i.test(line));
+}
+
 /** Replaces every versioned string in one file; how many it replaced. */
 export function bumpText(
   text: string,

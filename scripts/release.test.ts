@@ -1,7 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { $ } from "bun";
 import { join } from "node:path";
-import { bumpText, cutChangelog, PACKAGES, releaseNotes, VERSIONED } from "./release.ts";
+import {
+  bumpText,
+  cutChangelog,
+  PACKAGES,
+  quotesVersion,
+  releaseNotes,
+  VERSIONED,
+} from "./release.ts";
 
 // W-1016: the release script bumps every place that names the version, cuts the CHANGELOG and
 // prints (never runs) the publish and tag commands.
@@ -26,7 +33,6 @@ describe("W-1016: version bump", () => {
 
   test("no other tracked file quotes the current version", async () => {
     const listed = new Set(VERSIONED.map((v) => v.file));
-    const quoted = new RegExp(`\\\\?"${current.replaceAll(".", "\\.")}\\\\?"`);
     const files = (await $`git ls-files`.cwd(ROOT).text())
       .split("\n")
       .filter(
@@ -39,7 +45,15 @@ describe("W-1016: version bump", () => {
           /\.(ts|tsx|json|mjs|astro)$/.test(f),
       );
     const texts = await Promise.all(files.map(async (f) => [f, await read(f)] as const));
-    expect(texts.filter(([, text]) => quoted.test(text)).map(([f]) => f)).toEqual([]);
+    expect(texts.filter(([, text]) => quotesVersion(text, current)).map(([f]) => f)).toEqual([]);
+  });
+
+  test("W-1084: a quoted version counts, unless the line names EmDash's own release", () => {
+    expect(quotesVersion(`export const V = "9.8.7";`, "9.8.7")).toBe(true);
+    expect(quotesVersion(`"search": "V = \\"9.8.7\\";"`, "9.8.7")).toBe(true);
+    expect(quotesVersion(`"9.8.70"`, "9.8.7")).toBe(false);
+    expect(quotesVersion(`const EMDASH_ZOD = { "9.8.7": "4.5.4" };`, "9.8.7")).toBe(false);
+    expect(quotesVersion(`emdash: "9.8.7",\nconst v = "9.8.7";`, "9.8.7")).toBe(true);
   });
 
   test("a bump replaces versions and cross-dependencies, nothing else", () => {
