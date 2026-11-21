@@ -79,6 +79,21 @@ describe("validation stays small on crafted documents (S-03)", () => {
     expect(ms).toBeLessThan(100);
   });
 
+  test("250,000 hiddenOn items stop at the length check, whichever zod runs (W-989)", () => {
+    // zod 4.6.6+ stops at the length by itself; EmDash 1.4's zod 4.5.4 doesn't, so the issue
+    // must be boundedArray's own.
+    const result = validateLayout(
+      root({
+        id: "node0001",
+        type: "container",
+        props: {},
+        hiddenOn: zeros(250_000),
+        children: [],
+      }),
+    ) as { ok: boolean; issues?: { message: string }[] };
+    expect(result.issues?.map((issue) => issue.message)).toEqual(["Too many items: at most 4."]);
+  });
+
   test("an element reports ten issues, then how many more", () => {
     const result = validateLayout(
       root({ id: "list0001", type: "list", props: { items: zeros(200) } }),

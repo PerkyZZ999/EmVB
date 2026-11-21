@@ -9,6 +9,14 @@ const issues = (schema: z.ZodType, value: unknown) => {
   const result = schema.safeParse(value);
   return result.success ? [] : result.error.issues;
 };
+/**
+ * The one issue boundedArray makes, by its message. zod 4.6.6+ also stops at the length on its
+ * own (one "Too big" issue), but EmDash 1.4 pins zod 4.5.4, which parses every item first; the
+ * message proves the input still goes through boundedArray whichever zod the tests run on.
+ */
+const cutShort = (schema: z.ZodType, value: unknown) =>
+  issues(schema, value).map((issue) => issue.message.replace(/\d+/g, "N"));
+const ONE_CUT = ["Too many items: at most N."];
 
 describe("D-070: arrays from requests check their length before their items", () => {
   test("an oversized array of bad items is one issue, not one per item", () => {
@@ -32,12 +40,14 @@ describe("D-070: arrays from requests check their length before their items", ()
 
   test("propose_changes ops", () => {
     const input = { pageId: "p", baseRevision: "r", baseDesignRevision: null, ops: flood() };
-    expect(issues(ProposeChangesInput, input)).toHaveLength(1);
+    expect(cutShort(ProposeChangesInput, input)).toEqual(ONE_CUT);
   });
 
   test("add_element children, at any depth", () => {
     const element = { type: "container", children: [{ type: "container", children: flood() }] };
-    expect(issues(AddElementInput, { pageId: "p", parentId: "root0001", element })).toHaveLength(1);
+    expect(cutShort(AddElementInput, { pageId: "p", parentId: "root0001", element })).toEqual(
+      ONE_CUT,
+    );
   });
 
   test("update_site_styles variables, removals and classes", () => {
@@ -47,7 +57,7 @@ describe("D-070: arrays from requests check their length before their items", ()
       { classes: flood() },
       { removeClasses: flood() },
     ]) {
-      expect(issues(UpdateSiteStylesInput, input)).toHaveLength(1);
+      expect(cutShort(UpdateSiteStylesInput, input)).toEqual(ONE_CUT);
     }
   });
 });
