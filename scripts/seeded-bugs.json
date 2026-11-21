@@ -55101,6 +55101,246 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1089/title-heading-kept",
+      "requirement": "W-1089",
+      "description": "#28: an agent's add_element with an H1 leaves create_page's title heading, so the page has two H1s with the title out of place.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "      next = removeNode(next, title.id).layout;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 an"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/title-heading-option-ignored",
+      "requirement": "W-1089",
+      "description": "#28: create_page ignores titleHeading: false and still starts the page with an H1 of its title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "  if (input.titleHeading === false && !input.template) {",
+          "replace": "  if (input.titleHeading === undefined && false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 create_page with titleHeading"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/title-heading-edited-removed",
+      "requirement": "W-1089",
+      "description": "#28: an agent's H1 also removes a title heading someone has edited.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "Object.keys(props).length === 2 && props[\"level\"] === 1 && props[\"text\"] === title.trim()",
+          "replace": "Object.keys(props).length === 2 && props[\"level\"] === 1"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 a title heading someone changed"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/agent-sample-content",
+      "requirement": "W-1089",
+      "description": "#29: elements an agent adds get the Add panel's sample content in every optional field it leaves out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/agent-defaults.ts",
+          "search": "  for (const key of sample) delete props[key];\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 a price table keeps only"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/agent-price-table-ribbon",
+      "requirement": "W-1089",
+      "description": "#29: a price table an agent adds shows the sample Featured ribbon.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/agent-defaults.ts",
+          "search": "    \"featured\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 a price table keeps only"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/agent-map-sample-coordinates",
+      "requirement": "W-1089",
+      "description": "#29: a map an agent adds with its own address keeps the sample Eiffel Tower coordinates.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/agent-defaults.ts",
+          "search": "  map: [\"lat\", \"lng\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 required props still"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/agent-required-prop-dropped",
+      "requirement": "W-1089",
+      "description": "#29: a required prop is treated as sample content, so a price table an agent adds without a price has none.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/agent-defaults.ts",
+          "search": "    \"description\",\n",
+          "replace": "    \"description\",\n    \"price\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 (required props still|every optional default)"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/ext-not-listed",
+      "requirement": "W-1089",
+      "description": "#38: list_element_types leaves out registered extension elements.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/read.ts",
+          "search": "      ...extensions,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 list_element_types lists a registered extension"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/ext-add-refused",
+      "requirement": "W-1089",
+      "description": "#38: add_element refuses a registered extension element as an unknown type.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "  if (isExtensionType(spec.type)) return buildExtensionNode(spec);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 add_element and update_element take"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/ext-invalid-props-defaulted",
+      "requirement": "W-1089",
+      "description": "#38: an extension element with invalid props is stored with the schema defaults instead of being refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/extensions.ts",
+          "search": "  if (result.ok) return result.props;\n",
+          "replace": "  if (result.ok || given) return result.props;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 add_element and update_element take"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/ext-update-unchecked",
+      "requirement": "W-1089",
+      "description": "#38: update_element stores extension props its schema refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "        if (touchesProps) copy[\"props\"] = checkedExtensionProps(node.type, copy[\"props\"]);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 add_element and update_element take"
+      ],
+      "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1089/ext-missing-update-allowed",
+      "requirement": "W-1089",
+      "description": "#38: update_element changes an extension element whose extension is no longer registered.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "        if (!liveElement(node.type)) {\n",
+          "replace": "        if (!liveElement(node.type) && !node.type) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-agent-issues.test.ts",
+        "-t",
+        "W-1089 an extension element that isn't registered"
+      ],
+      "expect": "\\(fail\\).*W-1089"
     }
   ]
 }

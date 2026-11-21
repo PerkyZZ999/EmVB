@@ -12,6 +12,7 @@ import {
   SECTION_RECIPES,
   SECTION_TEMPLATES,
   siteTokens,
+  validateExtensionProps,
   validateLayout,
   type DesignSystem,
   type ElementType,
@@ -26,6 +27,7 @@ import { requiredFieldIssues, requiredFieldIssueText } from "../core/forms/bindi
 import { isFormNode } from "../core/schema/layout.ts";
 import { forEachNode, nodeChildren } from "../core/tree-ops.ts";
 import { McpToolError } from "./errors.ts";
+import { extensionJsonSchema, registeredExtensionElements } from "./extensions.ts";
 import type { EmvbPorts, PageRecord } from "./ports.ts";
 
 /** A stored layout the tools can work on, or a NOT_FOUND / INVALID_LAYOUT error the agent can read. */
@@ -157,9 +159,8 @@ const SCHEMAS = new Map(
 const sample = (type: string): LayoutNode =>
   Object.assign({}, defaultElement(type as ElementType, "sample"), { id: "sample" }) as LayoutNode;
 
-/** Which parent types accept `type`, by the same rule drag-and-drop and save use (W-354). */
-function allowedParents(type: string): string[] {
-  const child = sample(type);
+/** Which parent types accept `child`, by the same rule drag-and-drop and save use (W-354). */
+function allowedParents(child: LayoutNode): string[] {
   return ELEMENT_DESCRIPTORS.map((d) => d.type).filter((parentType) => {
     const parent = sample(parentType);
     if (!isParentNode(parent)) return false;
@@ -181,6 +182,9 @@ export const ListElementTypesOutput = z.object({
       props: z.unknown(),
       example: z.unknown(),
       notes: z.string().optional(),
+      /** W-1089 (#38): an extension element's inspector fields and its extension's id. */
+      fields: z.unknown().optional(),
+      extension: z.string().optional(),
     }),
   ),
 });
@@ -205,29 +209,61 @@ const ELEMENT_NOTES: Record<string, string> = {
     "Use one per page band. props.contentWidth caps the inner width (for example 1200 px) while the background spans the screen.",
 };
 
+/**
+ * W-1089 (#38): the extension elements registered on this site, as `ext:<pkg>/<name>` with the
+ * extension's prop schema (as JSON Schema), its inspector fields and its schema defaults.
+ */
+function extensionEntries(type: string | undefined) {
+  return registeredExtensionElements()
+    .filter((element) => type === undefined || element.type === type)
+    .map((element) => {
+      const example = {
+        id: "sample",
+        type: element.type,
+        props: validateExtensionProps(element.schema, {}).props,
+      } as LayoutNode;
+      return {
+        type: element.type,
+        name: element.label,
+        group: element.group,
+        container: false,
+        allowedParents: allowedParents(example),
+        props: extensionJsonSchema(element.schema),
+        example: { type: element.type, props: example.props },
+        fields: element.fields,
+        extension: element.extensionId,
+        notes: `An extension element from ${element.extensionId}. Its props are checked by the extension's schema; it holds no children.`,
+      };
+    });
+}
+
 export function listElementTypes(input: z.infer<typeof ListElementTypesInput>) {
   const descriptors = input.type
     ? ELEMENT_DESCRIPTORS.filter((d) => d.type === input.type)
     : ELEMENT_DESCRIPTORS;
-  if (input.type && descriptors.length === 0) {
+  const extensions = extensionEntries(input.type);
+  if (input.type && descriptors.length === 0 && extensions.length === 0) {
     throw new McpToolError("NOT_FOUND", `Unknown element type ${input.type}.`);
   }
   return {
-    elements: descriptors.map((d) => {
-      const props = SCHEMAS.get(d.type);
-      const example = sample(d.type);
-      const entry: Record<string, unknown> = {
-        type: d.type,
-        name: d.name,
-        group: d.group,
-        container: isParentNode(example),
-        allowedParents: allowedParents(d.type),
-        props: props ? z.toJSONSchema(props, { unrepresentable: "any" }) : {},
-        example: { type: example.type, props: (example as { props?: unknown }).props ?? {} },
-      };
-      if (ELEMENT_NOTES[d.type]) entry["notes"] = ELEMENT_NOTES[d.type];
-      return entry;
-    }),
+    elements: [
+      ...descriptors.map((d) => {
+        const props = SCHEMAS.get(d.type);
+        const example = sample(d.type);
+        const entry: Record<string, unknown> = {
+          type: d.type,
+          name: d.name,
+          group: d.group,
+          container: isParentNode(example),
+          allowedParents: allowedParents(example),
+          props: props ? z.toJSONSchema(props, { unrepresentable: "any" }) : {},
+          example: { type: example.type, props: (example as { props?: unknown }).props ?? {} },
+        };
+        if (ELEMENT_NOTES[d.type]) entry["notes"] = ELEMENT_NOTES[d.type];
+        return entry;
+      }),
+      ...extensions,
+    ],
   };
 }
 

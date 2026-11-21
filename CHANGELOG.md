@@ -8,7 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- **1.1.1 and 1.1.2 on npm (W-1093).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0.
+- **1.1.1 and 1.1.2 on npm (W-1093, #25).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0.
+- **Agents: one H1, first (W-1089, #28).** A page made with `create_page` and then built with `add_element` had two H1s, with the generated title heading in the wrong place. Now the first element an agent adds that holds an H1 replaces the untouched title heading, and `create_page` takes `titleHeading: false` to start without it. Existing calls work as before otherwise. The tool's input changed, so after updating an admin approves EmVB's tools again on EmDash's Plugins screen.
+- **Agents: no sample content (W-1089, #29).** An element an agent adds with `add_element` no longer gets the Add panel's sample content in the optional fields it leaves out: a Price table with a title, price, features and button no longer shows "For growing teams.", a crossed-out "Custom domain" or a Featured ribbon. The same goes for the Alert, Testimonial, Counter, Progress bar, Countdown, Map (its sample coordinates), Call to action, Flip box and Animated headline. Required fields still get valid defaults, and the Add panel keeps its starter content for people.
+- **Agents: extension elements (W-1089, #38).** `list_element_types` now lists the elements of registered extensions (`ext:<package>/<name>`, with label, props schema and fields), and `add_element` and `update_element` accept them, checked by the extension's schema: invalid props are refused with the reason, and an element whose extension isn't registered is refused, as `propose_changes` already did. `list_element_types`'s description and output changed, so after updating an admin approves EmVB's tools again on EmDash's Plugins screen.
+
+### Documentation
+
+- **Who made an agent's change (W-1089, #33).** The [MCP guide](docs/guides/mcp.md#security-notes) now says why pages and versions an agent makes have no author in EmDash: EmDash 1.4 and 1.5 give plugins no way to set one (or to read revision authors, so `list_versions` answers `authorId: null`). EmVB's own record of agent changes, with the user whose token made each one, is on the AI agents page and in the version timeline.
 
 ## [1.4.0] - 2026-11-21
 

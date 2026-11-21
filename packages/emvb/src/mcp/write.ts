@@ -2,7 +2,6 @@ import { z } from "zod";
 import { boundedArray } from "../core/bounded-array.ts";
 import {
   byteLength,
-  defaultElement,
   findNode,
   MAX_LAYOUT_BYTES,
   nameKey,
@@ -24,6 +23,7 @@ import {
 import { stableJson } from "../core/stable-json.ts";
 import { addNode, moveNode, withFreshIds } from "../core/arrange.ts";
 import { ELEMENT_DESCRIPTORS } from "../core/elements/index.ts";
+import { isExtensionType, liveElement } from "../core/extensions/index.ts";
 import { nodeChildren, pageSlug, removeNode, starterLayout, updateNode } from "../core/tree-ops.ts";
 import { isSafeFontStack } from "../core/sanitize/css.ts";
 import { sanitizeMediaUrl } from "../core/sanitize/media-url.ts";
@@ -36,8 +36,10 @@ import {
   patchNestedStyle,
   upgradeLegacyNode,
 } from "../core/migrate/v18.ts";
+import { agentDefaultElement } from "./agent-defaults.ts";
+import { checkedExtensionProps } from "./extensions.ts";
 import { McpToolError } from "./errors.ts";
-import type { EmvbPorts } from "./ports.ts";
+import type { EmvbPorts, PageRecord } from "./ports.ts";
 import { queued } from "./queue.ts";
 import { nestsDeeperThan, resolveDesignRefs } from "./refs.ts";
 import {
@@ -103,7 +105,10 @@ export async function mutatePage(
   tool: string,
   pageId: string,
   expectedRev: string | undefined,
-  apply: (layout: Layout) => { layout: Layout; changed: string[]; summary: string },
+  apply: (
+    layout: Layout,
+    page: PageRecord,
+  ) => { layout: Layout; changed: string[]; summary: string },
 ): Promise<WriteResult> {
   return queued(`page:${pageId}`, async () => {
     // The retry must read, write and log in order.
@@ -132,7 +137,7 @@ export async function mutatePage(
           "The stored layout can't be read. Repair it in the editor.",
         );
       }
-      const next = apply(current.layout);
+      const next = apply(current.layout, page);
       refuseUnsafeImageSources(current.layout, next.layout);
       refuseUnsafeLinks(current.layout, next.layout);
       refuseUnsafeSvg(current.layout, next.layout);
@@ -306,13 +311,27 @@ const BoundedElementSpec = z.preprocess((value, ctx) => {
   return upgradeLegacyNode(value);
 }, ElementSpec);
 
+/**
+ * W-1089 (#38): a registered extension element, its props checked by the extension's schema.
+ * Extension elements hold no children (their render output is built-in elements).
+ */
+function buildExtensionNode(spec: ElementSpecT): LayoutNode {
+  const { type, props, children, ...rest } = spec;
+  delete (rest as { id?: unknown }).id;
+  const checked = checkedExtensionProps(type, props ?? {});
+  if (children?.length) refused(`${type} is an extension element and holds no children.`);
+  return { ...rest, id: "new", type, props: checked } as LayoutNode;
+}
+
 function buildNode(spec: ElementSpecT): LayoutNode {
+  if (isExtensionType(spec.type)) return buildExtensionNode(spec);
   if (!KNOWN_TYPES.has(spec.type)) {
     refused(`Unknown element type ${spec.type}. Call list_element_types.`);
   }
   const { type, props, children, ...rest } = spec;
   delete (rest as { id?: unknown }).id;
-  const base = defaultElement(type as ElementType, "new") as LayoutNode & {
+  // W-1089 (#29): the type's defaults without the Add panel's sample content.
+  const base = agentDefaultElement(type as ElementType, "new") as LayoutNode & {
     props?: Record<string, unknown>;
   };
   const node = { ...base, ...rest, props: { ...base.props, ...props } } as LayoutNode;
@@ -333,6 +352,11 @@ export const CreatePageInput = z.strictObject({
     .optional(),
   /** W-1068: start from a starter page template (see list_templates) instead of recipes. */
   template: z.enum(PAGE_TEMPLATES.map((t) => t.id) as [string, ...string[]]).optional(),
+  /**
+   * W-1089 (#28): a page without a template or a hero recipe starts with an H1 of its title.
+   * `false` leaves it out, for an agent that adds its own H1. Unset keeps it.
+   */
+  titleHeading: z.boolean().optional(),
 });
 export const CreatePageOutput = z.object({ pageId: z.string(), slug: z.string(), rev: z.string() });
 
@@ -393,6 +417,9 @@ export async function createPage(ports: EmvbPorts, input: z.infer<typeof CreateP
     };
     if (recipes[0] === "hero") layout = { ...layout, root: { ...layout.root, children: [] } };
   }
+  if (input.titleHeading === false && !input.template) {
+    layout = { ...layout, root: { ...layout.root, children: [] } };
+  }
   for (const id of recipes) {
     const node = recipeNode(id, design, layout);
     if (node)
@@ -429,22 +456,57 @@ export const AddElementInput = z.strictObject({
   expectedRev: Rev.optional(),
 });
 
+const isH1 = (node: LayoutNode): boolean =>
+  (node.type === "heading" || node.type === "headline") && propsOf(node)["level"] === 1;
+const h1Ids = (node: LayoutNode): string[] => [
+  ...(isH1(node) ? [node.id] : []),
+  ...nodeChildren(node).flatMap(h1Ids),
+];
+
+/**
+ * W-1089 (#28): the H1 create_page starts a page with, as long as nobody changed it: a heading
+ * straight in the root with the page's title as its only text and nothing else set.
+ */
+function untouchedTitleHeading(layout: Layout, title: string): LayoutNode | undefined {
+  return nodeChildren(layout.root).find((node) => {
+    if (
+      node.type !== "heading" ||
+      Object.keys(node).some((k) => !["id", "type", "props"].includes(k))
+    )
+      return false;
+    const props = propsOf(node);
+    return (
+      Object.keys(props).length === 2 && props["level"] === 1 && props["text"] === title.trim()
+    );
+  });
+}
+
 export async function addElement(ports: EmvbPorts, input: z.infer<typeof AddElementInput>) {
   const element = resolveDesignRefs(input.element, (await ports.getDesign()).design);
-  return mutatePage(ports, "add_element", input.pageId, input.expectedRev, (layout) => {
+  return mutatePage(ports, "add_element", input.pageId, input.expectedRev, (layout, page) => {
     if (!findNode(layout, input.parentId)) {
       refused(
         `No element with id ${input.parentId} on this page to add into. Call get_layout for the ids.`,
       );
     }
     const node = withFreshIds(layout, buildNode(element));
-    const next = arranged(
+    let next = arranged(
       addNode(layout, node, {
         parentId: input.parentId,
         index: input.index ?? Number.MAX_SAFE_INTEGER,
       }),
     );
-    return { layout: next, changed: [node.id], summary: `Added ${node.type} ${node.id}` };
+    const changed = [node.id];
+    let summary = `Added ${node.type} ${node.id}`;
+    // W-1089 (#28): an agent that builds the page's own H1 replaces the title heading
+    // create_page started it with, instead of leaving two H1s with the title out of place.
+    const title = h1Ids(node).length > 0 ? untouchedTitleHeading(layout, page.title) : undefined;
+    if (title && h1Ids(layout.root).length === 1 && input.parentId !== title.id) {
+      next = removeNode(next, title.id).layout;
+      changed.push(title.id);
+      summary += `; removed the page's title heading ${title.id} (the new element has the page's H1)`;
+    }
+    return { layout: next, changed, summary };
   });
 }
 
@@ -583,6 +645,19 @@ export async function updateElement(ports: EmvbPorts, input: z.infer<typeof Upda
           const style = copy[top];
           if (isRecord(style)) copy[top] = patchNestedStyle(style, { [sub]: undefined });
         } else if (isRecord(copy[top])) delete copy[top][sub];
+      }
+      // W-1089 (#38): an extension element changes only while its extension is registered, and
+      // its props must still pass the extension's schema.
+      if (isExtensionType(node.type)) {
+        if (!liveElement(node.type)) {
+          refused(
+            `${node.type} can't be changed: no extension on this site provides it. Remove it or install the extension.`,
+          );
+        }
+        const touchesProps =
+          "props" in set ||
+          (input.unset ?? []).some((path) => path === "props" || path.startsWith("props."));
+        if (touchesProps) copy["props"] = checkedExtensionProps(node.type, copy["props"]);
       }
       return copy as LayoutNode;
     });

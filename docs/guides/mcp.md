@@ -82,17 +82,39 @@ the token, never the token. Calls signed in without a token are counted per user
   Animated headline, Share buttons, Hotspots). Like Social links and Gallery pictures, Price list
   items, Share links and Hotspots go only inside their own parent: add the parent with its
   `children`, or add them to it.
+- **Extension elements (1.4.1).** `list_element_types` also lists the elements of the extensions
+  registered on the site ([Extensions](extensions.md)), typed `ext:<package>/<name>`, with their
+  label as `name`, their props schema as JSON Schema, the inspector `fields`, the `extension` id
+  and an `example` with the schema's defaults. `add_element` and `update_element` accept them:
+  props are checked by the extension's own schema, defaults fill the props left out, and invalid
+  props are refused with `INVALID_INPUT` naming each one, never replaced. An extension element
+  holds no children. One whose extension isn't registered (or was removed) isn't listed, can't
+  be added and can't be changed (`REFUSED`); `remove_element` still removes it, and
+  `propose_changes` follows the same rules.
 - Since 1.4 it also lists the Search form (`search-form`) and the Theme toggle (`theme-toggle`). A
   Menu item takes `panelPartId`, the id of a published Section theme part, to open it as a mega
   menu panel (agents can't create the Section itself), and `panelWidth`. A sticky element's style
   takes `motion.sticky` (scroll effects), and a colour variable in `update_site_styles` takes a
   `dark` value for dark mode.
+- **Only what the agent sets (1.4.1).** `add_element` fills a required prop the agent leaves out
+  with the element's default, so the element stays valid, but leaves optional props unset. The
+  Add panel's sample content (a Price table's description, excluded feature, button and Featured
+  ribbon, a Call to action's text and button, a Map's coordinates, a Testimonial's role, and the
+  like) is for people to edit and never reaches an agent's element. Settings such as a Counter's
+  thousands separator or a form field's label keep their defaults. `list_element_types` still
+  shows the full Add panel default as `example`. `propose_changes` stores elements exactly as sent.
 - Writes take an optional `expectedRev`; a stale one returns `CONFLICT`. Every write returns a new
   `rev`: pass that one to the next write.
 - Style references to a site variable can leave out `from`; EmVB fills it in from the variable's
   kind and refuses ids and classes that don't exist, listing the ones that do.
 - `create_page` uses the slug EmDash derives from the title and refuses a taken one. It starts
   from section `recipes` or from a starter page `template` (`list_templates`), not both.
+- **The title heading (1.4.1).** Without a template or a `hero` recipe first, `create_page` starts
+  the page with an H1 of its title. An agent that builds its own H1 can pass `titleHeading: false`
+  to leave it out. Otherwise, the first `add_element` whose element holds an H1 removes that title
+  heading, as long as nobody has changed it and it is the page's only H1, so the page keeps one
+  H1 and it comes first; the write's `changed` and `summary` name the removed heading. A title
+  heading someone edited stays. In a proposal, delete it yourself (see `list_page_outline`).
 - `insert_template` adds a starter section template in the site's styles with new ids; its H1
   becomes an H2 when the page already has one. See [Starter templates](starter-templates.md).
 - `update_site_styles` changes the style draft only, and refuses to remove a variable a page or class
@@ -192,9 +214,15 @@ Agent publishing is **off** by default. In **AI agents**, an admin can separatel
 
 - Agents can't change the AI agents settings; no tool writes them.
 - Every agent write is validated with the same rules as the editor and the save hook.
-- Known limits, raised with EmDash: plugin writes skip `content:beforeSave` hooks of other plugins
-  and record no author on the revision (EmVB keeps its own log), and there is a short window between
-  EmVB's revision check and the write.
+- Known limits, raised with EmDash: plugin writes skip `content:beforeSave` hooks of other plugins,
+  and there is a short window between EmVB's revision check and the write.
+- **Who made an agent's change.** EmDash records no author on pages and versions an agent makes:
+  the entry and its revisions have no `authorId`. EmVB knows the token's user, but EmDash 1.4 and
+  1.5 give plugins no way to set it: the plugin content API's `create` and `update` take no author,
+  and it hides revision authors from plugins, so `list_versions` answers `authorId: null` too. This
+  needs a change in EmDash. Until then EmVB keeps its own record: each agent change, with the
+  user whose token made it, is in **AI agents → recent agent changes** and marked **Agent** in the
+  page's version timeline.
 
 ## Debugging
 

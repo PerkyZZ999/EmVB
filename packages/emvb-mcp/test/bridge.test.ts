@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { TOOLS } from "@perkyzz/emvb/mcp";
+import { clearExtensions, defineExtension, rememberExtensions } from "../../emvb/src/core/index.ts";
 import { s1Page } from "../../emvb/test/fixtures/layouts.ts";
 import { createTestRuntime } from "../../emvb/test/server/runtime.ts";
 import { createBridgeServer } from "../src/bridge.ts";
@@ -232,5 +233,60 @@ describe("bridge resources, prompts and the skill (W-467, W-468)", () => {
       'get_page_brief with {"purpose":"Weekend brunch","sections":["Hero","Menu"]}',
     );
     expect(text).toContain("single propose_changes call");
+  });
+});
+
+describe("W-1089: agent fixes through the bridge", () => {
+  test("W-1089 create_page takes titleHeading false through the bridge", async () => {
+    await connect();
+    const created = (await client.callTool({
+      name: "create_page",
+      arguments: { title: "Bridged blank", titleHeading: false },
+    })) as ToolResult;
+    expect(created.isError ?? false).toBe(false);
+    const { pageId } = created.structuredContent as { pageId: string };
+    const direct = (await t.mcp("get_layout", { pageId })).data as {
+      layout: { root: { children: unknown[] } };
+    };
+    expect(direct.layout.root.children).toEqual([]);
+  });
+
+  test("W-1089 list_element_types and add_element take a registered extension element through the bridge", async () => {
+    rememberExtensions([
+      defineExtension({
+        id: "fieldnotes",
+        elements: [
+          {
+            name: "notice",
+            label: "Notice",
+            schema: { type: "object", properties: { text: { type: "string" } } },
+            fields: [{ key: "text", kind: "text", label: "Text" }],
+            render: (props) => ({ id: "n", type: "text", props: { text: String(props.text) } }),
+          },
+        ],
+      }),
+    ]);
+    try {
+      const pageId = await newPage();
+      await connect();
+      const listed = (await client.callTool({
+        name: "list_element_types",
+        arguments: { type: "ext:fieldnotes/notice" },
+      })) as ToolResult;
+      expect(listed.isError ?? false).toBe(false);
+      const direct = await t.mcp("list_element_types", { type: "ext:fieldnotes/notice" });
+      expect(listed.structuredContent).toEqual(direct.data as Record<string, unknown>);
+      const added = (await client.callTool({
+        name: "add_element",
+        arguments: {
+          pageId,
+          parentId: "root0001",
+          element: { type: "ext:fieldnotes/notice", props: { text: "Hi" } },
+        },
+      })) as ToolResult;
+      expect(added.isError ?? false).toBe(false);
+    } finally {
+      clearExtensions();
+    }
   });
 });

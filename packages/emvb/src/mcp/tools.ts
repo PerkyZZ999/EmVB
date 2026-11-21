@@ -64,7 +64,7 @@ const READ_TOOLS: ToolDef[] = [
     name: "list_element_types",
     title: "List element types",
     description:
-      "Lists every EmVB element type with its props JSON Schema, whether it holds children, which parents accept it and a default example. Never invent element types.",
+      "Lists every EmVB element type with its props JSON Schema, whether it holds children, which parents accept it and a default example, plus the extension elements registered on this site (ext:<package>/<name>, with their fields). Never invent element types.",
     input: read.ListElementTypesInput,
     output: read.ListElementTypesOutput,
     readOnly: true,
@@ -155,7 +155,7 @@ const WRITE_TOOLS: ToolDef[] = [
     name: "create_page",
     title: "Create a page",
     description:
-      "Creates a new unpublished EmVB page with a starter layout, optionally followed by section recipes (hero, features, …), or from a starter page template (template: see list_templates). Returns the page id and rev.",
+      "Creates a new unpublished EmVB page with a starter layout, optionally followed by section recipes (hero, features, …), or from a starter page template (template: see list_templates). Without a template or a hero recipe the page starts with an H1 of its title: titleHeading false leaves it out, and an element with an H1 added later replaces it while it is unchanged. Returns the page id and rev.",
     input: write.CreatePageInput,
     output: write.CreatePageOutput,
     readOnly: false,
@@ -166,7 +166,7 @@ const WRITE_TOOLS: ToolDef[] = [
     name: "add_element",
     title: "Add an element",
     description:
-      "Adds an element (with optional children) into parentId at index (default: last). Unset props take the type's defaults; ids are generated. Refused with the editor's reason when the parent can't hold it.",
+      "Adds an element (with optional children) into parentId at index (default: last). Unset required props take the type's defaults; optional props you leave out stay unset (no sample text, links or prices); ids are generated. Refused with the editor's reason when the parent can't hold it.",
     input: write.AddElementInput,
     output: write.WriteOutput,
     readOnly: false,
