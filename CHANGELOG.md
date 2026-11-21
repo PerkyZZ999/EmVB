@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- **1.1.1 and 1.1.2 on npm (W-1093).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0. From now on every tagged release, security fixes included, is published to npm the same day.
+- **1.1.1 and 1.1.2 on npm (W-1093).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0.
 
 ## [1.4.0] - 2026-11-21
 
