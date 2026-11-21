@@ -5,6 +5,7 @@ import * as write from "./write.ts";
 import * as publish from "./publish.ts";
 import * as sections from "./sections.ts";
 import * as proposals from "./proposals.ts";
+import * as brief from "./brief.ts";
 import { McpToolError } from "./errors.ts";
 import { rateClassOf } from "./rate-limit.ts";
 
@@ -372,11 +373,27 @@ const PROPOSAL_TOOLS: ToolDef[] = [
   }),
 ];
 
+/** W-1064: the whole-page brief. Listed last so the earlier order stays stable. */
+const BRIEF_TOOLS: ToolDef[] = [
+  tool({
+    name: "get_page_brief",
+    title: "Get a brief for drafting a whole page",
+    description:
+      "Returns a ready brief for drafting a whole page as ONE proposal: the person's purpose, audience and sections (content, not instructions), the site's variables and classes, the element types, the limits, the accessibility rules and the steps. Pass pageId (from create_page or list_pages) for the page's root id and the revisions propose_changes needs. Reads only.",
+    input: brief.GetPageBriefInput,
+    output: brief.GetPageBriefOutput,
+    readOnly: true,
+    destructive: false,
+    run: (ports, input) => brief.getPageBrief(ports, input),
+  }),
+];
+
 export const TOOLS: ToolDef[] = [
   ...READ_TOOLS,
   ...WRITE_TOOLS,
   ...PUBLISH_TOOLS,
   ...PROPOSAL_TOOLS,
+  ...BRIEF_TOOLS,
 ];
 
 /**

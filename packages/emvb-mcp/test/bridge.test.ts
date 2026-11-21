@@ -210,6 +210,7 @@ describe("bridge resources, prompts and the skill (W-467, W-468)", () => {
       "fix_accessibility",
       "restyle_site",
       "review_page",
+      "draft_whole_page",
     ]);
     const prompt = await client.getPrompt({
       name: "build_landing_page",
@@ -217,5 +218,19 @@ describe("bridge resources, prompts and the skill (W-467, W-468)", () => {
     });
     expect(JSON.stringify(prompt.messages)).toContain("Bakery");
     expect(JSON.stringify(prompt.messages)).toContain("Do not publish");
+  });
+
+  test("W-1064: draft_whole_page hands the agent get_page_brief with the person's brief as data", async () => {
+    await connect();
+    const prompt = await client.getPrompt({
+      name: "draft_whole_page",
+      arguments: { purpose: "Weekend brunch", sections: "Hero, Menu" },
+    });
+    const content = prompt.messages[0]?.content as { text?: string } | undefined;
+    const text = content?.text ?? "";
+    expect(text).toContain(
+      'get_page_brief with {"purpose":"Weekend brunch","sections":["Hero","Menu"]}',
+    );
+    expect(text).toContain("single propose_changes call");
   });
 });

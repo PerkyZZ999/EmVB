@@ -54340,6 +54340,111 @@
       ],
       "command": ["bun", "test", "./scripts/ci-e2e.test.ts", "-t", "compared by look"],
       "expect": "\\(fail\\).*compared by look"
+    },
+    {
+      "id": "W-1064/brief-drops-classes",
+      "requirement": "W-1064",
+      "description": "The page brief leaves out the site's classes, so an agent styles the page with one-off values.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/brief.ts",
+          "search": "classes: (design.classes ?? []).map((c) => ({ id: c.id, name: c.name })),",
+          "replace": "classes: [],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-brief.test.ts",
+        "-t",
+        "returns the site's styles"
+      ],
+      "expect": "\\(fail\\).*returns the site's styles"
+    },
+    {
+      "id": "W-1064/brief-no-page",
+      "requirement": "W-1064",
+      "description": "The brief ignores pageId, so the agent has no root id or revisions to propose against.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/brief.ts",
+          "search": "const page = input.pageId ? await listPageOutline(ports, { pageId: input.pageId }) : null;",
+          "replace": "const page = input.pageId && false ? await listPageOutline(ports, { pageId: input.pageId }) : null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-brief.test.ts",
+        "-t",
+        "names the root and the revisions"
+      ],
+      "expect": "\\(fail\\).*names the root and the revisions"
+    },
+    {
+      "id": "W-1064/prompt-splices-args",
+      "requirement": "W-1064",
+      "description": "draft_whole_page splices the person's purpose into the prompt as text instead of quoting it as JSON data.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/prompts.ts",
+          "search": "Call get_page_brief with ${JSON.stringify(args)}.",
+          "replace": "Call get_page_brief for this purpose: ${args.purpose}."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-brief.test.ts",
+        "-t",
+        "quotes the person's arguments as JSON"
+      ],
+      "expect": "\\(fail\\).*quotes the person's arguments as JSON"
+    },
+    {
+      "id": "W-1064/review-line-no-heading",
+      "requirement": "W-1064",
+      "description": "An added section is listed as a bare 'Add Section' with no heading, so a whole-page proposal can't be told apart section by section.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/co-design.ts",
+          "search": "quoted(textOf(op.node) ?? headingOf(op.node))",
+          "replace": "quoted(textOf(op.node))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/co-design.test.ts",
+        "-t",
+        "W-1064"
+      ],
+      "expect": "\\(fail\\).*W-1064"
+    },
+    {
+      "id": "W-1064/review-line-no-count-e2e",
+      "requirement": "W-1064",
+      "description": "The Agent tab drops the element count of an added section, so a person can't see the size of a whole-page proposal.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/co-design.ts",
+          "search": "return count > 1 ? `${added} (${count} elements)` : added;",
+          "replace": "return count > 1 ? added : added;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/agent-page.e2e.ts",
+        "--project=node",
+        "-g",
+        "whole page as one proposal"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

@@ -64,13 +64,48 @@ const BIDI_AND_CONTROLS =
 
 const quoted = (text: string | undefined) => (text ? ` “${text}”` : "");
 
+const childrenOf = (node: unknown): unknown[] => {
+  const children = (node as { children?: unknown } | null)?.children;
+  return Array.isArray(children) ? children : [];
+};
+
+/**
+ * W-1064: a whole section arrives as one insert; name it by its first heading, depth first, so a
+ * whole-page proposal reads as a list of sections. Bounded like the proposal itself.
+ */
+function headingOf(node: unknown): string | undefined {
+  const stack = childrenOf(node).toReversed();
+  for (let seen = 0; stack.length > 0 && seen < 2000; seen++) {
+    const item = stack.pop();
+    if ((item as { type?: unknown } | null)?.type === "heading") {
+      const text = textOf(item);
+      if (text) return text;
+    }
+    stack.push(...childrenOf(item).toReversed());
+  }
+  return undefined;
+}
+
+/** How many elements an insert adds, so a person sees the size of what they accept. */
+function countNodes(node: unknown): number {
+  const stack = [node];
+  let count = 0;
+  while (stack.length > 0 && count < 2000) {
+    count += 1;
+    stack.push(...childrenOf(stack.pop()));
+  }
+  return count;
+}
+
 /** One line a person can read: what the change does, to which element. Agent text is quoted. */
 export function describeOp(op: Op, layout: Layout | null): string {
   const target = (id: string) => (layout ? findNode(layout, id) : null);
   switch (op.kind) {
     case "insert": {
       const parent = target(op.parentId);
-      return `Add ${nameOf(op.node)}${quoted(textOf(op.node))} to ${nameOf(parent)}`;
+      const added = `Add ${nameOf(op.node)}${quoted(textOf(op.node) ?? headingOf(op.node))} to ${nameOf(parent)}`;
+      const count = countNodes(op.node);
+      return count > 1 ? `${added} (${count} elements)` : added;
     }
     case "update": {
       const node = target(op.id);

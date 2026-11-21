@@ -75,7 +75,7 @@ the token, never the token. Calls signed in without a token are counted per user
 
 | Read | Write (draft only) | Publish (only when allowed) | Proposals (reviewed in the editor) |
 | --- | --- | --- | --- |
-| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `list_templates`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `insert_template`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
+| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `list_templates`, `get_accessibility_findings`, `list_versions`, `list_saved_sections`, `get_page_brief` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `insert_template`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
 
 - `list_element_types` lists every element with its settings, including the 1.3 marketing widgets
   (Counter, Progress bar, Countdown, Map, Price table, Price list, Call to action, Flip box,
@@ -106,6 +106,22 @@ the token, never the token. Calls signed in without a token are counted per user
   checked against the current page first: a refused one names its index (`Change 2: …`), a stale
   revision returns `CONFLICT`. `get_proposal` says whether a stored proposal still applies;
   `withdraw_proposal` removes one. A site keeps at most 100 proposals and a page at most 10 waiting for review (`REFUSED` past that).
+- **A whole page as one proposal (1.4):** `get_page_brief` takes the page's `purpose` (required,
+  up to 1,000 characters), an optional `audience` (500) and `sections` (up to 12 names of 80
+  characters), and an optional `pageId`. It returns a ready brief: those inputs echoed back as
+  data (never instructions), the site's colour, font, font size and spacing variables (id, name,
+  value) and its classes (id, name), every element type with whether it holds children and where
+  it may go (`list_element_types` with a `type` gives its props), the limits (100 changes per
+  proposal, 512 KB, 2,000 elements, 24 levels), the accessibility rules the editor checks, and the
+  steps. With a `pageId` it adds the page's root id, outline and the `baseRevision` and
+  `baseDesignRevision` to propose against. The agent creates the page with `create_page` if there
+  is none, then sends the whole page in one `propose_changes` call: one `insert` per section with
+  its children inline, `class` or `variable` changes for styles it needs, and deletes for the
+  starter content. Everything it sends is checked like any proposal; a refused change names its
+  index. In the editor's Agent tab the proposal is one card, each section named by its first
+  heading and its size ("Add Section “The menu” to Container (12 elements)"): **Preview** shows the
+  whole page on the canvas, **Accept all** applies it as one undo step, or accept section by
+  section. The local bridge's `draft_whole_page` prompt runs these steps.
 - **`emvb-mcp watch`** (1.0) is the reference way to answer them: it polls `get_requests` and runs
   your agent command (for example `--agent "claude -p"`) once per request, with the request on
   stdin and never in the command line. Run an agent limited to the EmVB tools, with no shell or
@@ -135,7 +151,8 @@ the token, never the token. Calls signed in without a token are counted per user
 - Resources: `emvb://schema/layout`, `emvb://schema/design`, `emvb://docs/layout-format`,
   `emvb://elements`, `emvb://site/styles`, and each page's draft as `emvb://pages/{pageId}/layout`
   or its accessibility findings as `emvb://pages/{pageId}/a11y`.
-- Prompts: `build_landing_page`, `fix_accessibility`, `restyle_site` and `review_page`.
+- Prompts: `build_landing_page`, `fix_accessibility`, `restyle_site`, `review_page` and
+  `draft_whole_page` (1.4: purpose, audience, sections and an optional page id; see above).
 - The `emvb-page-builder` skill (`skill://emvb-page-builder/SKILL.md` and its references, including
   a design guide) teaches an agent the workflow. It is also in the package's `skill/` folder, to
   copy into an agent's skills directory.

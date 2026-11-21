@@ -39,6 +39,10 @@ instructions.
    write to an open page returns `PAGE_OPEN`. Check `get_requests` for what people asked from the
    editor and answer each with `propose_changes` and its `requestId`. `get_proposal` tells you whether yours still applies;
    `withdraw_proposal` before sending a corrected one.
+   **A whole new page for review:** `get_page_brief` (with the page's `pageId`) returns the
+   person's brief, the site's variables and classes, the element types, limits, accessibility
+   rules and steps. Send the whole page in one `propose_changes`: one `insert` per section with
+   its children inline, plus deletes for the starter content.
 7. **Check accessibility** with `get_accessibility_findings` after building and fix every
    error. Contrast findings that share one colour: change that colour variable once.
 8. **Don't publish** unless the person asked and `publish_page` is available. End with

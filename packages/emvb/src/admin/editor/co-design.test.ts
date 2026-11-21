@@ -138,4 +138,33 @@ describe("co-design review (W-930)", () => {
     const op = { kind: "update", id: "head0001", set: { props: { text: "invoice\u202Efdp.exe" } } };
     expect(describeOp(op as never, layout())).toBe("Change Heading text to “invoicefdp.exe”");
   });
+
+  test("W-1064: a whole section is named by its first heading and its size in a review line", () => {
+    const node = {
+      id: "sect0001",
+      type: "layout-section",
+      props: {},
+      children: [
+        {
+          id: "cont0001",
+          type: "container",
+          props: {},
+          children: [
+            { id: "text0009", type: "text", props: { text: "Intro" } },
+            { id: "head0009", type: "heading", props: { text: "The menu", level: 2 } },
+            { id: "head0010", type: "heading", props: { text: "Later", level: 3 } },
+          ],
+        },
+      ],
+    };
+    const op = { kind: "insert", parentId: "root0001", index: 0, node };
+    expect(describeOp(op as never, layout())).toBe(
+      "Add Section “The menu” to Container (5 elements)",
+    );
+    const bare = {
+      ...op,
+      node: { id: "sect0002", type: "layout-section", props: {}, children: [] },
+    };
+    expect(describeOp(bare as never, layout())).toBe("Add Section to Container");
+  });
 });
