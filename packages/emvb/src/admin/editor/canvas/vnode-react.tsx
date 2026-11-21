@@ -41,6 +41,8 @@ const BOOLEAN_ATTRS = new Set([
   "autoplay",
   "required",
   "novalidate",
+  // W-1065: a form's Previous and Next buttons, shown only by the forms script.
+  "hidden",
 ]);
 
 /** SVG tags the core keeps lowercase; the SVG namespace only knows their camelCase names. */

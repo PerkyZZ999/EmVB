@@ -5,7 +5,7 @@
  * EmVB's sanitizers before it lands in a node.
  */
 import { MAX_TABS, MAX_TEXT_LENGTH } from "../../limits.ts";
-import { FIELD_NAME_PATTERN, ICON_SVG_MAX } from "../../schema/layout.ts";
+import { FIELD_NAME_PATTERN, ICON_SVG_MAX, MAX_INPUT_NUMBER } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
 import { type ImportContext, type MenuLink, svgFileId } from "./context.ts";
@@ -1490,13 +1490,60 @@ const FIELD_TYPES: Record<string, string> = {
   acceptance: "checkbox",
 };
 
+/** W-1065: an Elementor date limit as YYYY-MM-DD (its date picker also allows "today"). */
+const ELEMENTOR_DATE = /^[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
+const isoDate = (value: unknown) => {
+  const text = str(value)?.trim() ?? "";
+  if (!ELEMENTOR_DATE.test(text)) return undefined;
+  const [y, m, d] = text.split("-").map(Number) as [number, number, number];
+  const day = new Date(Date.UTC(y, m - 1, d));
+  return day.getUTCMonth() === m - 1 && day.getUTCDate() === d ? text : undefined;
+};
+const inputNumber = (value: unknown) => {
+  const n = num(value);
+  return n !== undefined && Math.abs(n) <= MAX_INPUT_NUMBER ? n : undefined;
+};
+
+const defined = (props: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(props).filter(([, value]) => value !== undefined));
+
+/** W-1065: a number or date field's own box and limits. */
+function typedField(type: string, raw: Settings): Record<string, unknown> {
+  if (type === "number") {
+    const min = inputNumber(raw["field_min"]);
+    const max = inputNumber(raw["field_max"]);
+    const range = min !== undefined && max !== undefined && min > max ? {} : { min, max };
+    return defined({ inputType: "number", ...range });
+  }
+  if (type === "date") {
+    const minDate = isoDate(raw["min_date"]);
+    const maxDate = isoDate(raw["max_date"]);
+    const range = minDate && maxDate && minDate > maxDate ? {} : { minDate, maxDate };
+    return defined({ inputType: "date", ...range });
+  }
+  return {};
+}
+
+const MAX_FORM_STEPS = 20;
+
 const form: Widget = (s, ctx, el) => {
   const fields = Array.isArray(s["form_fields"]) ? s["form_fields"].slice(0, 100) : [];
-  const children: N[] = [];
+  const loose: N[] = [];
+  const steps: { title: string; children: N[] }[] = [];
   const names = new Set<string>();
+  let nextLabel = "";
+  let prevLabel = "";
   fields.forEach((raw, i) => {
     if (!isRecord(raw)) return;
     const type = str(raw["field_type"]) ?? "text";
+    // W-1065: a Step field starts a step; the fields after it, up to the next, are its fields.
+    if (type === "step") {
+      if (steps.length >= MAX_FORM_STEPS) return;
+      steps.push({ title: plain(raw["field_label"]).text.slice(0, 200), children: [] });
+      nextLabel ||= plain(raw["next_button"]).text.slice(0, 80);
+      prevLabel ||= plain(raw["previous_button"]).text.slice(0, 80);
+      return;
+    }
     const nodeType = FIELD_TYPES[type];
     if (!nodeType) {
       ctx.note("skipped", el, `Form field type "${type}" was left out.`);
@@ -1510,14 +1557,24 @@ const form: Widget = (s, ctx, el) => {
       plain(raw["field_label"]).text.slice(0, 200) ||
       (type === "acceptance" ? plain(raw["acceptance_text"]).text.slice(0, 200) : "");
     const placeholder = plain(raw["placeholder"]).text.slice(0, 200);
-    children.push(
-      node(ctx, nodeType, {
-        field: name,
-        ...(label ? { label } : {}),
-        ...(placeholder && nodeType !== "checkbox" ? { placeholder } : {}),
-      }),
-    );
+    const field = node(ctx, nodeType, {
+      field: name,
+      ...(label ? { label } : {}),
+      ...(placeholder && nodeType !== "checkbox" ? { placeholder } : {}),
+      ...typedField(type, raw),
+    });
+    const step = steps[steps.length - 1];
+    if (step) step.children.push(field);
+    else loose.push(field);
   });
+  // Fields before the first Step field are a step of their own, as Elementor shows them.
+  if (steps.length > 0 && loose.length > 0) steps.unshift({ title: "", children: loose.splice(0) });
+  const children: N[] = [
+    ...loose,
+    ...steps.map((step) =>
+      node(ctx, "form-step", step.title ? { title: step.title } : {}, { children: step.children }),
+    ),
+  ];
   const label = plain(s["button_text"]).text.slice(0, 80) || "Send";
   children.push(node(ctx, "submit", { label }));
   ctx.note(
@@ -1525,8 +1582,24 @@ const form: Widget = (s, ctx, el) => {
     el,
     "Connect each imported form to a form in the forms plugin; field options and email actions weren't imported.",
   );
+  if (steps.length > 0) {
+    ctx.note(
+      "approximated",
+      el,
+      'Form steps became EmVB form steps; one Next and one Previous label serve every step, and the step indicator is EmDash\'s "Step 1 of 3".',
+    );
+  }
+  const labels = {
+    ...(steps.length > 0 && nextLabel ? { nextLabel } : {}),
+    ...(steps.length > 0 && prevLabel ? { prevLabel } : {}),
+  };
   return [
-    node(ctx, "form", { formId: "" }, { style: { gap: { value: 10, unit: "px" } }, children }),
+    node(
+      ctx,
+      "form",
+      { formId: "", ...labels },
+      { style: { gap: { value: 10, unit: "px" } }, children },
+    ),
   ];
 };
 

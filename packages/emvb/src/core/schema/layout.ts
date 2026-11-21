@@ -537,6 +537,21 @@ export const FormNode = parentNode(
   z.strictObject({
     /** Empty until the editor binds a forms-plugin form (W-036). */
     formId: z.string().max(64),
+    /** W-1065: the Next and Previous buttons of a form with steps. Unset: "Next", "Previous". */
+    nextLabel: z.string().max(80).optional(),
+    prevLabel: z.string().max(80).optional(),
+  }),
+);
+
+/**
+ * W-1065: one step of a form, placed directly inside it. With the forms script the visitor sees
+ * one step at a time; without it every step shows, as one long form. All steps send together.
+ */
+export const FormStepNode = parentNode(
+  "form-step",
+  z.strictObject({
+    /** The step's legend, read out when it opens. Unset: "Step 2". */
+    title: z.string().max(200).optional(),
   }),
 );
 
@@ -546,7 +561,36 @@ const InputFieldProps = z.strictObject({
   placeholder: z.string().max(200).optional(),
 });
 
-export const TextInputNode = leafNode("text-input", InputFieldProps);
+/** W-1065: the most a number input's limits and step may be, either way. */
+export const MAX_INPUT_NUMBER = 1e12;
+const InputNumber = z.number().min(-MAX_INPUT_NUMBER).max(MAX_INPUT_NUMBER);
+/** A calendar date as date inputs take it: YYYY-MM-DD, a real day of years 1000 to 9999. */
+const InputDate = z
+  .string()
+  .regex(/^[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/, "Dates are YYYY-MM-DD")
+  .refine((value) => {
+    const [y, m, d] = value.split("-").map(Number) as [number, number, number];
+    const day = new Date(Date.UTC(y, m - 1, d));
+    return day.getUTCMonth() === m - 1 && day.getUTCDate() === d;
+  }, "That day doesn't exist");
+
+/** W-1065: input kinds a Text input may ask for when its form field is plain text. */
+export const TEXT_INPUT_TYPES = ["number", "date"] as const;
+
+export const TextInputNode = leafNode(
+  "text-input",
+  InputFieldProps.extend({
+    /** W-1065: a number or date box; the form field's own type (email, number, date) wins. */
+    inputType: z.enum(TEXT_INPUT_TYPES).optional(),
+    /** Lowest and highest number, and the step between allowed numbers (unset: any). */
+    min: InputNumber.optional(),
+    max: InputNumber.optional(),
+    step: z.number().positive().max(MAX_INPUT_NUMBER).optional(),
+    /** Earliest and latest date (YYYY-MM-DD). */
+    minDate: InputDate.optional(),
+    maxDate: InputDate.optional(),
+  }),
+);
 
 export const TextareaNode = leafNode("textarea", InputFieldProps);
 
@@ -806,6 +850,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "hotspot",
   "search-form",
   "theme-toggle",
+  "form-step",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1496,6 +1541,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   IconNode,
   VideoNode,
   FormNode,
+  FormStepNode,
   TextInputNode,
   TextareaNode,
   SelectNode,
@@ -1674,7 +1720,13 @@ export type TabsNode = NodeEnvelope & {
 
 export type FormNode = NodeEnvelope & {
   type: "form";
-  props: { formId: string };
+  props: { formId: string; nextLabel?: string; prevLabel?: string };
+  children: LayoutNode[];
+};
+
+export type FormStepNode = NodeEnvelope & {
+  type: "form-step";
+  props: { title?: string };
   children: LayoutNode[];
 };
 
@@ -1787,6 +1839,7 @@ export type LayoutNode =
   | TabsNode
   | TabPanelNode
   | FormNode
+  | FormStepNode
   | LoopNode
   | LoopEmptyNode
   | SectionNode
@@ -1960,6 +2013,8 @@ export const isContainerNode = (node: LayoutNode): node is ContainerNode =>
 
 export const isFormNode = (node: LayoutNode): node is FormNode => node.type === "form";
 
+export const isFormStepNode = (node: LayoutNode): node is FormStepNode => node.type === "form-step";
+
 export const isLoopNode = (node: LayoutNode): node is LoopNode => node.type === "loop";
 
 /**
@@ -1999,7 +2054,8 @@ export const isLayoutParentNode = (
   | LoopEmptyNode
   | AccordionItemNode
   | MenuItemNode
-  | CarouselSlideNode =>
+  | CarouselSlideNode
+  | FormStepNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -2010,7 +2066,8 @@ export const isLayoutParentNode = (
   node.type === "loop-empty" ||
   node.type === "accordion-item" ||
   node.type === "menu-item" ||
-  node.type === "carousel-slide";
+  node.type === "carousel-slide" ||
+  node.type === "form-step";
 
 /** Nodes that may hold children. */
 export const isParentNode = (
@@ -2022,6 +2079,7 @@ export const isParentNode = (
   | FlexboxNode
   | GridNode
   | FormNode
+  | FormStepNode
   | LoopNode
   | LoopEmptyNode
   | SectionNode
@@ -2044,6 +2102,7 @@ export const isParentNode = (
   node.type === "flexbox" ||
   node.type === "grid" ||
   node.type === "form" ||
+  node.type === "form-step" ||
   node.type === "loop" ||
   node.type === "loop-empty" ||
   node.type === "part-ref" ||

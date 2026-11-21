@@ -192,8 +192,10 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `image` | src, alt, decorative, width, height, mediaId, priority, href, newTab, caption, focalX, focalY, sources, edit |
 | `icon` | iconId, iconSvg, singleColor, size, decorative, title, href, newTab |
 | `video` | url, title, mediaId |
-| `form` | formId |
-| `text-input`, `textarea`, `select`, `radio` | field, label, placeholder |
+| `form` | formId, nextLabel, prevLabel |
+| `form-step` | title |
+| `text-input` | field, label, placeholder, inputType, min, max, step, minDate, maxDate |
+| `textarea`, `select`, `radio` | field, label, placeholder |
 | `checkbox` | field, label |
 | `submit` | label |
 | `post-title` | level |

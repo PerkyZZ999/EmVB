@@ -69,6 +69,7 @@ import {
   UserIcon,
   VideoCameraIcon,
   WarningCircleIcon,
+  StepsIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
 export type ElementIconComponent = typeof SquaresFourIcon;
@@ -128,6 +129,7 @@ export const ELEMENT_ICONS: Record<string, ElementIconComponent> = {
   "theme-toggle": MoonIcon,
   video: VideoCameraIcon,
   form: ArticleIcon,
+  "form-step": StepsIcon,
   "text-input": TextboxIcon,
   textarea: TextAaIcon,
   select: CaretCircleDownIcon,

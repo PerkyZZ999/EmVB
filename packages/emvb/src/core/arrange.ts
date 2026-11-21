@@ -69,6 +69,7 @@ export const REASONS = {
   nestedForm: "A form can't go inside another form.",
   searchInForm: "A Search form can't go inside a form.",
   fieldOutsideForm: "Form fields must be placed inside a form.",
+  stepOutsideForm: "Form steps can only go directly inside a form.",
   formIntoField: "A form can only go inside a layout container.",
   tabOutsideTabs: "Tab panels can only go inside Tabs.",
   onlyTabPanels: "Tabs can only hold tab panels.",
@@ -209,6 +210,8 @@ export function parentChildRefusal(
   // W-1073: a Search form is a <form> too; inside a form its button sent that form.
   if (child.type === "search-form" && inForm) return REASONS.searchInForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
+  // W-1065: the forms script pages through the form's own steps; a nested one would never show.
+  if (child.type === "form-step" && !isFormNode(parent)) return REASONS.stepOutsideForm;
   return undefined;
 }
 

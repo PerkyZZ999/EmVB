@@ -533,3 +533,71 @@ describe("Mega menu over MCP (W-1069)", () => {
     expect(JSON.stringify(refused.error)).toContain("panelWidth");
   });
 });
+
+describe("Form steps, numbers and dates over MCP (W-1065)", () => {
+  test("list_element_types describes form-step and where it and its fields go", async () => {
+    const all = await catalogue();
+    const step = all.get("form-step") as
+      | (Element & { allowedParents: string[]; notes?: string })
+      | undefined;
+    expect(step?.name).toBe("Form step");
+    expect(step?.allowedParents).toEqual(["form"]);
+    expect(step?.notes).toContain("one step at a time");
+    const input = all.get("text-input") as (Element & { allowedParents: string[] }) | undefined;
+    expect(input?.allowedParents).toContain("form-step");
+    expect(Object.keys(input?.props.properties ?? {})).toEqual(
+      expect.arrayContaining(["inputType", "min", "max", "step", "minDate", "maxDate"]),
+    );
+  });
+
+  test("add_element builds a stepped form; a step outside a form or a bad date is refused", async () => {
+    const pageId = await newPage();
+    const added = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "form",
+        props: { formId: "trip", nextLabel: "Continue" },
+        children: [
+          {
+            type: "form-step",
+            props: { title: "When" },
+            children: [
+              {
+                type: "text-input",
+                props: {
+                  field: "arrive",
+                  label: "Arrive",
+                  inputType: "date",
+                  minDate: "2026-01-01",
+                },
+              },
+            ],
+          },
+          { type: "submit", props: {} },
+        ],
+      },
+    });
+    expect(added.success).toBe(true);
+    const outside = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "form-step", props: { title: "Lost" } },
+    });
+    expect(outside.success).toBe(false);
+    expect(JSON.stringify(outside.error)).toContain(
+      "Form steps can only go directly inside a form",
+    );
+    const badDate = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "form",
+        props: { formId: "trip" },
+        children: [{ type: "text-input", props: { field: "a", minDate: "2026-02-30" } }],
+      },
+    });
+    expect(badDate.success).toBe(false);
+    expect(JSON.stringify(badDate.error)).toContain("minDate");
+  });
+});

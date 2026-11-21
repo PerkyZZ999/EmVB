@@ -34,7 +34,7 @@ test("a blank text or radio label renders no empty label (W-587)", () => {
 
 // W-753: with no label and no placeholder, nothing named the field for a screen reader.
 test("a field with no label is named by its field name (W-753)", () => {
-  const input = (props: Record<string, string>) =>
+  const input = (props: TextInputNode["props"]) =>
     text(textInput.build({ id: "ti000002", type: "text-input", props } as TextInputNode, {}, []));
   expect(input({ field: "email", label: " " })).toContain('"aria-label":"email"');
   expect(input({ field: "email", label: "Email" })).not.toContain("aria-label");

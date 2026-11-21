@@ -8,6 +8,7 @@ import { XSS_CORPUS } from "../../../../test/fixtures/xss.ts";
 import { renderPage } from "../../render/index.ts";
 import { emptyDesign } from "../../schema/design.ts";
 import type { Layout, LayoutNode } from "../../schema/layout.ts";
+import { nestingIssues } from "../../nesting.ts";
 import { validateLayout } from "../../validate.ts";
 import { htmlToBlocks } from "./html.ts";
 import {
@@ -1382,5 +1383,67 @@ describe("Elementor import: the 1.4 widgets", () => {
     });
     expect(props(ofType(result.layout, "search-form")[0])).toEqual({});
     expect(notes(result)).toContain("Search forms show a field and a Search button.");
+  });
+});
+
+describe("Elementor form steps, numbers and dates (W-1065)", () => {
+  const form = (fields: Record<string, unknown>[]) =>
+    ok(
+      importElementor(
+        JSON.stringify([
+          {
+            id: "w",
+            elType: "widget",
+            widgetType: "form",
+            settings: { form_fields: fields, button_text: "Book" },
+          },
+        ]),
+        { icon },
+      ),
+    );
+
+  test("Step fields become form steps holding the fields after them", () => {
+    const result = form([
+      { field_type: "text", custom_id: "intro", field_label: "Intro" },
+      { field_type: "step", field_label: "You", next_button: "Onward", previous_button: "Back" },
+      { field_type: "email", custom_id: "email", field_label: "Email" },
+      { field_type: "step", field_label: "Trip", next_button: "Ignored" },
+      { field_type: "number", custom_id: "guests", field_min: "1", field_max: 12 },
+      { field_type: "date", custom_id: "arrive", min_date: "2026-01-01", max_date: "bad" },
+    ]);
+    const built = ofType(result.layout, "form")[0];
+    expect(props(built)).toEqual({ formId: "", nextLabel: "Onward", prevLabel: "Back" });
+    expect(built?.children?.map((c) => [c.type, props(c)["title"] ?? props(c)["label"]])).toEqual([
+      ["form-step", undefined],
+      ["form-step", "You"],
+      ["form-step", "Trip"],
+      ["submit", "Book"],
+    ]);
+    const [first, you, trip] = built?.children ?? [];
+    expect(first?.children?.map((c) => props(c)["field"])).toEqual(["intro"]);
+    expect(you?.children?.map((c) => props(c)["field"])).toEqual(["email"]);
+    expect(trip?.children?.map(props)).toEqual([
+      { field: "guests", inputType: "number", min: 1, max: 12 },
+      { field: "arrive", inputType: "date", minDate: "2026-01-01" },
+    ]);
+    expect(validateLayout(result.layout).ok).toBe(true);
+    expect(nestingIssues(result.layout)).toEqual([]);
+    expect(notes(result)).toContain("Form steps became EmVB form steps");
+  });
+
+  test("a form without steps has none, and an empty range or a non-day is left off", () => {
+    const result = form([
+      { field_type: "number", custom_id: "n", field_min: 9, field_max: 1 },
+      { field_type: "date", custom_id: "d", min_date: "2026-02-30", max_date: "2026-03-01" },
+    ]);
+    const built = ofType(result.layout, "form")[0];
+    expect(props(built)).toEqual({ formId: "" });
+    expect(built?.children?.map(props)).toEqual([
+      { field: "n", inputType: "number" },
+      { field: "d", inputType: "date", maxDate: "2026-03-01" },
+      { label: "Book" },
+    ]);
+    expect(validateLayout(result.layout).ok).toBe(true);
+    expect(notes(result)).not.toContain("Form steps");
   });
 });

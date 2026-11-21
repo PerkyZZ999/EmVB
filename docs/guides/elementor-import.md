@@ -137,7 +137,9 @@ copy ("Card 2"). The page looks the same either way.
 These keep their content in the closest EmVB form, and the report says so:
 
 - **Pro widgets:** Form (its fields; connect it to a form in the forms plugin), Blockquote, Table
-  of Contents, Code Highlight.
+  of Contents, Code Highlight. A multi-step form keeps its steps as Form steps, with the first
+  step's Next and Previous labels for all of them; number and date fields keep their box and
+  their lowest/highest number or earliest/latest date.
 - **Hover effects** of Call to Action boxes and the exact look of Elementor's highlight shapes
   (curly, zigzag and double lines become an underline; an X becomes a strike).
 - **Text formatting** inside headings and paragraphs keeps bold, italic, coloured and linked words,

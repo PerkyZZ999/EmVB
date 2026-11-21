@@ -344,3 +344,55 @@ describe("mega menu (W-1069)", () => {
     ]);
   });
 });
+
+describe("form steps (W-1065)", () => {
+  const field = (id: string) => ({
+    id,
+    type: "text-input",
+    props: { field: id, label: "Name" },
+  });
+  const step = (id: string, title: string | undefined, children: unknown[]) => ({
+    id,
+    type: "form-step",
+    props: title === undefined ? {} : { title },
+    children,
+  });
+  const form = (...children: unknown[]) => ({
+    id: "form0001",
+    type: "form",
+    props: { formId: "f" },
+    children,
+  });
+
+  test("titled steps with fields, and a Submit outside them, are fine", () => {
+    expect(
+      audit(
+        form(
+          step("step0001", "You", [field("inpt0001")]),
+          step("step0002", "Trip", [field("inpt0002")]),
+          { id: "subm0001", type: "submit", props: {} },
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  test("an untitled step, an empty step and a field outside the steps warn", () => {
+    expect(
+      audit(
+        form(
+          field("inpt0009"),
+          step("step0001", " ", [field("inpt0001")]),
+          step("step0002", "Extras", []),
+        ),
+      ),
+    ).toEqual([
+      "form-steps:warning:inpt0009",
+      "form-steps:warning:step0001",
+      "form-steps:warning:step0002",
+    ]);
+  });
+
+  test("a form without steps has nothing to say about them", () => {
+    expect(audit(form(field("inpt0001")))).toEqual([]);
+  });
+});

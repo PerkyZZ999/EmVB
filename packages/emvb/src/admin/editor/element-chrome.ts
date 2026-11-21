@@ -65,6 +65,7 @@ import {
   VideoCameraIcon,
   WarningCircleIcon,
   type Icon,
+  StepsIcon,
 } from "@phosphor-icons/react";
 import { ELEMENT_DESCRIPTORS } from "../../core/index.ts";
 
@@ -132,6 +133,7 @@ export const ELEMENT_ICONS: Record<string, Icon> = {
   hotspot: NumberCircleOneIcon,
   video: VideoCameraIcon,
   form: ArticleIcon,
+  "form-step": StepsIcon,
   "text-input": TextboxIcon,
   textarea: TextAaIcon,
   select: CaretCircleDownIcon,

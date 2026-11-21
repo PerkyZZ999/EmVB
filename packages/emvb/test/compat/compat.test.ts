@@ -59,6 +59,7 @@ const ADDED_IN_1X: Record<string, string> = {
   "language-switcher": "1.0 (W-937): src/core/render/language-switcher.test.ts",
   "search-form": "1.4 (W-1073): src/core/elements/site.test.ts",
   "theme-toggle": "1.4 (W-1067): src/core/elements/site.test.ts",
+  "form-step": "1.4 (W-1065): src/core/render/form-steps.test.ts",
   rating: "1.2 (W-1023): src/core/elements/widgets.test.ts",
   alert: "1.2 (W-1025): src/core/elements/widgets.test.ts",
   "icon-box": "1.2 (W-1020): src/core/elements/widgets.test.ts",

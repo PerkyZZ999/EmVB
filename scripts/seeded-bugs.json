@@ -54712,6 +54712,290 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1065/steps-not-pages",
+      "requirement": "W-1065",
+      "description": "Form steps render without the forms plugin's data-page, so its script can't page through them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "          \"data-page\": String(page),\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-steps.test.ts",
+        "-t",
+        "each step is one of the forms plugin's pages"
+      ],
+      "expect": "\\(fail\\).*each step is one of the forms plugin's pages"
+    },
+    {
+      "id": "W-1065/nav-shown-without-script",
+      "requirement": "W-1065",
+      "description": "The Previous and Next buttons render visible, so without the script they show and do nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "attrs: { type: \"button\", class: cls, [data]: \"\", hidden: \"\" },",
+          "replace": "attrs: { type: \"button\", class: cls, [data]: \"\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-steps.test.ts",
+        "-t",
+        "each step is one of the forms plugin's pages"
+      ],
+      "expect": "\\(fail\\).*each step is one of the forms plugin's pages"
+    },
+    {
+      "id": "W-1065/step-anywhere",
+      "requirement": "W-1065",
+      "description": "A form step may be dropped anywhere, not only directly inside a form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (child.type === \"form-step\" && !isFormNode(parent)) return REASONS.stepOutsideForm;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-steps.test.ts",
+        "-t",
+        "a step goes only directly inside a form"
+      ],
+      "expect": "\\(fail\\).*a step goes only directly inside a form"
+    },
+    {
+      "id": "W-1065/empty-range-kept",
+      "requirement": "W-1065",
+      "description": "A number range whose lowest is above its highest is written to the page, so no answer can pass.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/input-limits.ts",
+          "search": "...range(lo, hi, Number(lo) > Number(hi)),",
+          "replace": "...range(lo, hi, false),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-steps.test.ts",
+        "-t",
+        "untrusted limits"
+      ],
+      "expect": "\\(fail\\).*untrusted limits"
+    },
+    {
+      "id": "W-1065/text-field-type-ignored",
+      "requirement": "W-1065",
+      "description": "A Text input bound to a plain text field ignores its Asks for (number or date).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "        ? own?.inputType\n",
+          "replace": "        ? undefined\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-steps.test.ts",
+        "-t",
+        "a plain text field asked for as a number or a date"
+      ],
+      "expect": "\\(fail\\).*a plain text field asked for as a number or a date"
+    },
+    {
+      "id": "W-1065/no-aria-invalid",
+      "requirement": "W-1065",
+      "description": "A field with a message is never marked aria-invalid.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms/enhance.ts",
+          "search": "      if (invalid) control.setAttribute(\"aria-invalid\", \"true\");\n",
+          "replace": "      if (invalid) void control;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/forms/enhance.test.ts",
+        "-t",
+        "Next with an empty required field"
+      ],
+      "expect": "\\(fail\\).*Next with an empty required field"
+    },
+    {
+      "id": "W-1065/invalid-not-focused",
+      "requirement": "W-1065",
+      "description": "Submit with a field to fix leaves focus where it was.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms/enhance.ts",
+          "search": "  if (!first) return false;\n  first.focus();\n",
+          "replace": "  if (!first) return false;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/forms/enhance.test.ts",
+        "-t",
+        "Submit with a field to fix focuses the first one"
+      ],
+      "expect": "\\(fail\\).*Submit with a field to fix focuses the first one"
+    },
+    {
+      "id": "W-1065/server-error-not-focused",
+      "requirement": "W-1065",
+      "description": "A field error from the server is shown but focus stays on the Submit button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms/enhance.ts",
+          "search": "    if (focusFirstInvalid(form)) sending.delete(form);\n    else if",
+          "replace": "    if (false) sending.delete(form);\n    else if"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/forms/enhance.test.ts",
+        "-t",
+        "a server error written after the send"
+      ],
+      "expect": "\\(fail\\).*a server error written after the send"
+    },
+    {
+      "id": "W-1065/step-not-focused",
+      "requirement": "W-1065",
+      "description": "A step that opens doesn't take focus, so its title isn't read out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms/enhance.ts",
+          "search": "  openStep(form)?.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/forms/enhance.test.ts",
+        "-t",
+        "a valid step opens the next one"
+      ],
+      "expect": "\\(fail\\).*a valid step opens the next one"
+    },
+    {
+      "id": "W-1065/a11y-untitled-step",
+      "requirement": "W-1065",
+      "description": "The accessibility check says nothing about a form step with no title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "        if (!title && !child.bind) {\n",
+          "replace": "        if (false) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/a11y/widgets.test.ts",
+        "-t",
+        "an untitled step, an empty step"
+      ],
+      "expect": "\\(fail\\).*an untitled step, an empty step"
+    },
+    {
+      "id": "W-1065/elementor-steps-flattened",
+      "requirement": "W-1065",
+      "description": "Elementor Step fields are dropped and the form loses its steps.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "    if (type === \"step\") {\n",
+          "replace": "    if (type === \"step\" && false) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor.test.ts",
+        "-t",
+        "Step fields become form steps"
+      ],
+      "expect": "\\(fail\\).*Step fields become form steps"
+    },
+    {
+      "id": "W-1065/mcp-step-fields-outside-form",
+      "requirement": "W-1065",
+      "description": "list_element_types says fields can't go in a form step.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/read.ts",
+          "search": "    if (parentType === \"form-step\") return parentChildRefusal(parent, child, true) === undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-widgets.test.ts",
+        "-t",
+        "list_element_types describes form-step"
+      ],
+      "expect": "\\(fail\\).*list_element_types describes form-step"
+    },
+    {
+      "id": "W-1065/e2e-submit-shown-early",
+      "requirement": "W-1065",
+      "description": "The Submit button's own display beats [hidden], so it shows on the first step (found by the e2e).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": ".emvb-form-step-nav [hidden],.emvb-form .ec-form-submit[hidden]{display:none!important}",
+          "replace": ".emvb-form-step-nav [hidden]{display:none!important}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/form-steps.e2e.ts",
+        "--project=node",
+        "-g",
+        "goes through the steps"
+      ],
+      "expect": "\\d+ failed"
+    },
+    {
+      "id": "W-1065/e2e-enhance-not-loaded",
+      "requirement": "W-1065",
+      "description": "The forms runtime loads only the plugin's script, so fields are never marked invalid nor focused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms/EmVBFormsClient.astro",
+          "search": "  initForms();\n  enhanceForms();\n",
+          "replace": "  initForms();\n  void enhanceForms;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/form-steps.e2e.ts",
+        "--project=node",
+        "-g",
+        "goes through the steps"
+      ],
+      "expect": "\\d+ failed"
     }
   ]
 }

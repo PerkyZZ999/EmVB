@@ -1,14 +1,17 @@
 import { selectPrompt } from "./select-prompt.ts";
 import { controlId } from "./field-id.ts";
+import { typedInputAttrs } from "./input-limits.ts";
 import type {
   CheckboxNode,
   FormNode,
+  FormStepNode,
   RadioNode,
   SelectNode,
   SubmitNode,
   TextInputNode,
   TextareaNode,
 } from "../schema/layout.ts";
+import { MAX_INPUT_NUMBER } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import type { ElementDefinition } from "./definition.ts";
@@ -57,12 +60,64 @@ export const form: ElementDefinition<FormNode> = {
   defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
   descriptor: fieldDescriptor("form", "Form", [
     { key: "formId", kind: "text", label: "Form id", message: "Paste a forms-plugin form id." },
+    {
+      key: "nextLabel",
+      kind: "text",
+      label: "Next button",
+      optional: true,
+      message: 'For a form with steps. Leave it empty for "Next".',
+    },
+    {
+      key: "prevLabel",
+      kind: "text",
+      label: "Previous button",
+      optional: true,
+      message: 'For a form with steps. Leave it empty for "Previous".',
+    },
   ]),
   build: (_node, attrs, children) => ({
     tag: "form",
     attrs,
     children,
   }),
+};
+
+/**
+ * W-1065: a form step. The form renders it as a page of the forms plugin's multi-page markup
+ * (`data-page`, render/form.ts); on its own it is a fieldset named by its title.
+ */
+export const formStep: ElementDefinition<FormStepNode> = {
+  baseCss:
+    ".emvb-form-step{display:flex;flex-direction:column;gap:12px;min-width:0;margin:0;padding:0;border:0}.emvb-form-step[hidden]{display:none!important}.emvb-form-step:focus{outline:none}" +
+    ":where(.emvb-form-step-title){float:left;width:100%;margin:0 0 4px;padding:0;font-weight:700;font-size:1.125em}" +
+    ".emvb-form-step-nav{display:flex;flex-wrap:wrap;gap:8px}.emvb-form-step-nav [hidden],.emvb-form .ec-form-submit[hidden]{display:none!important}" +
+    ":where(.emvb-form-step-nav button){padding:.5em 1em;font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;cursor:pointer}" +
+    ":where(.emvb-form-step-nav button:focus-visible){outline:2px solid currentColor;outline-offset:2px}" +
+    ".emvb-form-step-progress{margin:0}.emvb-form-step-progress:empty{display:none}" +
+    "@media (prefers-reduced-motion:no-preference){.emvb-form-step[data-page]:not([hidden]){animation:emvb-form-step-in .2s ease-out}}@keyframes emvb-form-step-in{from{opacity:0;transform:translateY(6px)}}",
+  defaults: () => ({ type: "form-step", props: { title: "Step" }, children: [] }),
+  descriptor: fieldDescriptor("form-step", "Form step", [
+    {
+      key: "title",
+      kind: "text",
+      label: "Title",
+      optional: true,
+      message: 'Read out when the step opens. Leave it empty for "Step 2".',
+    },
+  ]),
+  build: (node, attrs, children) => {
+    const title = node.props.title?.trim();
+    return {
+      tag: "fieldset",
+      attrs,
+      children: [
+        ...(title
+          ? [{ tag: "legend", attrs: { class: "emvb-form-step-title" }, children: [title] }]
+          : []),
+        ...children,
+      ],
+    };
+  },
 };
 
 /** Where the forms runtime writes a field's validation message. */
@@ -146,15 +201,70 @@ const textControl = (
 export const textInput: ElementDefinition<TextInputNode> = {
   baseCss: ".emvb-text-input{display:flex;flex-direction:column;gap:4px}",
   defaults: () => ({ type: "text-input", props: { field: "name", label: "Name" } }),
-  descriptor: fieldDescriptor("text-input", "Text input", TEXT_FIELDS),
-  build: (node, attrs) =>
-    fieldWrap(
-      controlId(node.id),
-      node.props.field,
-      node.props.label,
-      textControl("input", node.props, controlId(node.id)),
-      attrs,
-    ),
+  descriptor: fieldDescriptor("text-input", "Text input", [
+    ...TEXT_FIELDS,
+    {
+      key: "inputType",
+      kind: "select",
+      label: "Asks for",
+      optional: true,
+      options: [
+        { value: "number", label: "A number" },
+        { value: "date", label: "A date" },
+      ],
+      message: "Unset: text. A form field that is an email, number or date keeps its own type.",
+    },
+    {
+      key: "min",
+      kind: "decimal",
+      label: "Lowest number",
+      optional: true,
+      min: -MAX_INPUT_NUMBER,
+      max: MAX_INPUT_NUMBER,
+    },
+    {
+      key: "max",
+      kind: "decimal",
+      label: "Highest number",
+      optional: true,
+      min: -MAX_INPUT_NUMBER,
+      max: MAX_INPUT_NUMBER,
+    },
+    {
+      key: "step",
+      kind: "decimal",
+      label: "Step",
+      optional: true,
+      min: 0.000001,
+      max: MAX_INPUT_NUMBER,
+      message: "Allowed numbers go up by this much, such as 1 or 0.5. Leave it empty for any.",
+    },
+    {
+      key: "minDate",
+      kind: "text",
+      label: "Earliest date",
+      optional: true,
+      message: "As YYYY-MM-DD, such as 2026-01-31.",
+    },
+    {
+      key: "maxDate",
+      kind: "text",
+      label: "Latest date",
+      optional: true,
+      message: "As YYYY-MM-DD, such as 2026-12-31.",
+    },
+  ]),
+  build: (node, attrs) => {
+    const control = textControl("input", node.props, controlId(node.id));
+    const type = node.props.inputType;
+    const typed: VNode = type
+      ? {
+          ...control,
+          attrs: { ...control.attrs, type, ...typedInputAttrs(type, node.props) },
+        }
+      : control;
+    return fieldWrap(controlId(node.id), node.props.field, node.props.label, typed, attrs);
+  },
 };
 
 export const textareaEl: ElementDefinition<TextareaNode> = {

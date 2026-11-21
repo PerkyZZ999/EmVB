@@ -4,7 +4,7 @@ import type { DesignSystem } from "../schema/design.ts";
 import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { boxBecomesLink } from "../render/extras.ts";
 import { ICON_ANIMATION_LIMIT_MS, iconAnimationRuns } from "../icons/animation-runs.ts";
-import { updateNode } from "../tree-ops.ts";
+import { someNode, updateNode } from "../tree-ops.ts";
 import { DEVICES } from "../theme/popup-rules.ts";
 import { hiddenOnEveryDevice } from "../design/devices.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
@@ -50,7 +50,8 @@ export type A11yIssue = {
     | "flip-box-face"
     | "countdown-title"
     | "hotspot-names"
-    | "mega-panel";
+    | "mega-panel"
+    | "form-steps";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -134,6 +135,7 @@ const TEXT_TYPES = new Set([
   "post-excerpt",
 ]);
 const FIELD_TYPES = new Set(["text-input", "textarea", "select", "checkbox", "radio"]);
+const isStep = (node: LayoutNode) => node.type === "form-step";
 const LINKISH = new Set(["link", "button", "menu-item"]);
 
 function px(value: unknown, design?: DesignSystem): number | undefined {
@@ -664,6 +666,42 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
           });
         }
         seen.add(title);
+      }
+    }
+    // W-1065: a form with steps shows one step at a time; each is read out by its title.
+    if (node.type === "form" && isParentNode(node) && node.children.some(isStep)) {
+      let place = 0;
+      for (const child of node.children) {
+        if (!isStep(child)) {
+          if (someNode(child, (n) => FIELD_TYPES.has(n.type))) {
+            add({
+              nodeId: child.id,
+              rule: "form-steps",
+              severity: "warning",
+              message:
+                "This field is outside the form's steps, so it shows on every step and isn't checked before Next. Move it into a step.",
+            });
+          }
+          continue;
+        }
+        place += 1;
+        const title = spoken((child.props as Record<string, unknown>)["title"]);
+        if (!title && !child.bind) {
+          add({
+            nodeId: child.id,
+            rule: "form-steps",
+            severity: "warning",
+            message: `This form step has no title, so screen readers only hear "Step ${place}". Give it a title, such as "Your details".`,
+          });
+        } else if (!someNode(child, (n) => FIELD_TYPES.has(n.type))) {
+          add({
+            nodeId: child.id,
+            rule: "form-steps",
+            severity: "warning",
+            message:
+              "This form step has no fields, so Next opens an empty step. Add fields or remove it.",
+          });
+        }
       }
     }
     // W-419: an empty heading still shows up in screen readers' heading list, with nothing to say.

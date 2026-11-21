@@ -69,7 +69,16 @@ import {
   socialLink,
   testimonial,
 } from "./widgets.ts";
-import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
+import {
+  checkbox,
+  form,
+  formStep,
+  radio,
+  selectEl,
+  submit,
+  textInput,
+  textareaEl,
+} from "./form-elements.ts";
 import {
   loop,
   loopEmpty,
@@ -1177,6 +1186,7 @@ export const ELEMENTS = {
   icon,
   video,
   form,
+  "form-step": formStep,
   "text-input": textInput,
   textarea: textareaEl,
   select: selectEl,

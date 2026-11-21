@@ -167,7 +167,8 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
     expect(byType.get("heading")?.props.properties).toHaveProperty("level");
     expect(byType.get("container")?.container).toBe(true);
     expect(byType.get("menu-item")?.allowedParents.toSorted()).toEqual(["menu", "menu-item"]);
-    expect(byType.get("text-input")?.allowedParents).toEqual(["form"]);
+    // W-1065: a form step sits in a form, so fields may go in one.
+    expect(byType.get("text-input")?.allowedParents).toEqual(["form", "form-step"]);
     expect(byType.get("tab-panel")?.allowedParents).toEqual(["tabs"]);
   });
 

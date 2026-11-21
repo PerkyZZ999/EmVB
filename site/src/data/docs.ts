@@ -38,6 +38,12 @@ export const DOC_GROUPS: DocGroup[] = [
         summary: "Ready-made sections and pages in your Site styles, from Add → Templates.",
       },
       {
+        slug: "forms",
+        title: "Forms",
+        summary:
+          "Forms sent to EmDash's forms plugin: steps, number and date boxes, and messages next to the fields.",
+      },
+      {
         slug: "saved-sections",
         title: "Saved sections",
         summary: "Save any element and reuse it, as a copy or synced everywhere.",

@@ -163,6 +163,8 @@ function allowedParents(type: string): string[] {
   return ELEMENT_DESCRIPTORS.map((d) => d.type).filter((parentType) => {
     const parent = sample(parentType);
     if (!isParentNode(parent)) return false;
+    // W-1065: a form step only ever sits in a form, so its fields are inside one too.
+    if (parentType === "form-step") return parentChildRefusal(parent, child, true) === undefined;
     return parentChildRefusal(parent, child, parentType === "form") === undefined;
   });
 }
@@ -190,7 +192,11 @@ export const ListElementTypesOutput = z.object({
 const ELEMENT_NOTES: Record<string, string> = {
   icon: `iconId is one of the bundled icons: ${BUNDLED_ICON_IDS.join(", ")}. Colour it with style.color; size is in px. Set decorative: true next to a text label, or give it a title.`,
   button: `iconId takes the same bundled icon ids as the icon element (${BUNDLED_ICON_IDS.slice(0, 6).join(", ")}, …). Style buttons with a site class (see get_site_styles classes) rather than per-button styles.`,
-  form: "formId is the id of a form made in the EmDash admin under Forms; there is no tool to list or create forms, so ask the person for it. An unbound form (empty formId) shows only in the editor, not on the live page. Each field's field prop must match a field name in that form; add a submit last.",
+  form: "formId is the id of a form made in the EmDash admin under Forms; there is no tool to list or create forms, so ask the person for it. An unbound form (empty formId) shows only in the editor, not on the live page. Each field's field prop must match a field name in that form; add a submit last. For a form in steps, put the fields in form-step children (one per step, each with a title) and the submit after the last step; nextLabel and prevLabel word the step buttons.",
+  "form-step":
+    "One step of a form with steps; only directly inside a form. Give it a title (read out when the step opens) and put that step's fields in it. Visitors see one step at a time and can't go on with a field to fix; all steps send together as one submission. Without the forms script every step shows.",
+  "text-input":
+    "field must match a field name in the form. For a plain text field, inputType number or date gives a number or date box: min, max and step for a number, minDate and maxDate (YYYY-MM-DD) for a date. A form field that is itself an email, number or date keeps its own type and limits.",
   loop: "A collection Loop needs collection (a collection slug such as posts); ask the person which one if unsure. The children are the item template (post-title, post-image, post-excerpt, post-link, post-date), plus an optional loop-empty shown when there are no entries.",
   tabs: "Holds only tab-panel children; each tab-panel's label is its tab. Put content inside the panels.",
   accordion:

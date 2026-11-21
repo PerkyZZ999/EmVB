@@ -5,7 +5,8 @@ import {
   type PublicFormDefinition,
   type PublicFormField,
 } from "../forms/definition.ts";
-import type { FormNode, LayoutNode } from "../schema/layout.ts";
+import type { FormNode, LayoutNode, TextInputNode } from "../schema/layout.ts";
+import { typedInputAttrs } from "../elements/input-limits.ts";
 import { selectPrompt } from "../elements/select-prompt.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
 import { nodeChildren } from "../tree-ops.ts";
@@ -98,13 +99,15 @@ export function renderForm(
     "Submit";
   const previousForm = ctx.formId;
   ctx.formId = formId;
-  const fieldNodes = ctx.children(node.children, dynamic);
-  ctx.formId = previousForm;
+  const stepped = node.children.some((child) => child.type === "form-step");
   const page: VNode = {
     tag: "div",
     attrs: { "data-page": "0" },
-    children: fieldNodes,
+    children: stepped ? [] : ctx.children(node.children, dynamic),
   };
+  // W-1065: a form with steps has a page per step instead of one around everything.
+  const pages = stepped ? steppedChildren(node, ctx, dynamic) : [page];
+  ctx.formId = previousForm;
   return {
     tag: "form",
     attrs: {
@@ -120,7 +123,7 @@ export function renderForm(
       "data-submit-label": submitLabel,
     },
     children: [
-      page,
+      ...pages,
       { tag: "input", attrs: { type: "hidden", name: "formId", value: formId }, children: [] },
       ...hiddenFields(ctx.definitions.get(formId)),
       // One id per form element, so the same form placed twice keeps unique ids (W-187), also
@@ -133,6 +136,85 @@ export function renderForm(
       },
     ],
   };
+}
+
+/** W-1065: what the Next and Previous buttons say when the form element doesn't set it. */
+const FORM_STEP_LABELS = { next: "Next", prev: "Previous" } as const;
+
+const stepLabel = (value: string | undefined, fallback: string) => value?.trim() || fallback;
+
+/** A Previous or Next button, hidden until the forms script shows it. */
+const stepButton = (data: string, text: string, cls: string): VNode => ({
+  tag: "button",
+  attrs: { type: "button", class: cls, [data]: "", hidden: "" },
+  children: [text],
+});
+
+/**
+ * W-1065: a form with steps, in the forms plugin's multi-page markup. Each step is a page
+ * (`data-page`, in order); the plugin's script shows one at a time, checks a page's fields before
+ * Next, and writes "Step 2 of 3" into `data-ec-progress`. Its Previous and Next buttons are
+ * hidden until the script shows them, so without it every step shows, as one long form, and the
+ * Submit button sends it. Anything outside the steps (an intro, the Submit button) stays put.
+ */
+function steppedChildren(
+  node: FormNode,
+  ctx: RenderContext,
+  dynamic: ThemeDynamicData | undefined,
+): VNode[] {
+  const out: VNode[] = [];
+  let page = 0;
+  let lastStep = -1;
+  for (const child of node.children) {
+    for (const vnode of ctx.children([child], dynamic)) {
+      if (child.type !== "form-step") {
+        out.push(vnode);
+        continue;
+      }
+      const titled = vnode.children.some(
+        (part) => typeof part !== "string" && part.tag === "legend",
+      );
+      out.push({
+        ...vnode,
+        attrs: {
+          ...vnode.attrs,
+          class: `${vnode.attrs.class ?? ""} ec-form-page`.trim(),
+          "data-page": String(page),
+          // The forms script moves focus here when the step opens (astro/forms/enhance.ts).
+          tabindex: "-1",
+          ...(titled ? {} : { "aria-label": `Step ${page + 1}` }),
+        },
+      });
+      page += 1;
+      lastStep = out.length - 1;
+    }
+  }
+  if (lastStep === -1) return out;
+  const nav: VNode = {
+    tag: "div",
+    attrs: { class: "emvb-form-step-nav" },
+    children: [
+      stepButton(
+        "data-ec-prev",
+        stepLabel(node.props.prevLabel, FORM_STEP_LABELS.prev),
+        "emvb-form-step-prev",
+      ),
+      stepButton(
+        "data-ec-next",
+        stepLabel(node.props.nextLabel, FORM_STEP_LABELS.next),
+        "emvb-form-step-next",
+      ),
+    ],
+  };
+  const progress: VNode = {
+    tag: "p",
+    attrs: { class: "emvb-form-step-progress", "data-ec-progress": "", "aria-live": "polite" },
+    children: [],
+  };
+  const first = out.findIndex((vnode) => vnode.attrs["data-page"] === "0");
+  out.splice(lastStep + 1, 0, nav);
+  out.splice(first, 0, progress);
+  return out;
 }
 
 /**
@@ -352,7 +434,15 @@ function lengthLimit(value: unknown, round: (n: number) => number): string | und
  * the label. Without them the forms client found nothing to check before sending.
  */
 function withFieldMeta(vnode: VNode, node: LayoutNode, meta: PublicFormField): VNode {
-  const type = node.type === "text-input" && INPUT_TYPES.has(meta.type) ? meta.type : undefined;
+  const own = node.type === "text-input" ? (node as TextInputNode).props : undefined;
+  // W-1065: a plain text field may be asked for as a number or a date; the forms plugin takes
+  // either as text. A field with its own type (email, number, date) keeps it.
+  const type =
+    node.type === "text-input" && INPUT_TYPES.has(meta.type)
+      ? meta.type
+      : meta.type === "text"
+        ? own?.inputType
+        : undefined;
   const rules = meta.validation ?? {};
   const kind = type ?? (node.type === "textarea" ? "textarea" : meta.type);
   const limits: Record<string, string> = {};
@@ -365,11 +455,12 @@ function withFieldMeta(vnode: VNode, node: LayoutNode, meta: PublicFormField): V
       if (lo !== undefined) limits.minlength = lo;
       if (hi !== undefined) limits.maxlength = hi;
     }
-    if (kind === "number") {
+    if (own && (kind === "number" || kind === "date")) {
+      // W-578: unless the element sets a step, a number takes decimals, as the forms plugin does.
+      Object.assign(limits, typedInputAttrs(kind, own, kind === "number" ? rules : {}));
+    } else if (kind === "number") {
       if (rules.min !== undefined) limits.min = String(rules.min);
       if (rules.max !== undefined) limits.max = String(rules.max);
-      // W-578: the forms plugin accepts any number; the browser's default step of 1 refused
-      // decimals (and, counted from a fractional min, every whole number).
       limits.step = "any";
     }
     if (node.type === "text-input" && kind !== "number" && kind !== "date" && rules.pattern) {
@@ -384,10 +475,12 @@ function withFieldMeta(vnode: VNode, node: LayoutNode, meta: PublicFormField): V
   };
   return mapNodes(vnode, (child) => {
     if (isControl(child)) {
+      // The element's own number or date limits were for the type it asked for, not this one.
+      const { min: _min, max: _max, step: _step, ...rest } = child.attrs;
       return {
         ...child,
         attrs: {
-          ...child.attrs,
+          ...(own ? rest : child.attrs),
           ...(type ? { type } : {}),
           ...(meta.required ? { required: "" } : {}),
           ...limits,
