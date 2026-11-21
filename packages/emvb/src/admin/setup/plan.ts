@@ -13,6 +13,8 @@ export type FieldState = {
   required?: boolean;
   validation?: { options?: string[] } | null;
   defaultValue?: unknown;
+  /** EmDash i18n: false when the field is shared by every language of an entry. */
+  translatable?: boolean;
 };
 
 export type CollectionState = {

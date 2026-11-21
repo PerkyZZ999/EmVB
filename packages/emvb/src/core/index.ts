@@ -628,6 +628,8 @@ export {
 export { portableTextToLayout } from "./portable-text.ts";
 export {
   type ElementorImport,
+  type ImportedForm,
+  type ImportedFormField,
   type ImportNote,
   type ImportOptions,
   importElementor,

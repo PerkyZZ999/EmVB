@@ -275,6 +275,13 @@ export const UI_CSS = `
 .emvb-import-report ul { margin: 4px 0 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 2px; }
 .emvb-import-report li { overflow-wrap: anywhere; }
 .emvb-import-summary { font-weight: 600; }
+.emvb-import-forms {
+  display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: 6px;
+  border-inline-start: 3px solid var(--color-kumo-warning, #b7791f); box-shadow: var(--emvb-elevation-s);
+  font-size: 13px; line-height: 1.35; color: var(--text-color-kumo-default);
+}
+.emvb-import-forms ul { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 2px; }
+.emvb-import-forms li { overflow-wrap: anywhere; }
 .emvb-list-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 /* UX-090: 16 px so the title stands above the 14 px field labels under it. */
 .emvb-dialog :is(h2, [data-slot="title"]) {

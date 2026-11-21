@@ -19,10 +19,13 @@ import type { MenuLink } from "../../core/import/elementor/context.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { loadIconSet } from "../editor/icons/library.ts";
 import { createThemePart } from "../theme-api.ts";
+import { type FormsCapability, loadFormsCapability } from "../forms-api.ts";
+import { createImportedForms, withFormIds } from "../import-forms.ts";
 import { saveDesign } from "../design-api.ts";
 import { loadDesign } from "../editor/useEditorData.ts";
 import { BUTTON, FIELD } from "../ui.ts";
 import { CreateDialog } from "./CreateDialog.tsx";
+import { ImportForms } from "./ImportForms.tsx";
 import { ImportReport } from "./ImportReport.tsx";
 import { type Copy, fileNameOf, ImportImageCopies } from "./ImportImageCopies.tsx";
 import {
@@ -133,6 +136,9 @@ export function ImportElementorDialog({
   // W-1026: the site's own menus (from its WordPress import) for imported Nav Menus, by name.
   // A menu the site doesn't have is kept as no links, so it is asked for once.
   const [siteMenus, setSiteMenus] = React.useState<ReadonlyMap<string, MenuLink[]>>(new Map());
+  // W-1091 (#27): imported forms can be created in EmDash Forms (off until asked).
+  const [createForms, setCreateForms] = React.useState(false);
+  const [formsCapability, setFormsCapability] = React.useState<FormsCapability>();
   const iconsLoad = React.useRef<Promise<IconMap> | undefined>(undefined);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const kitRef = React.useRef<HTMLInputElement>(null);
@@ -156,6 +162,7 @@ export function ImportElementorDialog({
       setCopies(new Map());
       setSession((n) => n + 1);
       setSiteMenus(new Map());
+      setCreateForms(false);
     }
   }
 
@@ -192,6 +199,18 @@ export function ImportElementorDialog({
   const missingSvgs = result?.ok ? result.svgFiles : [];
   const linkedPages = result?.ok ? result.pageLinks : [];
   const oldImages = result?.ok ? result.images.filter((url) => !copies.has(url)) : [];
+  const importedForms = result?.ok ? result.forms : [];
+  const hasForms = importedForms.length > 0;
+  React.useEffect(() => {
+    if (!hasForms || formsCapability) return;
+    let live = true;
+    void loadFormsCapability(fetcher).then((found) => {
+      if (live) setFormsCapability(found);
+    });
+    return () => {
+      live = false;
+    };
+  }, [hasForms, formsCapability, fetcher]);
 
   // W-1026: fetch each menu the export's Nav Menus name once; the import re-runs with them.
   const wantedMenus = (result?.ok ? result.menus : []).filter((name) => !siteMenus.has(name));
@@ -278,6 +297,13 @@ export function ImportElementorDialog({
     }
     writePageLinks(pageLinks);
     let layout = imported.layout;
+    if (createForms && imported.forms.length > 0) {
+      // W-1091 (#27): each form becomes an EmDash form and the page's Form points at it.
+      const known = await loadFormsCapability(fetcher);
+      const slugs = new Set(known.status === "ready" ? known.forms.map((f) => f.slug) : []);
+      const made = await createImportedForms(fetcher, imported.forms, slugs);
+      layout = withFormIds(layout, made.ids);
+    }
     if (imported.classes.length > 0) {
       // W-958 (D-060): never changes a class already on the site; identical ones are reused, a
       // different one with the same name is added as a numbered copy. Classes are saved first,
@@ -520,6 +546,12 @@ export function ImportElementorDialog({
             ))}
           </Select>
         )}
+        <ImportForms
+          forms={importedForms}
+          capability={formsCapability}
+          create={createForms}
+          onCreateChange={setCreateForms}
+        />
         <ElementorReport result={result} {...(target === "part" ? { partType } : {})} />
       </div>
     </CreateDialog>

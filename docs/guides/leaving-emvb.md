@@ -67,6 +67,11 @@ For EmVB pages:
 3. Click **Copy pages**. Each page becomes a **draft** entry there with the same title and address,
    holding its words, headings, lists, links and images.
 
+On a site with more than one language, each language of a page becomes its own draft, in its own
+language, linked to the default language's draft as its translation and with the same address.
+If the collection's rich-text field is shared by all languages (not translatable), only the
+default language is copied and the result lists the others as not copied.
+
 For entries in your own collections that have an EmVB layout:
 
 1. Open the entry and click **Convert to rich text** on the Canvas card.
@@ -77,7 +82,8 @@ For entries in your own collections that have an EmVB layout:
    Apply) and save the entry. Your site's own template takes over again.
 
 The design (colours, columns, spacing) doesn't come across as rich text. Forms, icons, dividers,
-embeds and similar elements are left out and named, never guessed at.
+embeds and similar elements are left out and named by their element names ("2 icon boxes, 1
+form"), never guessed at.
 
 ### As JSON
 

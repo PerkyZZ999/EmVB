@@ -90,10 +90,12 @@ forms plugin's wording for the server's.
 
 ## Importing
 
-An Elementor form keeps its fields. Its Step fields become Form steps (the fields after each Step
-field go into that step), with the first step's button labels on the Form. Number fields keep
-their lowest and highest values, date fields their earliest and latest dates. See
-[Import from Elementor](elementor-import.md).
+An Elementor form keeps its fields, their names and types. Its Step fields become Form steps (the
+fields after each Step field go into that step), with the first step's button labels on the Form.
+Number fields keep their lowest and highest values, date fields their earliest and latest dates.
+The import can also create the matching form in EmDash Forms (fields, types, options and success
+message) and connect it; otherwise connect it yourself in the Form's settings. See
+[Import from Elementor](elementor-import.md#forms).
 
 ## Agents
 

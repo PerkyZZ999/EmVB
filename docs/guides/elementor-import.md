@@ -56,6 +56,25 @@ SVG without its file stays an image.
 Elementor 4 exports often name an SVG only by its WordPress media number. Those become empty Icon
 elements at the right size; pick each file in the editor (**Icon → My uploads**).
 
+### Forms
+
+An Elementor Pro Form becomes an EmVB Form with the same fields, but a Form only shows on your live
+site once it is connected to a form in EmDash Forms (the forms plugin), which receives and stores
+the submissions. The dialog says so above the report and lists each form's fields with their names
+and types (`Email [email] (email, required)`) and its success message.
+
+- Tick **Create the forms in EmDash Forms** and each one is created there when you import: the same
+  field names, types (text, email, phone, URL, number, date, text area, select with its options,
+  radio, checkbox), required fields, button label and success message, with steps as pages. The
+  imported Form is connected to it. Creating forms needs an administrator; for an editor the import
+  stops and says so, and nothing is created.
+- Or leave it unticked, create the form in **Forms** yourself and pick it in the Form's settings.
+
+Field names come from the field's ID in Elementor (Advanced → ID), cleaned up to letters, digits,
+`_` and `-` (so `1st name` becomes `st_name`), or from its label when it has no ID. Elementor's
+email actions, redirects and webhooks aren't imported; set them up in EmDash Forms. A checkbox list
+becomes one checkbox.
+
 **Give unstyled widgets Elementor's default colours and fonts** is on by default: widgets you never
 styled in Elementor look the way Elementor showed them (its kit colours, Roboto). Turn it off if
 your site had Elementor's default colours and fonts disabled, so those widgets take your EmVB site
@@ -136,7 +155,8 @@ copy ("Card 2"). The page looks the same either way.
 
 These keep their content in the closest EmVB form, and the report says so:
 
-- **Pro widgets:** Form (its fields; connect it to a form in the forms plugin), Blockquote, Table
+- **Pro widgets:** Form (its fields; connect it to a form, or let the import create it: see
+  [Forms](#forms)), Blockquote, Table
   of Contents, Code Highlight. A multi-step form keeps its steps as Form steps, with the first
   step's Next and Previous labels for all of them; number and date fields keep their box and
   their lowest/highest number or earliest/latest date.

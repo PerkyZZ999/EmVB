@@ -13,7 +13,13 @@ import { atomicElement } from "./atomic.ts";
 import { readSnapshots } from "./snapshots.ts";
 import { customCss, wordRules } from "./css.ts";
 import { type CounterItem, counterItems, counterOf } from "./counter-steps.ts";
-import { ImportContext, type ImportNote, type ImportOptions, type StyleClass } from "./context.ts";
+import {
+  ImportContext,
+  type ImportedForm,
+  type ImportNote,
+  type ImportOptions,
+  type StyleClass,
+} from "./context.ts";
 import {
   boxReader,
   deviceStyles,
@@ -39,7 +45,7 @@ import {
   WIDGETS,
 } from "./widgets.ts";
 
-export type { ImportNote, ImportOptions } from "./context.ts";
+export type { ImportedForm, ImportedFormField, ImportNote, ImportOptions } from "./context.ts";
 
 /** Pasted or uploaded JSON larger than this is refused before parsing. */
 export const MAX_IMPORT_CHARS = 8 * 1024 * 1024;
@@ -73,6 +79,11 @@ export type ElementorImport =
       menus: string[];
       /** W-958: images on the old site the page uses (`media` gives their library copies). */
       images: string[];
+      /**
+       * W-1091 (#27): the Elementor forms the page has, each an EmVB Form (`nodeId`) that needs
+       * connecting to a forms-plugin form: their fields, types and messages, to list or create.
+       */
+      forms: ImportedForm[];
       /** W-958: with `classes`, the EmVB classes the page's elements point at, to add to the site. */
       classes: StyleClass[];
     }
@@ -927,10 +938,20 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
     pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
     menus: [...ctx.menus].toSorted(),
     images: [...ctx.images],
+    forms: ctx.forms.filter((f) => hasNode(checked.layout.root, f.nodeId)),
     classes: usedClasses(checked.layout, ctx).map((cls) =>
       options.media ? (pointAtCopies(structuredClone(cls), ctx) as StyleClass) : cls,
     ),
   };
+}
+
+/** Whether the layout still holds the node (pruning may have dropped it). */
+function hasNode(tree: { id: string; children?: unknown }, id: string): boolean {
+  if (tree.id === id) return true;
+  return (
+    Array.isArray(tree.children) &&
+    tree.children.some((child) => hasNode(child as { id: string; children?: unknown }, id))
+  );
 }
 
 /**

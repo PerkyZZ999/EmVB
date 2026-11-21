@@ -121,3 +121,122 @@ test("one page only, when chosen", async () => {
   expect(posts.map((p) => p.body.slug)).toEqual(["home"]);
   expect(Object.keys(posts[0]?.body.data ?? {})).toEqual(["content"]);
 });
+
+/** W-1091 (#26): a site with English and French, and a page translated into French. */
+function bilingual(options: { i18n?: boolean; contentTranslatable?: boolean } = {}) {
+  const { i18n = true, contentTranslatable = true } = options;
+  const posts: {
+    body: { data: Record<string, unknown>; slug?: string; locale?: string; translationOf?: string };
+  }[] = [];
+  const translated = (
+    id: string,
+    locale: string,
+    text: string,
+    group = "g1",
+    slug = "care-plans",
+  ) => ({ ...page(id, slug, text), locale, translationGroup: group });
+  const fetcher: Fetcher = async (path, init) => {
+    if (path === "/_emdash/api/manifest")
+      return Response.json({
+        data: i18n ? { i18n: { defaultLocale: "en", locales: ["en", "fr"] } } : {},
+      });
+    if (path === "/_emdash/api/schema/collections")
+      return Response.json({ data: { items: [{ slug: "posts", label: "Posts" }] } });
+    if (path.startsWith("/_emdash/api/schema/collections/posts"))
+      return Response.json({
+        data: {
+          item: {
+            slug: "posts",
+            fields: [
+              { slug: "title", type: "string" },
+              { slug: "content", type: "portableText", translatable: contentTranslatable },
+            ],
+          },
+        },
+      });
+    if (path.startsWith("/_emdash/api/content/emvb_pages"))
+      return Response.json({
+        data: {
+          items: [
+            // The French copy comes first (by title), as it did in the report.
+            translated("fr1", "fr", "Forfaits d'entretien"),
+            translated("en1", "en", "Website care plans"),
+            translated("en2", "en", "About", "g2", "about"),
+          ],
+        },
+      });
+    if (path.startsWith("/_emdash/api/content/emvb_theme_parts"))
+      return Response.json({ data: { items: [] } });
+    if (path.includes("/design/draft")) return Response.json({ data: { design: emptyDesign() } });
+    if (path.startsWith("/_emdash/api/content/posts") && init?.method === "POST") {
+      const body = JSON.parse(String(init.body)) as (typeof posts)[number]["body"];
+      const locale = body.locale ?? "en";
+      // EmDash: a slug is unique per language.
+      if (posts.some((p) => p.body.slug === body.slug && (p.body.locale ?? "en") === locale))
+        return Response.json(
+          { error: { code: "CONFLICT", message: "Slug exists" } },
+          { status: 409 },
+        );
+      posts.push({ body });
+      return Response.json({ data: { item: { id: `new-${posts.length}` } } }, { status: 201 });
+    }
+    throw new ApiError(404, "NOT_FOUND", path);
+  };
+  return { fetcher, posts };
+}
+
+const POSTS = { slug: "posts", label: "Posts", field: "content", hasTitle: true };
+const headingOf = (body: { data: Record<string, unknown> }) =>
+  (body.data["content"] as { children: { text: string }[] }[])[0]?.children[0]?.text;
+
+test("W-1091 (#26): each language becomes its own entry, in its own locale, linked as translations", async () => {
+  const { fetcher, posts } = bilingual();
+  const result = await copyPagesAsRichText(fetcher, POSTS);
+  expect(result.failed).toEqual([]);
+  const sent = posts.map((p) => [
+    p.body.locale,
+    p.body.slug,
+    headingOf(p.body),
+    p.body.translationOf,
+  ]);
+  expect(sent).toEqual([
+    ["en", "about", "About", undefined],
+    ["en", "care-plans", "Website care plans", undefined],
+    // The French entry is a translation of the English one, with the French words.
+    ["fr", "care-plans", "Forfaits d'entretien", "new-2"],
+  ]);
+  expect(result.created.map((c) => c.title)).toEqual([
+    "About (en)",
+    "Website care plans (en)",
+    "Forfaits d'entretien (fr)",
+  ]);
+});
+
+test("W-1091 (#26): a rich-text field shared by every language takes the default language only", async () => {
+  const { fetcher, posts } = bilingual({ contentTranslatable: false });
+  const [target] = await richTextTargets(fetcher);
+  expect(target).toEqual({ ...POSTS, translatable: false });
+  if (!target) throw new Error("no target");
+  const result = await copyPagesAsRichText(fetcher, target);
+  expect(posts.map((p) => [p.body.locale, headingOf(p.body)])).toEqual([
+    ["en", "About"],
+    ["en", "Website care plans"],
+  ]);
+  expect(result.failed).toEqual([
+    {
+      title: "Forfaits d'entretien (fr)",
+      message: "Posts shares its content field across languages, so only the en page was copied",
+    },
+  ]);
+});
+
+test("W-1091 (#26): without languages set up, one entry per page and no other language's words", async () => {
+  const { fetcher, posts } = bilingual({ i18n: false });
+  const result = await copyPagesAsRichText(fetcher, POSTS);
+  expect(posts.map((p) => [p.body.locale, headingOf(p.body)])).toEqual([
+    [undefined, "About"],
+    [undefined, "Website care plans"],
+  ]);
+  expect(result.failed.map((f) => f.title)).toEqual(["Forfaits d'entretien (fr)"]);
+  expect(result.failed[0]?.message).toContain("languages");
+});

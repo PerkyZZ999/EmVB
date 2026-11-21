@@ -2,6 +2,7 @@ import { Button, Dialog, Loader } from "@cloudflare/kumo";
 import { TextAlignLeftIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Layout } from "../../core/index.ts";
+import { elementCount } from "../../core/elements/element-nouns.ts";
 import type { Fetcher } from "../api.ts";
 import { DialogCloseButton } from "../editor/DialogCloseButton.tsx";
 import { BUTTON, SOLID_DESTRUCTIVE, UI_CSS } from "../ui.ts";
@@ -11,10 +12,10 @@ type Plan = Extract<RichTextPlan, { ok: true }>;
 
 const plural = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
 
-/** "form, 2 icons", for what a conversion leaves out. */
+/** "form, 12 icon boxes", for what a conversion leaves out (W-1091: names, real plurals). */
 export function leftOutText(skipped: Record<string, number>): string {
   return Object.entries(skipped)
-    .map(([type, n]) => (n === 1 ? type : `${n} ${type}s`))
+    .map(([type, n]) => elementCount(type, n))
     .join(", ");
 }
 

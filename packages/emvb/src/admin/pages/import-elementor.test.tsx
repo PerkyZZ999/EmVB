@@ -517,3 +517,118 @@ test("W-1026: a Nav Menu gets the links of the site menu with its name", async (
   expect(layout).toContain('"text":"Shop","href":"/shop"');
   expect(asked.filter((p) => p === "/_emdash/api/menus")).toHaveLength(1);
 });
+
+/** W-1091 (#27): an Elementor Pro Form with a name and an email field and a success message. */
+const withForm = JSON.stringify({
+  version: "0.4",
+  title: "Contact us",
+  type: "page",
+  content: [
+    {
+      id: "f",
+      elType: "widget",
+      widgetType: "form",
+      settings: {
+        form_name: "Contact",
+        form_fields: [
+          { custom_id: "name", field_type: "text", field_label: "Name", required: "true" },
+          { custom_id: "email", field_type: "email", field_label: "Email" },
+        ],
+        button_text: "Send",
+        success_message: "Thanks, we'll reply soon.",
+      },
+    },
+  ],
+});
+
+async function openWithForms(answer: (path: string, body: unknown) => Response | undefined) {
+  const calls: { path: string; body: unknown }[] = [];
+  const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+  restoreNavigation = () => navigation.mockRestore();
+  const fetcher: Fetcher = async (path, init) => {
+    const body = init?.body ? (JSON.parse(String(init.body)) as unknown) : undefined;
+    calls.push({ path, body });
+    const answered = answer(path, body);
+    if (answered) return answered;
+    if (path.endsWith("/forms/list"))
+      return Response.json({ data: { items: [{ id: "old", name: "Contact", slug: "contact" }] } });
+    return Response.json({ data: { item: { id: "made-1" } } }, { status: 201 });
+  };
+  await mount(
+    <ImportElementorDialog fetcher={fetcher} open onOpenChange={() => undefined} target="page" />,
+  );
+  await settle();
+  return { calls, navigation };
+}
+
+const formsNotice = () => document.querySelector("[data-emvb-import-forms]")?.textContent ?? "";
+
+async function tickCreateForms() {
+  const label = [...document.querySelectorAll("label")].find((l) =>
+    l.textContent?.includes("Create the forms in EmDash Forms"),
+  );
+  const toggle = label?.querySelector<HTMLElement>("button, input");
+  if (!toggle) throw new Error("Create forms box is missing");
+  await act(async () => toggle.click());
+  await settle();
+}
+
+test("W-1091 (#27): the preview says the form needs connecting and lists its fields", async () => {
+  const { calls } = await openWithForms(() => undefined);
+  await paste(withForm);
+  expect(formsNotice()).toContain("needs connecting to an EmDash form");
+  expect(formsNotice()).toContain("Contact:");
+  expect(formsNotice()).toContain("Name [name] (text, required), Email [email] (email)");
+  expect(formsNotice()).toContain("Thanks, we'll reply soon.");
+  await typeTitle("Contact us");
+  await submit();
+  // Not asked to: nothing is created in the forms plugin, and the page's Form stays unconnected.
+  expect(calls.some((c) => c.path.endsWith("/forms/create"))).toBe(false);
+  const pagePost = calls.find((c) => c.path === "/_emdash/api/content/emvb_pages");
+  expect(JSON.stringify(pagePost?.body)).toContain('"formId":""');
+});
+
+test("W-1091 (#27): Create the forms makes an EmDash form with the fields and connects the page", async () => {
+  const { calls } = await openWithForms((path) =>
+    path.endsWith("/forms/create") ? Response.json({ data: { id: "form-9" } }) : undefined,
+  );
+  await paste(withForm);
+  await tickCreateForms();
+  await typeTitle("Contact us");
+  await submit();
+  const created = calls.find((c) => c.path.endsWith("/forms/create"))?.body as {
+    name: string;
+    slug: string;
+    pages: { fields: { name: string; type: string; label: string; required: boolean }[] }[];
+    settings: Record<string, unknown>;
+  };
+  expect(created.name).toBe("Contact");
+  // "contact" is taken on the site already.
+  expect(created.slug).toBe("contact-2");
+  expect(created.pages[0]?.fields.map((f) => [f.name, f.type, f.label, f.required])).toEqual([
+    ["name", "text", "Name", true],
+    ["email", "email", "Email", false],
+  ]);
+  expect(created.settings).toEqual({
+    submitLabel: "Send",
+    confirmationMessage: "Thanks, we'll reply soon.",
+  });
+  const pagePost = calls.find((c) => c.path === "/_emdash/api/content/emvb_pages");
+  expect(JSON.stringify(pagePost?.body)).toContain('"formId":"form-9"');
+});
+
+test("W-1091 (#27): an editor who can't create forms is told so, and no page is made", async () => {
+  const { calls, navigation } = await openWithForms((path) =>
+    path.endsWith("/forms/create")
+      ? Response.json({ error: { code: "FORBIDDEN", message: "No" } }, { status: 403 })
+      : undefined,
+  );
+  await paste(withForm);
+  await tickCreateForms();
+  await typeTitle("Contact us");
+  await submit();
+  const alerts = [...document.querySelectorAll('[role="alert"]')].map((el) => el.textContent ?? "");
+  expect(alerts.some((t) => t.includes("Only administrators can create forms"))).toBe(true);
+  expect(calls.some((c) => c.path === "/_emdash/api/content/emvb_pages")).toBe(false);
+  expect(navigation.mock.calls).toHaveLength(0);
+});

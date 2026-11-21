@@ -55341,6 +55341,253 @@
         "W-1089 an extension element that isn't registered"
       ],
       "expect": "\\(fail\\).*W-1089"
+    },
+    {
+      "id": "W-1091/left-out-raw-type-plural",
+      "requirement": "W-963",
+      "description": "#39: the rich-text export summary pluralises element types by adding an s (\"12 icon-boxs, 6 price-tables\") instead of their names.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/ConvertToRichText.tsx",
+          "search": "    .map(([type, n]) => elementCount(type, n))",
+          "replace": "    .map(([type, n]) => (n === 1 ? type : `${n} ${type}s`))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/widgets/left-out-text.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/left-out-raw-type-plural-e2e",
+      "requirement": "W-963",
+      "description": "#39 (e2e): the Export pages rich-text summary reads \"2 icon-boxs\" instead of \"2 icon boxes\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/ConvertToRichText.tsx",
+          "search": "    .map(([type, n]) => elementCount(type, n))",
+          "replace": "    .map(([type, n]) => (n === 1 ? type : `${n} ${type}s`))"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/export-html.e2e.ts", "--project=node", "-g", "W-1091"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1091/rich-copy-no-locale",
+      "requirement": "W-963",
+      "description": "#26: the rich-text export sends no locale, so a French page's words land in a draft with the default locale (en) and its translation is refused as a slug in use.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "            ...(locale ? { locale } : {}),\n            ...(locale && source ? { translationOf: source } : {}),",
+          "replace": "            ...(locale && source ? { translationOf: source } : {}),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/copy-rich-text.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/rich-copy-not-linked",
+      "requirement": "W-963",
+      "description": "#26: each language is copied as a separate entry, not linked as translations (no translationOf).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "            ...(locale && source ? { translationOf: source } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/copy-rich-text.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/rich-copy-shared-field-all-languages",
+      "requirement": "W-963",
+      "description": "#26: a rich-text field shared by every language still gets each language's words, so the last one copied overwrites the others.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "translationOrder(pages, defaultLocale, !perLanguage)",
+          "replace": "translationOrder(pages, defaultLocale, !languages)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/copy-rich-text.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/rich-copy-no-locale-e2e",
+      "requirement": "W-963",
+      "description": "#26 (e2e): Export pages → Rich text writes a French page without its locale.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "            ...(locale ? { locale } : {}),\n            ...(locale && source ? { translationOf: source } : {}),",
+          "replace": "            ...(locale && source ? { translationOf: source } : {}),"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/export-html.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1091 \\(#26\\)"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1091/elementor-form-names-from-id-only",
+      "requirement": "W-945",
+      "description": "#27: an Elementor form field without an id becomes field_2 instead of a name from its label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "[{ text: str(raw[\"custom_id\"]) }, { text: label, lower: true }, { text: type }],",
+          "replace": "[{ text: str(raw[\"custom_id\"]) }],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/elementor-form-email-as-text",
+      "requirement": "W-945",
+      "description": "#27: an Elementor email field is listed (and created) as a plain text field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "const PLUGIN_FIELD_TYPES: Record<string, string> = {\n  text: \"text\",\n  email: \"email\",",
+          "replace": "const PLUGIN_FIELD_TYPES: Record<string, string> = {\n  text: \"text\",\n  email: \"text\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/elementor-form-success-dropped",
+      "requirement": "W-945",
+      "description": "#27: the Elementor form's success message is dropped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "    ...(successMessage ? { successMessage } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/import/elementor/elementor.test.ts",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/elementor-forms-not-mentioned",
+      "requirement": "W-945",
+      "description": "#27: the import preview doesn't say the form needs connecting (the forms notice is gone).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportForms.tsx",
+          "search": "  if (forms.length === 0) return null;",
+          "replace": "  if (forms.length >= 0) return null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/import-elementor.test.tsx",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/elementor-created-form-not-connected",
+      "requirement": "W-945",
+      "description": "#27: Create the forms makes the EmDash form but the page's Form keeps formId \"\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      layout = withFormIds(layout, made.ids);",
+          "replace": "      void made;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/import-elementor.test.tsx",
+        "-t",
+        "W-1091"
+      ],
+      "expect": "\\(fail\\).*W-1091"
+    },
+    {
+      "id": "W-1091/elementor-created-form-not-connected-e2e",
+      "requirement": "W-945",
+      "description": "#27 (e2e): the imported form is created in EmDash Forms but not connected, so the live page shows no form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      layout = withFormIds(layout, made.ids);",
+          "replace": "      void made;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/elementor-import.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1091"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

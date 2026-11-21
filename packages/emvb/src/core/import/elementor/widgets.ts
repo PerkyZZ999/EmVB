@@ -8,7 +8,13 @@ import { MAX_TABS, MAX_TEXT_LENGTH } from "../../limits.ts";
 import { FIELD_NAME_PATTERN, ICON_SVG_MAX, MAX_INPUT_NUMBER } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
-import { type ImportContext, type MenuLink, svgFileId } from "./context.ts";
+import {
+  type ImportContext,
+  type ImportedForm,
+  type ImportedFormField,
+  type MenuLink,
+  svgFileId,
+} from "./context.ts";
 import {
   type Block,
   cleanText,
@@ -1526,13 +1532,82 @@ function typedField(type: string, raw: Settings): Record<string, unknown> {
 
 const MAX_FORM_STEPS = 20;
 
+/** W-1091 (#27): the forms plugin's field type for an Elementor field type. */
+const PLUGIN_FIELD_TYPES: Record<string, string> = {
+  text: "text",
+  email: "email",
+  url: "url",
+  tel: "tel",
+  number: "number",
+  date: "date",
+  time: "text",
+  password: "text",
+  textarea: "textarea",
+  select: "select",
+  radio: "radio",
+  checkbox: "checkbox",
+  acceptance: "checkbox",
+};
+
+/**
+ * W-1091 (#27): a field name the forms plugin accepts (a letter, then letters, digits, `_`, `-`):
+ * Elementor's own id when it has one, cleaned up, else the label's words, else the field type.
+ * Each name is used once per form; a repeat gets `_2`, `_3`.
+ */
+function formFieldName(
+  candidates: readonly { text: string | undefined; lower?: boolean }[],
+  taken: ReadonlySet<string>,
+  fallback: string,
+): string {
+  let base = "";
+  for (const { text, lower } of candidates) {
+    const clean = (text ?? "")
+      .normalize("NFKD")
+      .replaceAll(/[\u0300-\u036f]/g, "")
+      .trim()
+      .replaceAll(/[^a-zA-Z0-9_-]+/g, "_")
+      .replace(/^[^a-zA-Z]+/, "")
+      .replace(/[_-]+$/, "")
+      .slice(0, 72);
+    if (clean && FIELD_NAME_PATTERN.test(clean)) {
+      base = lower ? clean.toLowerCase() : clean;
+      break;
+    }
+  }
+  base ||= fallback;
+  let name = base;
+  for (let n = 2; taken.has(name); n++) name = `${base}_${n}`;
+  return name;
+}
+
+/** W-1091 (#27): Elementor's `field_options` lines ("Label" or "Label|value") as options. */
+function formOptions(value: unknown): { label: string; value: string }[] {
+  const options: { label: string; value: string }[] = [];
+  const seen = new Set<string>();
+  for (const line of (str(value) ?? "").split(/\r?\n/).slice(0, 100)) {
+    const [rawLabel = "", rawValue] = line.split("|");
+    const label = plain(rawLabel).text.trim().slice(0, 200);
+    const option = (rawValue === undefined ? label : plain(rawValue).text.trim()).slice(0, 200);
+    if (!label || !option || seen.has(option)) continue;
+    seen.add(option);
+    options.push({ label, value: option });
+  }
+  return options;
+}
+
+const isOn = (value: unknown) => value === true || value === "true" || value === "yes";
+
 const form: Widget = (s, ctx, el) => {
   const fields = Array.isArray(s["form_fields"]) ? s["form_fields"].slice(0, 100) : [];
   const loose: N[] = [];
   const steps: { title: string; children: N[] }[] = [];
+  // W-1091 (#27): the same fields as the forms plugin holds them, page by page.
+  const loosePlan: ImportedFormField[] = [];
+  const stepPlans: ImportedFormField[][] = [];
   const names = new Set<string>();
   let nextLabel = "";
   let prevLabel = "";
+  let checkboxLists = 0;
   fields.forEach((raw, i) => {
     if (!isRecord(raw)) return;
     const type = str(raw["field_type"]) ?? "text";
@@ -1540,6 +1615,7 @@ const form: Widget = (s, ctx, el) => {
     if (type === "step") {
       if (steps.length >= MAX_FORM_STEPS) return;
       steps.push({ title: plain(raw["field_label"]).text.slice(0, 200), children: [] });
+      stepPlans.push([]);
       nextLabel ||= plain(raw["next_button"]).text.slice(0, 80);
       prevLabel ||= plain(raw["previous_button"]).text.slice(0, 80);
       return;
@@ -1549,13 +1625,16 @@ const form: Widget = (s, ctx, el) => {
       ctx.note("skipped", el, `Form field type "${type}" was left out.`);
       return;
     }
-    let name = str(raw["custom_id"]) ?? "";
-    if (!FIELD_NAME_PATTERN.test(name) || name.length > 80 || names.has(name))
-      name = `field_${i + 1}`;
-    names.add(name);
     const label =
       plain(raw["field_label"]).text.slice(0, 200) ||
       (type === "acceptance" ? plain(raw["acceptance_text"]).text.slice(0, 200) : "");
+    // W-1091 (#27): Elementor's field id (cleaned), else the label, so `name` and `email` stay.
+    const name = formFieldName(
+      [{ text: str(raw["custom_id"]) }, { text: label, lower: true }, { text: type }],
+      names,
+      `field_${i + 1}`,
+    );
+    names.add(name);
     const placeholder = plain(raw["placeholder"]).text.slice(0, 200);
     const field = node(ctx, nodeType, {
       field: name,
@@ -1563,12 +1642,34 @@ const form: Widget = (s, ctx, el) => {
       ...(placeholder && nodeType !== "checkbox" ? { placeholder } : {}),
       ...typedField(type, raw),
     });
+    const options =
+      nodeType === "select" || nodeType === "radio" ? formOptions(raw["field_options"]) : [];
+    if (type === "checkbox" && formOptions(raw["field_options"]).length > 1) checkboxLists += 1;
+    const typed = typedField(type, raw) as { min?: number; max?: number };
+    const planned: ImportedFormField = {
+      name,
+      label: label || name,
+      type: PLUGIN_FIELD_TYPES[type] ?? "text",
+      required: isOn(raw["required"]) || type === "acceptance",
+      ...(placeholder && nodeType !== "checkbox" ? { placeholder } : {}),
+      ...(options.length > 0 ? { options } : {}),
+      ...(typed.min !== undefined ? { min: typed.min } : {}),
+      ...(typed.max !== undefined ? { max: typed.max } : {}),
+    };
     const step = steps[steps.length - 1];
-    if (step) step.children.push(field);
-    else loose.push(field);
+    if (step) {
+      step.children.push(field);
+      stepPlans[stepPlans.length - 1]?.push(planned);
+    } else {
+      loose.push(field);
+      loosePlan.push(planned);
+    }
   });
   // Fields before the first Step field are a step of their own, as Elementor shows them.
-  if (steps.length > 0 && loose.length > 0) steps.unshift({ title: "", children: loose.splice(0) });
+  if (steps.length > 0 && loose.length > 0) {
+    steps.unshift({ title: "", children: loose.splice(0) });
+    stepPlans.unshift(loosePlan.splice(0));
+  }
   const children: N[] = [
     ...loose,
     ...steps.map((step) =>
@@ -1580,8 +1681,11 @@ const form: Widget = (s, ctx, el) => {
   ctx.note(
     "approximated",
     el,
-    "Connect each imported form to a form in the forms plugin; field options and email actions weren't imported.",
+    "Each form needs connecting to an EmDash form before it shows on your site; the import can create it in EmDash Forms. Email actions weren't imported.",
   );
+  if (checkboxLists > 0) {
+    ctx.note("approximated", el, "A checkbox list became one checkbox; its options weren't kept.");
+  }
   if (steps.length > 0) {
     ctx.note(
       "approximated",
@@ -1593,14 +1697,30 @@ const form: Widget = (s, ctx, el) => {
     ...(steps.length > 0 && nextLabel ? { nextLabel } : {}),
     ...(steps.length > 0 && prevLabel ? { prevLabel } : {}),
   };
-  return [
-    node(
-      ctx,
-      "form",
-      { formId: "", ...labels },
-      { style: { gap: { value: 10, unit: "px" } }, children },
-    ),
-  ];
+  const built = node(
+    ctx,
+    "form",
+    { formId: "", ...labels },
+    { style: { gap: { value: 10, unit: "px" } }, children },
+  );
+  const successMessage = plain(s["success_message"]).text.trim().slice(0, 500);
+  const plan: ImportedForm = {
+    nodeId: built.id,
+    name: plain(s["form_name"]).text.trim().slice(0, 200) || "Imported form",
+    pages:
+      steps.length > 0
+        ? steps.map((step, i) =>
+            step.title
+              ? { title: step.title, fields: stepPlans[i] ?? [] }
+              : { fields: stepPlans[i] ?? [] },
+          )
+        : [{ fields: loosePlan }],
+    submitLabel: label,
+    ...(successMessage ? { successMessage } : {}),
+    ...labels,
+  };
+  if (ctx.forms.length < 50) ctx.forms.push(plan);
+  return [built];
 };
 
 /** W-1026: a site menu's links as Menu items (three levels, as the Menu shows). */

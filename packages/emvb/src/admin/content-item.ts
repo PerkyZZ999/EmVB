@@ -6,6 +6,9 @@ export type ContentItem = {
   draftRevisionId?: string | null;
   updatedAt?: string;
   data?: Record<string, unknown>;
+  /** W-1091: EmDash i18n: the entry's language, and the group its translations share. */
+  locale?: string | null;
+  translationGroup?: string | null;
   seo?: {
     title?: string | null;
     description?: string | null;

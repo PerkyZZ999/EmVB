@@ -123,6 +123,8 @@ export async function loadExportData(
         });
       }
       if (item.seo?.description) page.description = item.seo.description;
+      if (item.locale) page.locale = item.locale;
+      if (item.translationGroup) page.translationGroup = item.translationGroup;
       return page;
     })
     .toSorted((a, b) => a.title.localeCompare(b.title));

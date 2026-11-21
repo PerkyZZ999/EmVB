@@ -212,6 +212,128 @@ test("W-963: published pages copy into a collection as rich-text drafts", async 
   if (copy) await api(request, "DELETE", `/_emdash/api/content/pages/${copy.id}`);
 });
 
+/** An Icon box, which rich text can't hold (W-1091). */
+const iconBox = (id: string) => ({
+  id,
+  type: "icon-box",
+  props: { iconId: "star", title: "Fast", text: "Quick to load" },
+});
+
+test("W-1091 (#39): the rich-text summary names what it left out, with proper plurals", async ({
+  page,
+  request,
+}) => {
+  const title = `Left out ${unique()}`;
+  const slug = title.toLowerCase().replaceAll(" ", "-");
+  const id = await createPage(
+    request,
+    title,
+    {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "head0001", type: "heading", props: { text: title, level: 1 } },
+          iconBox("ibox0001"),
+          iconBox("ibox0002"),
+        ],
+      },
+    },
+    slug,
+  );
+  await publishPage(request, id);
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Export pages", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="export-pages"]');
+  await dialog.getByText("Rich text in a collection", { exact: true }).click();
+  await dialog.getByRole("combobox", { name: "Collection" }).click();
+  await page.getByRole("option", { name: "Pages", exact: true }).click();
+  await dialog.getByRole("combobox", { name: "Pages" }).click();
+  await page.getByRole("option", { name: title, exact: true }).click();
+  await dialog.getByRole("button", { name: "Copy pages", exact: true }).click();
+  await expect(dialog.locator("[data-emvb-export-status]")).toHaveText(
+    "Created 1 draft in Pages. Left out, as rich text can't hold them: 2 icon boxes.",
+  );
+  const list = await api(request, "GET", `/_emdash/api/content/pages?limit=50`);
+  const items = ((list.json ?? {})["data"] as { items: { id: string; slug: string }[] }).items;
+  const copy = items.find((item) => item.slug === slug);
+  if (copy) await api(request, "DELETE", `/_emdash/api/content/pages/${copy.id}`);
+});
+
+test("W-1091 (#26): a translated page copies as one rich-text entry per language", async ({
+  page,
+  request,
+}) => {
+  const word = `care${unique().replace(/\W/g, "")}`;
+  const slug = `plans-${word}`;
+  const layoutSaying = (text: string) => ({
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [{ id: "text0001", type: "text", props: { text: `${text} ${word}` } }],
+    },
+  });
+  const make = async (title: string, locale: string, translationOf?: string) => {
+    const created = await api(request, "POST", "/_emdash/api/content/emvb_pages", {
+      data: { title, layout: layoutSaying(title) },
+      slug,
+      locale,
+      ...(translationOf ? { translationOf } : {}),
+    });
+    expect(created.status, JSON.stringify(created.json)).toBe(201);
+    const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
+    if (!id) throw new Error("no id");
+    await publishPage(request, id);
+    return id;
+  };
+  const en = await make(`Care plans ${word}`, "en");
+  await make(`Forfaits ${word}`, "fr", en);
+
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("searchbox", { name: "Search pages" }).fill(word);
+  await expect(page.locator("[data-emvb-row]")).toHaveCount(2);
+  await page.getByRole("checkbox", { name: `Select all pages shown` }).click();
+  await page.locator("[data-emvb-bulk-bar]").getByRole("button", { name: "Export" }).click();
+  const dialog = page.locator('[data-emvb-dialog="export-pages"]');
+  await dialog.getByText("Rich text in a collection", { exact: true }).click();
+  await dialog.getByRole("combobox", { name: "Collection" }).click();
+  await page.getByRole("option", { name: "Pages", exact: true }).click();
+  await dialog.getByRole("button", { name: "Copy pages", exact: true }).click();
+  await expect(dialog.locator("[data-emvb-export-status]")).toHaveText(
+    "Created 2 drafts in Pages.",
+  );
+
+  type Entry = {
+    id: string;
+    slug: string;
+    locale: string;
+    translationGroup: string;
+    data: Record<string, unknown>;
+  };
+  const copies: Entry[] = [];
+  for (const locale of ["en", "fr"]) {
+    // oxlint-disable-next-line no-await-in-loop -- one language at a time
+    const list = await api(request, "GET", `/_emdash/api/content/pages?limit=50&locale=${locale}`);
+    const items = ((list.json ?? {})["data"] as { items: Entry[] }).items;
+    copies.push(...items.filter((item) => item.slug === slug));
+  }
+  expect(
+    copies.map((c) => [c.locale, JSON.stringify(parsed(c.data["content"])).includes("Forfaits")]),
+  ).toEqual([
+    ["en", false],
+    ["fr", true],
+  ]);
+  // The French entry is a translation of the English one.
+  expect(copies[1]?.translationGroup).toBe(copies[0]?.translationGroup);
+  for (const copy of copies.toReversed())
+    // oxlint-disable-next-line no-await-in-loop -- translations before their source
+    await api(request, "DELETE", `/_emdash/api/content/pages/${copy.id}`);
+});
+
 test("W-977: an entry of your own collection exports as HTML, from its Canvas card and Export pages", async ({
   page,
   request,

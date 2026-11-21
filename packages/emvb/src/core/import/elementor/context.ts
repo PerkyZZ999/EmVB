@@ -63,6 +63,33 @@ export type ImportOptions = {
 };
 
 /** W-1026: one link of a site menu, with the links under it. */
+/**
+ * W-1091 (#27): an Elementor Pro form as the forms plugin would hold it, so the import can say
+ * what needs connecting and (when asked) create it: its fields in order, by page when it has
+ * steps, with their Elementor types, and its messages. `nodeId` is the EmVB Form it became.
+ */
+export type ImportedFormField = {
+  name: string;
+  label: string;
+  /** A forms-plugin field type: text, email, tel, url, number, date, textarea, select, radio, checkbox. */
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  options?: { label: string; value: string }[];
+  min?: number;
+  max?: number;
+};
+
+export type ImportedForm = {
+  nodeId: string;
+  name: string;
+  pages: { title?: string; fields: ImportedFormField[] }[];
+  submitLabel: string;
+  successMessage?: string;
+  nextLabel?: string;
+  prevLabel?: string;
+};
+
 export type MenuLink = {
   text: string;
   href?: string;
@@ -112,6 +139,8 @@ export class ImportContext {
   readonly menuOf: ImportOptions["menu"];
   /** W-1026: the menu names the export's Nav Menus point at, so the dialog can fetch them. */
   readonly menus = new Set<string>();
+  /** W-1091 (#27): the Elementor forms imported, to connect or create in the forms plugin. */
+  readonly forms: ImportedForm[] = [];
   /** W-958: Elementor class id → its EmVB class, or undefined when it can't be one. */
   readonly imported = new Map<string, ImportedClass | undefined>();
   readonly useClasses: boolean;

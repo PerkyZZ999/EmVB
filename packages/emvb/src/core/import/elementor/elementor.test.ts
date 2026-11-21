@@ -452,7 +452,8 @@ describe("Elementor import: theme builder, Pro widgets and kits (W-945)", () => 
       ["text-input", "email"],
       ["textarea", "msg"],
       ["checkbox", "terms"],
-      ["text-input", "field_6"],
+      // W-1091 (#27): an id the forms plugin can't take ("1bad id") is cleaned up, not renumbered.
+      ["text-input", "bad_id"],
       ["submit", "Send it"],
     ]);
     // W-1049: Price Table, Call to Action, Flip Box and Animated Headline become EmVB's own.
@@ -1383,6 +1384,125 @@ describe("Elementor import: the 1.4 widgets", () => {
     });
     expect(props(ofType(result.layout, "search-form")[0])).toEqual({});
     expect(notes(result)).toContain("Search forms show a field and a Search button.");
+  });
+});
+
+describe("Elementor forms keep their names, types and messages (W-1091, #27)", () => {
+  const imported = (settings: Record<string, unknown>) =>
+    ok(
+      importElementor(
+        JSON.stringify([{ id: "w", elType: "widget", widgetType: "form", settings }]),
+        { icon },
+      ),
+    );
+
+  test("field names come from Elementor's ids or labels, cleaned, and stay unique", () => {
+    const result = imported({
+      form_fields: [
+        { field_type: "text", custom_id: "name", field_label: "Name" },
+        { field_type: "email", field_label: "E-mail address" },
+        { field_type: "tel", custom_id: "", field_label: "Téléphone" },
+        { field_type: "text", custom_id: "name", field_label: "Again" },
+        { field_type: "url" },
+        { field_type: "text", custom_id: "1 two", field_label: "" },
+      ],
+    });
+    const fields = ofType(result.layout, "form")[0]?.children?.map((c) => props(c)["field"]);
+    expect(fields).toEqual([
+      "name",
+      "e-mail_address",
+      "telephone",
+      "name_2",
+      "url",
+      "two",
+      undefined,
+    ]);
+    expect(validateLayout(result.layout).ok).toBe(true);
+  });
+
+  test("the import lists each form's fields with the forms plugin's types, options and messages", () => {
+    const result = imported({
+      form_name: "Contact",
+      form_fields: [
+        { field_type: "text", custom_id: "name", field_label: "Name", required: "true" },
+        { field_type: "email", custom_id: "email", field_label: "Email", placeholder: "you@" },
+        { field_type: "tel", custom_id: "phone", field_label: "Phone" },
+        {
+          field_type: "number",
+          custom_id: "guests",
+          field_label: "Guests",
+          field_min: 1,
+          field_max: 9,
+        },
+        { field_type: "date", custom_id: "day", field_label: "Day" },
+        { field_type: "textarea", custom_id: "msg", field_label: "Message" },
+        {
+          field_type: "select",
+          custom_id: "topic",
+          field_label: "Topic",
+          field_options: "Sales\nSupport|help\n|empty",
+        },
+        { field_type: "checkbox", custom_id: "news", field_label: "News" },
+        { field_type: "acceptance", custom_id: "ok", acceptance_text: "I agree" },
+      ],
+      button_text: "Send it",
+      success_message: "Thanks, we'll be in touch.",
+    });
+    const form = ofType(result.layout, "form")[0];
+    expect(result.forms).toHaveLength(1);
+    const plan = result.forms[0];
+    expect(plan?.nodeId).toBe(form?.id ?? "");
+    expect(plan?.name).toBe("Contact");
+    expect(plan?.submitLabel).toBe("Send it");
+    expect(plan?.successMessage).toBe("Thanks, we'll be in touch.");
+    expect(plan?.pages).toHaveLength(1);
+    expect(plan?.pages[0]?.fields.map((f) => [f.name, f.type, f.required])).toEqual([
+      ["name", "text", true],
+      ["email", "email", false],
+      ["phone", "tel", false],
+      ["guests", "number", false],
+      ["day", "date", false],
+      ["msg", "textarea", false],
+      ["topic", "select", false],
+      ["news", "checkbox", false],
+      ["ok", "checkbox", true],
+    ]);
+    const fields = plan?.pages[0]?.fields ?? [];
+    expect(fields[1]?.placeholder).toBe("you@");
+    expect(fields[3]).toMatchObject({ min: 1, max: 9 });
+    expect(fields[6]?.options).toEqual([
+      { label: "Sales", value: "Sales" },
+      { label: "Support", value: "help" },
+    ]);
+    // On the page: the right EmVB inputs.
+    expect(form?.children?.map((c) => c.type)).toEqual([
+      "text-input",
+      "text-input",
+      "text-input",
+      "text-input",
+      "text-input",
+      "textarea",
+      "select",
+      "checkbox",
+      "checkbox",
+      "submit",
+    ]);
+    expect(notes(result)).toContain("needs connecting to an EmDash form");
+  });
+
+  test("a form with steps lists one page per step", () => {
+    const result = imported({
+      form_fields: [
+        { field_type: "text", custom_id: "a", field_label: "A" },
+        { field_type: "step", field_label: "Two", next_button: "On" },
+        { field_type: "email", custom_id: "b", field_label: "B" },
+      ],
+    });
+    expect(result.forms[0]?.pages.map((p) => [p.title, p.fields.map((f) => f.name)])).toEqual([
+      [undefined, ["a"]],
+      ["Two", ["b"]],
+    ]);
+    expect(result.forms[0]?.nextLabel).toBe("On");
   });
 });
 

@@ -254,3 +254,82 @@ test("W-1049: Elementor's Counter, Price List and Slides import as EmVB's Counte
   await expect(canvas(page).locator(".emvb-price-list-title")).toHaveText("Tea");
   await expect(canvas(page).locator(".emvb-carousel-slide")).toHaveCount(2);
 });
+
+test("W-1091 (#27): an Elementor form says it needs connecting, and Create the forms connects it", async ({
+  page,
+  request,
+}) => {
+  const title = `Form import ${unique()}`;
+  const formName = `Contact ${unique()}`;
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Import from Elementor", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="import-elementor"]');
+  await dialog.locator("[data-emvb-elementor-file]").setInputFiles({
+    name: "form.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({
+        title,
+        type: "page",
+        content: [
+          {
+            id: "f",
+            elType: "widget",
+            widgetType: "form",
+            settings: {
+              form_name: formName,
+              form_fields: [
+                { custom_id: "name", field_type: "text", field_label: "Name", required: "true" },
+                { custom_id: "email", field_type: "email", field_label: "Email", required: "true" },
+              ],
+              button_text: "Send",
+              success_message: "Thanks, we'll reply soon.",
+            },
+          },
+        ],
+      }),
+    ),
+  });
+  const notice = dialog.locator("[data-emvb-import-forms]");
+  await expect(notice).toContainText("needs connecting to an EmDash form");
+  await expect(notice).toContainText(
+    "Name [name] (text, required), Email [email] (email, required)",
+  );
+  await expect(notice).toContainText("Thanks, we'll reply soon.");
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    const axe = await new AxeBuilder({ page })
+      .include('[data-emvb-dialog="import-elementor"]')
+      .analyze();
+    expect(
+      axe.violations
+        .filter((v) => ["serious", "critical"].includes(v.impact ?? ""))
+        .map((v) => v.id),
+    ).toEqual([]);
+    await notice.screenshot({ path: test.info().outputPath(`import-forms-${colorScheme}.png`) });
+  }
+  await page.emulateMedia({ colorScheme: null });
+  await dialog.getByText("Create the forms in EmDash Forms", { exact: true }).click();
+  await dialog.getByRole("button", { name: "Import", exact: true }).click();
+  await expect(overlay(page)).toBeVisible({ timeout: 20_000 });
+
+  const id = editorEntry(page.url());
+  const stored = await storedLayout<{
+    root: { children: { type: string; props: { formId?: string } }[] };
+  }>(request, id);
+  const formId = stored.root.children.find((c) => c.type === "form")?.props.formId ?? "";
+  expect(formId).not.toBe("");
+
+  await publishPage(request, id);
+  await page.goto(`/${title.toLowerCase().replaceAll(" ", "-")}`);
+  await expect(page.locator("[data-ec-form][data-ec-initialized]")).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.locator('input[name="email"]')).toHaveAttribute("type", "email");
+  await page.locator('input[name="name"]').fill("Ada");
+  await page.locator('input[name="email"]').fill(`ada-${unique()}@example.com`);
+  await page.locator(".ec-form-submit").click();
+  await expect(page.locator("[data-form-status]")).toContainText("Thanks, we'll reply soon.", {
+    timeout: 15_000,
+  });
+});

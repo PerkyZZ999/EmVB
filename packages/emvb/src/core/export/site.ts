@@ -54,6 +54,9 @@ export type ExportPageInput = {
   /** W-977: an entry of one of your collections: its public path and collection. */
   path?: string;
   collection?: string;
+  /** W-1091: the page's language and its translation group (EmDash i18n), when the site has them. */
+  locale?: string;
+  translationGroup?: string;
 };
 
 /** A published theme part as the content API returns it (`data` fields). */
