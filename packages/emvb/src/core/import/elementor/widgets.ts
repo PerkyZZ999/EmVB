@@ -992,7 +992,6 @@ const testimonial: Widget = (s, ctx, el) => {
   ];
 };
 
-/** W-1023: Elementor's Star Rating → a Rating, with its title as text beside it. */
 /**
  * W-1073: Elementor Pro's Search Form becomes EmVB's, sending `?q=` to the site's /search page
  * (WordPress's `?s=` doesn't apply on EmDash). The icon-only button and the full-screen skin
@@ -1011,6 +1010,7 @@ const searchForm: Widget = (s, ctx, el) => {
   ];
 };
 
+/** W-1023: Elementor's Star Rating → a Rating, with its title as text beside it. */
 const starRating: Widget = (s, ctx, el) => {
   const scale = Math.min(10, Math.max(1, Math.round(num(s["rating_scale"]) ?? 5)));
   const value = Math.min(

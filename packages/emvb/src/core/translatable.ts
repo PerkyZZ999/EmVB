@@ -2,8 +2,11 @@ import { ELEMENT_DESCRIPTORS } from "./elements/index.ts";
 import type { Layout, LayoutNode } from "./schema/layout.ts";
 import { forEachNode } from "./tree-ops.ts";
 
-/** Text fields that name things rather than say things: never offered for translation. */
-const NOT_TEXT = new Set(["formId", "field"]);
+/**
+ * Text fields that name things rather than say things: never offered for translation. A Search
+ * form's `action` is an address (W-1073); a translated page sets its own by hand.
+ */
+const NOT_TEXT = new Set(["formId", "field", "action"]);
 
 export type TranslatableString = { nodeId: string; key: string; text: string };
 

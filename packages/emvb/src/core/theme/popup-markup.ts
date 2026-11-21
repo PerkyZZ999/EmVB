@@ -5,7 +5,9 @@ import type { TriggersDoc } from "./triggers.ts";
 /**
  * Minimal chrome styles for public popups (loaded only when popups match). W-758: the close
  * button sticks to the top of a long popup (it scrolled away with the content on phones) and
- * floats, so a long heading wraps beside it instead of running under it.
+ * floats, so a long heading wraps beside it instead of running under it. Panels (W-1071) sit at
+ * their edge by physical auto margins: flex-start and flex-end follow `dir`, so on a right-to-left
+ * site a left panel opened at the right while its slide came from the left.
  */
 export const POPUP_CHROME_CSS = `
 .emvb-popup{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:1.5rem;box-sizing:border-box}
@@ -17,6 +19,8 @@ export const POPUP_CHROME_CSS = `
 .emvb-popup__content{min-width:12rem}
 .emvb-popup--panel{padding:0;justify-content:flex-start}
 .emvb-popup--right{justify-content:flex-end}
+.emvb-popup--left .emvb-popup__dialog{margin-right:auto}
+.emvb-popup--right .emvb-popup__dialog{margin-left:auto}
 .emvb-popup--panel .emvb-popup__dialog{box-sizing:border-box;width:min(var(--emvb-panel-w,24rem),calc(100vw - 3rem));max-width:none;height:100%;max-height:none;border-radius:0}
 .emvb-popup--narrow{--emvb-panel-w:20rem}
 .emvb-popup--wide{--emvb-panel-w:32rem}

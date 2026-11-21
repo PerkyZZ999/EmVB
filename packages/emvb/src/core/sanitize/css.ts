@@ -883,8 +883,15 @@ export function styleDeclarations(style: unknown): {
     }
     if (key === "stickyMotion") {
       const found = stickyDeclarations(raw);
-      if (found && found.every((d) => isSafeCssValue(d.value))) sticky = found;
-      else rejected.push(key);
+      if (found && found.every((d) => isSafeCssValue(d.value))) {
+        sticky = found;
+        // W-1070: whether "Hide while scrolling down" is on at this width, for the sticky script.
+        // Unset keeps a wider device's choice; `{ type: "none" }` turns it off.
+        const { hide, type } = raw as { hide?: unknown; type?: unknown };
+        if (typeof hide === "boolean" || type === "none") {
+          declarations.push({ property: "--emvb-sticky-hide", value: hide === true ? "1" : "0" });
+        }
+      } else rejected.push(key);
       continue;
     }
     if (key === "transform") {

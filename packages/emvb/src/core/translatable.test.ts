@@ -34,3 +34,22 @@ describe("translatable strings (W-936)", () => {
     ]);
   });
 });
+
+test("a Search form's words are offered, its search page address isn't (W-1073)", () => {
+  const search = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "srch0001",
+          type: "search-form",
+          props: { placeholder: "Search", buttonText: "Go", action: "/fr/recherche" },
+        },
+      ],
+    },
+  } as unknown as Layout;
+  expect(translatableStrings(search).map((s) => s.key)).toEqual(["placeholder", "buttonText"]);
+});

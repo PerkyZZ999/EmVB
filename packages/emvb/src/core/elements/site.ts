@@ -35,7 +35,8 @@ export const searchForm: ElementDefinition<SearchFormNode> = {
         kind: "text",
         label: "Search page",
         optional: true,
-        message: "Where the words go, as ?q=…. Leave it empty for /search.",
+        message:
+          "The page the words are sent to, as ?q=…. Anything after a ? here is dropped by the browser. Leave it empty for /search.",
       },
     ],
   },

@@ -52,11 +52,36 @@ describe("sticky header effects (W-1070)", () => {
     expect(plain.includes("emvb-sticky")).toBe(false);
   });
 
-  test("hide marks the element and asks for the sticky script, with no CSS of its own", () => {
+  test("hide marks the element and asks for the sticky script, with only its on switch", () => {
     const { html, css, runtimes } = render(page({ hide: true }));
     expect(html).toContain("data-emvb-sticky-hide");
     expect(runtimes).toEqual(["sticky"]);
-    expect(css.includes("emvb-sticky-")).toBe(false);
+    expect(css).toContain("--emvb-sticky-hide:1");
+    expect(css.replace("--emvb-sticky-hide:1", "").includes("emvb-sticky-")).toBe(false);
+  });
+
+  test("hide follows each device: on for phones only, or off for phones only", () => {
+    const phoneOnly = page({ shadow: true });
+    const head = phoneOnly.root.children?.[0] as unknown as Record<string, unknown>;
+    head["devices"] = { mobile: { motion: { sticky: { hide: true } } } };
+    const only = render(phoneOnly);
+    expect(only.html).toContain("data-emvb-sticky-hide");
+    expect(only.runtimes).toEqual(["sticky"]);
+    expect(only.css).toMatch(/\.emvb-e-head0001\{[^}]*--emvb-sticky-hide:0/);
+    expect(only.css).toMatch(/@media \(max-width:[^{]*\{[^}]*--emvb-sticky-hide:1/);
+
+    const notPhones = page({ hide: true });
+    const desk = notPhones.root.children?.[0] as unknown as Record<string, unknown>;
+    desk["devices"] = { mobile: { motion: { sticky: { type: "none" } } } };
+    const off = render(notPhones);
+    expect(off.css).toContain("--emvb-sticky-hide:1");
+    expect(off.css).toMatch(/@media \(max-width:[^{]*\{[^}]*--emvb-sticky-hide:0/);
+
+    // A phone setting only a shadow keeps the wider device's hiding.
+    const kept = page({ hide: true });
+    const keep = kept.root.children?.[0] as unknown as Record<string, unknown>;
+    keep["devices"] = { mobile: { motion: { sticky: { shadow: true } } } };
+    expect(render(kept).css).not.toMatch(/@media \(max-width:[^{]*\{[^}]*--emvb-sticky-hide/);
   });
 
   test("an entrance on the same element keeps playing alongside", () => {

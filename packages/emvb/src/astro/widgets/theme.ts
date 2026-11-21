@@ -1,14 +1,15 @@
 /**
  * W-1067: the opt-in Theme toggle runtime. A choice made with a Theme toggle is kept in this
  * browser and marks `<html data-emvb-theme="light|dark">`, which the page CSS reads before the
- * visitor's system setting. Each toggle shows once this runs, and says whether dark is on.
+ * visitor's system setting. Each toggle shows once this runs, and says whether dark is on. The
+ * page itself puts a saved choice back before it is drawn (THEME_BOOT_SCRIPT).
  */
 
-const KEY = "emvb-theme";
+import { THEME_STORAGE_KEY } from "../../core/render/theme-boot.ts";
 
 function stored(): "light" | "dark" | null {
   try {
-    const value = localStorage.getItem(KEY);
+    const value = localStorage.getItem(THEME_STORAGE_KEY);
     return value === "light" || value === "dark" ? value : null;
   } catch {
     return null;
@@ -39,7 +40,7 @@ export function initTheme(root: ParentNode = document): void {
       const next = isDark() ? "light" : "dark";
       document.documentElement.dataset["emvbTheme"] = next;
       try {
-        localStorage.setItem(KEY, next);
+        localStorage.setItem(THEME_STORAGE_KEY, next);
       } catch {
         // Private mode: the choice lasts for this page only.
       }

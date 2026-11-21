@@ -83,6 +83,12 @@ describe("off-canvas panels (W-1071)", () => {
     );
   });
 
+  test("a left panel stays at the left on a right-to-left site, a right one at the right", () => {
+    // flex-start and flex-end follow the text direction; the slide-in comes from a physical edge.
+    expect(POPUP_CHROME_CSS).toContain(".emvb-popup--left .emvb-popup__dialog{margin-right:auto}");
+    expect(POPUP_CHROME_CSS).toContain(".emvb-popup--right .emvb-popup__dialog{margin-left:auto}");
+  });
+
   test("triggers accept a panel edge and width, and refuse others", () => {
     const at = (panel: unknown) =>
       validateTriggers({ schemaVersion: 1, open: [{ type: "page_load" }], panel }).ok;

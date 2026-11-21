@@ -28,7 +28,9 @@ Set a header's (or any box's) **Position** to **Sticky** with **Top** 0, and **W
 appears below: a **Background** and **Shadow** once scrolled, smaller **Top and bottom padding**
 (the header shrinks), over the first 120 px of scrolling unless you change **Changes over the
 first**. **Hide while scrolling down** slides the header away as the visitor reads down and brings
-it back as soon as they scroll up; it never hides while keyboard focus is in it. Hiding uses a
+it back as soon as they scroll up; it never hides while keyboard focus is in it. A bar held at the
+bottom of the screen slides down instead, and each device keeps its own choice (turn it on for
+phones only, or off for them). Hiding uses a
 small script that loads only on pages that use it; the rest is CSS. Browsers without scroll-driven
 animations, and visitors who prefer reduced motion, see the header as you made it.
 

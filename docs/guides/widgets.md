@@ -177,7 +177,10 @@ Add → Content → **Search form** is a search box and a button that send the w
 search page, `/search?q=…`, the page EmDash's own Search widget uses. It is a plain form: no
 script, and it works before any script loads. In its settings you can change the placeholder, the
 button's text, the name screen readers hear (unset "Search") and the search page, such as
-`/fr/recherche` for a French page. Pair it with a **Search Results** template in Theme Builder.
+`/fr/recherche` for a French page (the browser drops anything after a `?` in that address, and
+the address isn't offered for translation, so set it on each translated page). Pair it with a
+**Search Results** template in Theme Builder.
+Being a form itself, it can't go inside a **Form** element.
 
 ## Light and dark, and the Theme toggle
 
@@ -188,7 +191,15 @@ normal ones. Colours without a dark value stay the same in both.
 Add → Content → **Theme toggle** adds a "Dark mode" button (a toggle screen readers hear as on or
 off) that lets visitors choose for themselves; the choice is remembered in their browser. It needs
 a small script that loads only on pages with a toggle, so on a page without it no button shows.
-The first moment of a page load uses the device setting, then the stored choice applies.
+
+A site whose Site styles have any Dark mode value also gets one tiny inline script at the start of
+each EmVB page and theme part. It puts the visitor's stored choice back before the page is drawn,
+so the page never flashes the device's look first, and the choice holds on pages without a toggle.
+A site with no Dark mode value gets no script. If your site sends a Content Security Policy that
+blocks inline scripts, allow this one by its hash,
+`'sha256-tQy7biF/kugrT/8W/ZtwVQWgAwcnKKMv4WLE+A1RGjQ='` (EmVB pages already need inline styles
+allowed). Without it, the stored choice applies once the toggle's own script runs, on pages with a
+toggle.
 
 ## Scripts in theme parts
 

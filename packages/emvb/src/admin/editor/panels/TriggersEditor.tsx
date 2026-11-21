@@ -94,14 +94,20 @@ function ShowTimesField({
   );
 }
 
-/** W-1081: a show-from or show-until moment, typed as a Countdown's target; empty clears it. */
+/**
+ * W-1081: a show-from or show-until moment, typed as a Countdown's target; empty clears it. The
+ * pair is checked too: an end at or before the start would make the whole triggers save fail.
+ */
 function ShowDateField({
   label,
   value,
+  pair,
   onCommit,
 }: {
   label: string;
   value: string | null;
+  /** The other date's field and value, for the end-after-start check. */
+  pair: { from?: string | null; until?: string | null };
   onCommit: (value: string | null) => void;
 }) {
   const [draft, setDraft] = React.useState(value ?? "");
@@ -123,6 +129,11 @@ function ShowDateField({
       setError("Use a date, time and UTC offset such as 2026-12-01T09:00-05:00.");
       return;
     }
+    const dates = { from: raw, until: raw, ...pair };
+    if (dates.from && dates.until && Date.parse(dates.until) <= Date.parse(dates.from)) {
+      setError("The end must come after the start.");
+      return;
+    }
     setError(null);
     if (raw !== value) onCommit(raw);
   };
@@ -133,6 +144,7 @@ function ShowDateField({
       placeholder="2026-12-01T09:00-05:00"
       value={draft}
       {...(error ? { error } : {})}
+      aria-invalid={error ? true : undefined}
       onChange={(event) => setDraft(event.currentTarget.value)}
       onBlur={commit}
       onKeyDown={(event) => {
@@ -382,12 +394,14 @@ export function TriggersEditor({ triggers, onChange }: Props) {
         key={`from:${advanced.from ?? ""}`}
         label="Show from"
         value={advanced.from ?? null}
+        pair={{ until: advanced.until ?? null }}
         onCommit={(from) => onChange({ ...doc, advanced: { ...advanced, from } })}
       />
       <ShowDateField
         key={`until:${advanced.until ?? ""}`}
         label="Show until"
         value={advanced.until ?? null}
+        pair={{ from: advanced.from ?? null }}
         onCommit={(until) => onChange({ ...doc, advanced: { ...advanced, until } })}
       />
     </div>

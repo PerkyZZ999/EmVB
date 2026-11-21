@@ -144,6 +144,23 @@ describe("popup address rules and show dates (W-1081)", () => {
     await type(dateField("Show until"), "2026-02-30T09:00Z");
     expect(sent.length).toBe(before);
   });
+
+  test("an end at or before the start says so on the field and isn't saved", async () => {
+    await show(doc([{ type: "page_load" }], { from: "2026-12-01T09:00Z" }));
+    await type(dateField("Show until"), "2026-11-30T09:00Z");
+    expect(sent.length).toBe(0);
+    const until = dateField("Show until");
+    expect(document.body.textContent).toContain("The end must come after the start.");
+    expect(until?.getAttribute("aria-invalid")).toBe("true");
+    await type(dateField("Show until"), "2026-12-02T09:00Z");
+    expect(sent.at(-1)?.advanced).toEqual({
+      from: "2026-12-01T09:00Z",
+      until: "2026-12-02T09:00Z",
+    });
+    await show(doc([{ type: "page_load" }], { until: "2026-12-01T09:00Z" }));
+    await type(dateField("Show from"), "2026-12-01T09:00Z");
+    expect(sent.length).toBe(1);
+  });
 });
 
 describe("popup or off-canvas panel (W-1071)", () => {

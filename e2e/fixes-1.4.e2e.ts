@@ -8,7 +8,7 @@ import {
   setUpEmvbOnce,
 } from "./support/api.ts";
 import { loadDraft, publishStyles, removeColorsNamed, saveDesign } from "./support/design.ts";
-import { unique } from "./support/helpers.ts";
+import { canvas, openEditor, unique } from "./support/helpers.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
 
 // 1.4 fixes and hardening (PLAN_1.4 B and D), each on a published page in a real browser.
@@ -467,4 +467,186 @@ test("dismissing an Alert skips a button hidden on phones, so focus doesn't fall
   await page.goto(`/${slug}`);
   await page.getByRole("button", { name: "Dismiss" }).press("Enter");
   await expect(page.getByRole("link", { name: "Everywhere" })).toBeFocused();
+});
+
+test("hiding on scroll follows the device, and a bar at the bottom slides down (W-1070)", async ({
+  page,
+  request,
+}) => {
+  const slug = `sticky-device-${unique()}`;
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "head0002",
+          type: "container",
+          props: {},
+          // Hides on phones only.
+          style: { position: "sticky", top: { value: 0, unit: "px" }, backgroundColor: "#fff" },
+          devices: { mobile: { motion: { sticky: { hide: true } } } },
+          children: [{ id: "link0001", type: "link", props: { text: "Home", href: "/" } }],
+        },
+        { id: "spac0001", type: "spacer", props: { height: { value: 3000, unit: "px" } } },
+        {
+          id: "foot0002",
+          type: "container",
+          props: {},
+          style: {
+            position: "fixed",
+            bottom: { value: 0, unit: "px" },
+            motion: {
+              sticky: { hide: true },
+              transition: { property: "opacity", duration: 300, easing: "ease" },
+            },
+          },
+          children: [{ id: "link0002", type: "link", props: { text: "Top", href: "#" } }],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Sticky devices", layout, slug);
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.goto(`/${slug}`);
+  const header = page.locator(".emvb-e-head0002");
+  const bar = page.locator(".emvb-e-foot0002");
+  const ownTransition = await bar.evaluate((el) => getComputedStyle(el).transitionProperty);
+  await page.mouse.wheel(0, 400);
+  await expect(bar).toHaveAttribute("data-emvb-away", "");
+  await expect
+    .poll(() => bar.evaluate((el) => el.getBoundingClientRect().top))
+    .toBeGreaterThanOrEqual(800);
+  expect(await bar.evaluate((el) => getComputedStyle(el).transitionProperty)).toBe(ownTransition);
+  // On Desktop the header's hiding is off.
+  await expect(header).not.toHaveAttribute("data-emvb-away");
+  await expect(header).toBeInViewport();
+
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.mouse.wheel(0, -100);
+  await page.mouse.wheel(0, 400);
+  await expect(header).toHaveAttribute("data-emvb-away", "");
+  await expect(header).not.toBeInViewport();
+});
+
+test("a panel from the left opens at the left on a right-to-left page, its button says it is open (W-1071)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique();
+  const title = `Side ${tag}`;
+  const panelId = await createThemePart(request, {
+    title,
+    partType: "popup",
+    slug: `side-${tag}`,
+    triggers: {
+      schemaVersion: 1,
+      open: [{ type: "click", selector: `#side-${tag}` }],
+      advanced: {},
+      panel: { edge: "left", size: "narrow" },
+    },
+  });
+  try {
+    await publishThemePart(request, panelId);
+    const slug = `fixes-${unique()}`;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "butn0001", type: "button", props: { text: "Side" }, htmlId: `side-${tag}` },
+        ],
+      },
+    };
+    await publishPage(request, await createPage(request, "RTL panel page", layout, slug));
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/${slug}`);
+    await page.evaluate(() => {
+      document.documentElement.dir = "rtl";
+    });
+    const dialog = page.getByRole("dialog", { name: title });
+    const opener = page.locator(`#side-${tag}`);
+    await expect(opener).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+    await opener.click();
+    await expect(dialog).toBeVisible();
+    await expect(opener).toHaveAttribute("aria-expanded", "true");
+    const box = await dialog.boundingBox();
+    expect(Math.round(box?.x ?? -1)).toBe(0);
+    expect(Math.round(box?.width ?? 0)).toBe(320);
+    await page.keyboard.press("Escape");
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+  } finally {
+    await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${panelId}`);
+  }
+});
+
+test("the editor canvas shows a Theme toggle (W-1067)", async ({ page, request }) => {
+  const text = `Toggle ${unique()}`;
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "head0001", type: "heading", props: { text, level: 1 } },
+        { id: "thme0001", type: "theme-toggle", props: {} },
+      ],
+    },
+  };
+  const id = await createPage(request, text, layout, `toggle-${unique()}`);
+  await openEditor(page, id, text);
+  await expect(canvas(page).getByRole("button", { name: "Dark mode" })).toBeVisible();
+});
+
+test("a saved light or dark choice holds on a page without a Theme toggle (W-1067)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(-8);
+  const name = `Boot test ${tag}`;
+  const id = `boot-${tag}`;
+  const draft = await loadDraft(request);
+  const colors = [
+    ...draft.design.variables.colors,
+    { id, name, value: "#ffffff", dark: "#0b1220" },
+  ];
+  await saveDesign(
+    request,
+    { ...draft.design, variables: { ...draft.design.variables, colors } },
+    draft.revision,
+  );
+  await publishStyles(request, draft.publishedRevision);
+  try {
+    const slug = `boot-${unique()}`;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: { backgroundColor: { var: id } },
+        children: [{ id: "head0001", type: "heading", props: { text: "No toggle", level: 1 } }],
+      },
+    };
+    await publishPage(request, await createPage(request, "Boot", layout, slug));
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.addInitScript(() => localStorage.setItem("emvb-theme", "light"));
+    await page.goto(`/${slug}`, { waitUntil: "domcontentloaded" });
+    const root = page.locator(".emvb-root").first();
+    expect(await root.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+      "rgb(255, 255, 255)",
+    );
+  } finally {
+    await removeColorsNamed(request, name);
+  }
 });

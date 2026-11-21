@@ -77,3 +77,41 @@ describe("form drop rules (W-034)", () => {
     expect(LayoutSchema.safeParse(layout).success).toBe(true);
   });
 });
+
+describe("a Search form is a form too (W-1073)", () => {
+  const search = { id: "srch0001", type: "search-form", props: {} } as LayoutNode;
+  const layout = page([
+    { id: "form0001", type: "form", props: { formId: "abc" }, children: [] },
+    { id: "box00001", type: "container", props: {}, children: [] },
+  ] as LayoutNode[]);
+
+  test("it can't go into a form, or into a box inside one", () => {
+    expect(canDrop(layout, { kind: "new", node: search }, "form0001")).toEqual({
+      ok: false,
+      reason: "A Search form can't go inside a form.",
+    });
+    expect(canDrop(layout, { kind: "new", node: search }, "box00001").ok).toBe(true);
+    const boxed = page([
+      {
+        id: "form0001",
+        type: "form",
+        props: { formId: "abc" },
+        children: [{ id: "box00002", type: "container", props: {}, children: [] }],
+      },
+    ] as LayoutNode[]);
+    expect(canDrop(boxed, { kind: "new", node: search }, "box00002").ok).toBe(false);
+  });
+
+  test("a box holding one can't go into a form", () => {
+    const box = {
+      id: "box00003",
+      type: "container",
+      props: {},
+      children: [search],
+    } as LayoutNode;
+    expect(canDrop(layout, { kind: "new", node: box }, "form0001")).toEqual({
+      ok: false,
+      reason: "A Search form can't go inside a form.",
+    });
+  });
+});

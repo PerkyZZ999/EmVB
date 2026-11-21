@@ -171,4 +171,19 @@ describe("URL rules and show dates (W-1081)", () => {
     expect(withinShowDates(dates, Date.parse("2026-12-02T00:00Z"))).toBe(false);
     expect(withinShowDates({ until: null }, 0)).toBe(true);
   });
+
+  test("an end at the start, or before it in another offset, is refused and never shows", () => {
+    const same = { from: "2026-12-01T09:00Z", until: "2026-12-01T09:00Z" };
+    // 09:00 at UTC-5 is 14:00 UTC, after 10:00 UTC though it reads earlier.
+    const offset = { from: "2026-12-01T09:00-05:00", until: "2026-12-01T10:00Z" };
+    for (const dates of [same, offset]) {
+      expect(withAdvanced(dates).ok).toBe(false);
+      for (const at of ["2026-11-30T00:00Z", "2026-12-01T09:00Z", "2026-12-01T12:00Z"]) {
+        expect(withinShowDates(dates, Date.parse(at))).toBe(false);
+      }
+    }
+    expect(withAdvanced({ from: "2026-12-01T09:00-05:00", until: "2026-12-01T15:00Z" }).ok).toBe(
+      true,
+    );
+  });
 });

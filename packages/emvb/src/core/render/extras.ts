@@ -70,9 +70,34 @@ const ALWAYS_INTERACTIVE = new Set([
   "submit",
   "pagination",
   "toc",
+  // W-1073, W-1067: a search box and button; a toggle button.
+  "search-form",
+  "theme-toggle",
+  // A pause button; a map link and load button; network links; marker buttons.
+  "countdown",
+  "map",
+  "social-icons",
+  "social-link",
+  "share-buttons",
+  "share-link",
+  "hotspots",
+  "hotspot",
   // Post content can hold links of its own.
   "post-content",
 ]);
+
+/** Elements that render a link only once this prop holds an address. */
+const LINK_PROP: Record<string, string> = {
+  heading: "href",
+  icon: "href",
+  image: "href",
+  "icon-box": "href",
+  "image-box": "href",
+  cta: "href",
+  "flip-box": "href",
+  "price-list-item": "href",
+  "price-table": "buttonHref",
+};
 
 function containsInteractive(node: LayoutNode): boolean {
   if (ALWAYS_INTERACTIVE.has(node.type)) return true;
@@ -83,14 +108,13 @@ function containsInteractive(node: LayoutNode): boolean {
   if (node.type === "loop" && typeof props.partId === "string" && props.partId.trim()) {
     return true;
   }
-  if (
-    BOX.has(node.type) ||
-    node.type === "heading" ||
-    node.type === "icon" ||
-    node.type === "image"
-  ) {
-    const href = (node.props as { href?: unknown }).href;
+  const linkKey = LINK_PROP[node.type] ?? (BOX.has(node.type) ? "href" : undefined);
+  if (linkKey) {
+    const href = (node.props as Record<string, unknown>)[linkKey];
     if (typeof href === "string" && href.trim()) return true;
+  }
+  if (node.type === "alert" && (node.props as { dismissible?: unknown }).dismissible === true) {
+    return true;
   }
   return childrenOf(node).some(containsInteractive);
 }

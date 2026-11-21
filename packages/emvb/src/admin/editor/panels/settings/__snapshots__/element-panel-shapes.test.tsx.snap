@@ -17287,7 +17287,7 @@ exports[`element panel markup (W-021, W-086 M16) search-form renders the same co
       "Search page"
     input.emvb-field aria-describedby="(generated)" aria-labelledby="(generated)" data-emvb-field="action" value=""
     p
-      "Where the words go, as ?q=…. Leave it empty for /search."
+      "The page the words are sent to, as ?q=…. Anything after a ? here is dropped by the browser. Leave it empty for /search."
     section.emvb-bind aria-labelledby="emvb-aud-bi1nwpcq-title" data-emvb-audience-editor=""
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"

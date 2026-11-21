@@ -92,4 +92,13 @@ describe("light and dark (W-1067)", () => {
     expect(runtimes).toEqual(["theme"]);
     expect(css).toContain(".emvb-theme-toggle:not([data-emvb-ready]){display:none}");
   });
+
+  test("the editor canvas shows the Theme toggle: it runs no scripts to mark it ready", () => {
+    const toggle = page({}) as unknown as { root: { children: unknown[] } };
+    toggle.root.children = [{ id: "thme0001", type: "theme-toggle", props: {} }];
+    const layout = toggle as unknown as Layout;
+    const editor = renderPage(layout, emptyDesign(), { mode: "editor" }).html;
+    expect(editor).toMatch(/<button class="emvb-theme-toggle"[^>]* data-emvb-ready=""/);
+    expect(renderPage(layout, emptyDesign()).html.includes("data-emvb-ready")).toBe(false);
+  });
 });

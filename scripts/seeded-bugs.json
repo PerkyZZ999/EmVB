@@ -18881,8 +18881,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/extras.ts",
-          "search": "    node.type === \"heading\" ||\n    node.type === \"icon\" ||",
-          "replace": "    false ||"
+          "search": "  heading: \"href\",\n  icon: \"href\",\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/elements/inner-link.test.ts"],
@@ -42748,7 +42748,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/translatable.ts",
-          "search": "const NOT_TEXT = new Set([\"formId\", \"field\"]);",
+          "search": "const NOT_TEXT = new Set([\"formId\", \"field\", \"action\"]);",
           "replace": "const NOT_TEXT = new Set<string>([]);"
         }
       ],
@@ -51046,8 +51046,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "      if (found && found.every((d) => isSafeCssValue(d.value))) sticky = found;",
-          "replace": "      if (found && found.length < 0) sticky = found;"
+          "search": "      if (found && found.every((d) => isSafeCssValue(d.value))) {",
+          "replace": "      if (found && found.length < 0) {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
@@ -51088,8 +51088,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;",
-          "replace": "  return false;"
+          "search": "  return [node.style as StickyStyle, ...Object.values(devices ?? {})].some(stickyHide);",
+          "replace": "  return devices === undefined && devices !== undefined;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
@@ -51102,8 +51102,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;",
-          "replace": "  return false;"
+          "search": "  return [node.style as StickyStyle, ...Object.values(devices ?? {})].some(stickyHide);",
+          "replace": "  return devices === undefined && devices !== undefined;"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1070"],
@@ -51119,8 +51119,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/sticky.ts",
-          "search": "      if (down && y > el.offsetHeight && !el.contains(document.activeElement)) {",
-          "replace": "      if (down && y > el.offsetHeight) {"
+          "search": "y > el.offsetHeight && !el.contains(document.activeElement)) {",
+          "replace": "y > el.offsetHeight) {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
@@ -51133,8 +51133,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/sticky.ts",
-          "search": "    if (!reduced) el.style.transition = \"translate 0.25s ease\";",
-          "replace": "    el.style.transition = \"translate 0.25s ease\";"
+          "search": "  if (reduced || typeof el.animate !== \"function\") return;",
+          "replace": "  if (typeof el.animate !== \"function\") return;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
@@ -51470,7 +51470,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "\u2718.*\\[node\\]"
+      "expect": "✘.*\\[node\\]"
     },
     {
       "id": "W-1054/focus-out-of-tab-order",
@@ -51551,7 +51551,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "\u2718.*\\[node\\]"
+      "expect": "✘.*\\[node\\]"
     },
     {
       "id": "W-1052/stale-rev-after-queue",
@@ -51643,7 +51643,7 @@
         "-g",
         "spinning arrow"
       ],
-      "expect": "\u2718.*\\[node\\]",
+      "expect": "✘.*\\[node\\]",
       "env": {
         "CI": "1"
       }
@@ -51688,7 +51688,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1077"],
-      "expect": "\u2718.*\\[node\\]",
+      "expect": "✘.*\\[node\\]",
       "env": {
         "CI": "1"
       }
@@ -51748,6 +51748,176 @@
       ],
       "command": ["bun", "test", "./test/setup/happydom.test.ts"],
       "expect": "\\(fail\\).*throws on a noted warning"
+    },
+    {
+      "id": "W-1071/rtl-panel-edge",
+      "requirement": "W-1071",
+      "description": "A left off-canvas panel follows the text direction and opens at the right on a right-to-left site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": ".emvb-popup--left .emvb-popup__dialog{margin-right:auto}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/popup-markup.test.ts",
+        "-t",
+        "right-to-left"
+      ],
+      "expect": "\\(fail\\).*left panel stays at the left"
+    },
+    {
+      "id": "W-1071/opener-expanded",
+      "requirement": "W-1071",
+      "description": "A popup's click trigger control never says it opens a dialog or whether it is open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      control.setAttribute(\"aria-expanded\", expanded);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/popups/runtime.test.ts",
+        "-t",
+        "W-1071"
+      ],
+      "expect": "\\(fail\\).*click trigger's control says it opens a dialog"
+    },
+    {
+      "id": "W-1067/toggle-hidden-in-editor",
+      "requirement": "W-1067",
+      "description": "The editor canvas hides the Theme toggle, waiting for a script the canvas never runs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (mode === \"editor\" && type === \"theme-toggle\") attrs[\"data-emvb-ready\"] = \"\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts", "-t", "W-1067"],
+      "expect": "\\(fail\\).*editor canvas shows the Theme toggle"
+    },
+    {
+      "id": "W-1067/no-theme-boot",
+      "requirement": "W-1067",
+      "description": "A saved light or dark choice is applied only by the toggle's script after the first paint, and never on pages without a toggle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    html: mode === \"public\" && designHasDark(design) ? THEME_BOOT_SCRIPT + html : html,\n",
+          "replace": "    html: mode === \"editor\" && designHasDark(design) ? THEME_BOOT_SCRIPT + html : html,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/theme-boot.test.ts"],
+      "expect": "\\(fail\\).*starts with the inline script"
+    },
+    {
+      "id": "W-1073/review-search-in-form",
+      "requirement": "W-1073",
+      "description": "A Search form may go inside a Form element, rendering a form inside a form whose Search button sends the outer form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (child.type === \"search-form\" && inForm) return REASONS.searchInForm;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/nesting.test.ts", "-t", "W-1073"],
+      "expect": "\\(fail\\).*Search form inside a form is refused on save"
+    },
+    {
+      "id": "W-1073/review-linked-box-search",
+      "requirement": "W-1073",
+      "description": "A linked box around a Search form or Theme toggle becomes a link, nesting a form and buttons inside an <a>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "  \"search-form\",\n  \"theme-toggle\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/box-link-nesting.test.ts"],
+      "expect": "\\(fail\\).*around a Search form it stays a box"
+    },
+    {
+      "id": "W-1070/review-hide-desktop-only",
+      "requirement": "W-1070",
+      "description": "Hide while scrolling down is read from the Desktop style only, so a header set to hide on phones alone never hides.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  return [node.style as StickyStyle, ...Object.values(devices ?? {})].some(stickyHide);\n",
+          "replace": "  return devices === devices && stickyHide(node.style as StickyStyle);\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
+      "expect": "\\(fail\\).*hide follows each device"
+    },
+    {
+      "id": "W-1070/review-bottom-bar-up",
+      "requirement": "W-1070",
+      "description": "A sticky bar held at the bottom of the screen hides by moving up over the page instead of down out of view.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/sticky.ts",
+          "search": "heldAtBottom(el) ? \"0 100%\" : \"0 -100%\"",
+          "replace": "heldAtBottom(el) ? \"0 -100%\" : \"0 -100%\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
+      "expect": "\\(fail\\).*held at the bottom of the screen slides down"
+    },
+    {
+      "id": "W-1070/review-transition-clobbered",
+      "requirement": "W-1070",
+      "description": "The sticky script overwrites the element's own CSS transitions with its translate transition.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/sticky.ts",
+          "search": "    el.dataset[\"emvbReady\"] = \"\";\n",
+          "replace": "    el.dataset[\"emvbReady\"] = \"\";\n    if (!reduced) el.style.transition = \"translate 0.25s ease\";\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
+      "expect": "\\(fail\\).*leaves the element's transitions alone"
+    },
+    {
+      "id": "W-1081/review-until-before-from",
+      "requirement": "W-1081",
+      "description": "The popup Show until field accepts a moment at or before Show from, saving an inverted range the triggers save then refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "Date.parse(dates.until) <= Date.parse(dates.from)",
+          "replace": "Date.parse(dates.until) < Number.NEGATIVE_INFINITY"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*an end at or before the start says so"
+    },
+    {
+      "id": "W-1073/review-action-translatable",
+      "requirement": "W-1073",
+      "description": "A Search form's search page address is offered to translators as words to translate.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/translatable.ts",
+          "search": "const NOT_TEXT = new Set([\"formId\", \"field\", \"action\"]);",
+          "replace": "const NOT_TEXT = new Set([\"formId\", \"field\"]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/translatable.test.ts"],
+      "expect": "\\(fail\\).*search page address isn't"
     }
   ]
 }

@@ -94,8 +94,8 @@ when the visitor's system prefers dark and no Theme toggle chose light, and when
 Added in 1.4 (W-1070, additive): `motion.sticky` is `{ distance?, background?, shadow?, padding?,
 hide? }` (at least one of the last four) or `{ type: "none" }`. Over the page's first `distance` px
 (10–2000, unset 120) the element takes `background` (a colour), a `shadow` and `padding` (top and
-bottom, a length), as CSS scroll-driven animations; `hide` slides it up while the visitor scrolls
-down (the opt-in `sticky` runtime). Normal-only, off for reduced motion. It has no 0.x key.
+bottom, a length), as CSS scroll-driven animations; `hide` slides it away while the visitor scrolls
+down (the opt-in `sticky` runtime; down for a bar held at the bottom), per device like the rest. Normal-only, off for reduced motion. It has no 0.x key.
 
 Added in 1.1 (W-974, additive): a style record may carry `viewportUnits`, a map from a length key
 (`height`, `minHeight`, `maxHeight` and the other box lengths) to `"dvh"` or `"svh"`. A plain `vh`

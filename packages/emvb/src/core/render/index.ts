@@ -59,6 +59,7 @@ import { renderPagination } from "./pagination.ts";
 import { pushSpacerBasis } from "./spacer-basis.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
+import { designHasDark, THEME_BOOT_SCRIPT } from "./theme-boot.ts";
 import { serialize, type VNode } from "./vnode.ts";
 import {
   isExtensionType,
@@ -235,15 +236,21 @@ const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def
 // W-927: placeholder + wrapper styles ship with every page that may hold an extension node.
 baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
 
+type StickyStyle =
+  | { motion?: { sticky?: { hide?: unknown } }; stickyMotion?: { hide?: unknown } }
+  | undefined;
+
+/** W-1070: a style's "Hide while scrolling down" (`motion.sticky`, or flat `stickyMotion`). */
+const stickyHide = (style: StickyStyle): boolean =>
+  (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;
+
 /**
- * W-1070: the element's own style asks to slide away while the page scrolls down (stored as
- * `motion.sticky`, flat `stickyMotion` once the style is read for CSS).
+ * W-1070: the element asks to slide away while the page scrolls down, on Desktop or any other
+ * device. The CSS says at which widths (`--emvb-sticky-hide`); the sticky script reads it.
  */
 function hidesOnScroll(node: LayoutNode): boolean {
-  const style = node.style as
-    | { motion?: { sticky?: { hide?: unknown } }; stickyMotion?: { hide?: unknown } }
-    | undefined;
-  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;
+  const devices = (node as { devices?: Record<string, StickyStyle> }).devices;
+  return [node.style as StickyStyle, ...Object.values(devices ?? {})].some(stickyHide);
 }
 
 /**
@@ -447,6 +454,11 @@ export function renderPage(
       ? (withInheritedLayers(node.style, classLayers) as typeof node.style)
       : undefined;
     const { declarations, rejected } = styleDeclarations(own);
+    // W-1070: hiding set on a narrower device only is off on Desktop (and the element doesn't
+    // take the value of a hiding box around it).
+    if (hidesOnScroll(node) && !declarations.some((d) => d.property === "--emvb-sticky-hide")) {
+      declarations.push({ property: "--emvb-sticky-hide", value: "0" });
+    }
     // W-210: a device that sets one background layer keeps the layers it inherits.
     const base = { ...classLayers, ...own };
     // W-956: Laptop between Desktop and Tablet; each narrower device inherits the wider ones.
@@ -724,6 +736,9 @@ export function renderPage(
       attrs["data-emvb-sticky-hide"] = "";
       runtimes.add("sticky");
     }
+    // W-1067: the canvas runs no widget scripts, so a Theme toggle waiting for its own stayed
+    // hidden there; the editor shows it as it looks once ready.
+    if (mode === "editor" && type === "theme-toggle") attrs["data-emvb-ready"] = "";
     if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
     if (mode === "editor" && stored.audience) {
       attrs["data-emvb-audience"] = audienceSummary(stored.audience);
@@ -884,7 +899,8 @@ export function renderPage(
   });
   return {
     vnode,
-    html,
+    // W-1067: a public page of a site with dark colours puts back the visitor's choice first.
+    html: mode === "public" && designHasDark(design) ? THEME_BOOT_SCRIPT + html : html,
     css: (scope ? scopeWrapperCss() + scopeCss(css, scope) : css) + printCss(),
     needsFormsRuntime: rendered.form || layoutHasForm(layout),
     needsTabsRuntime: rendered.tabs || layoutHasTabs(layout),

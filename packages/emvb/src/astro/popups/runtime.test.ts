@@ -740,3 +740,30 @@ test("W-757: starting the runtime twice opens a popup once, counts one show, and
   expect(root.hidden).toBe(true);
   expect(document.activeElement === outside).toBe(true);
 });
+
+test("W-1071: a click trigger's control says it opens a dialog and whether it is open", () => {
+  document.body.innerHTML = `<a href="#" id="menu-link">Menu</a><div class="wrap"><button type="button">Open</button></div>`;
+  const root = popup(
+    "c-aria",
+    doc([
+      { type: "click", selector: "#menu-link" },
+      { type: "click", selector: ".wrap" },
+    ]),
+  );
+  const link = document.querySelector<HTMLElement>("#menu-link");
+  const inner = document.querySelector<HTMLElement>(".wrap button");
+  const state = () =>
+    [link, inner].map(
+      (el) => `${el?.getAttribute("aria-haspopup")}/${el?.getAttribute("aria-expanded")}`,
+    );
+  expect(document.querySelector(".wrap")?.hasAttribute("aria-haspopup")).toBe(false);
+  expect(state()).toEqual(["dialog/false", "dialog/false"]);
+  link?.click();
+  expect(root.hidden).toBe(false);
+  expect(state()).toEqual(["dialog/true", "dialog/true"]);
+  root
+    .querySelector<HTMLElement>(".emvb-popup__dialog")
+    ?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  expect(root.hidden).toBe(true);
+  expect(state()).toEqual(["dialog/false", "dialog/false"]);
+});

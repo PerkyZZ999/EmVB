@@ -102,6 +102,8 @@ type Controller = {
   root: HTMLElement;
   dialog: HTMLElement;
   lastFocus: HTMLElement | null;
+  /** Click trigger selectors: the controls they match say they open this dialog. */
+  openers: string[];
   open: () => void;
   close: () => void;
   opened: boolean;
@@ -136,6 +138,32 @@ function unlockScroll(): void {
   if (!anyPopupOpen()) document.documentElement.style.overflow = savedOverflow;
 }
 
+const CONTROL = 'a[href], button, summary, input, [role="button"]';
+
+/** The controls a click trigger's selector names: the matches, or the controls inside a match. */
+function openerControls(selector: string): HTMLElement[] {
+  const out = new Set<HTMLElement>();
+  for (const match of document.querySelectorAll<HTMLElement>(selector)) {
+    if (match.matches(CONTROL)) out.add(match);
+    else for (const inner of match.querySelectorAll<HTMLElement>(CONTROL)) out.add(inner);
+  }
+  return [...out];
+}
+
+/**
+ * W-1071: a control that opens a popup or panel says so (aria-haspopup="dialog") and whether it
+ * is open (aria-expanded), kept in step as the dialog opens and closes.
+ */
+function markOpeners(ctrl: Controller): void {
+  const expanded = String(ctrl.opened);
+  for (const selector of ctrl.openers) {
+    for (const control of openerControls(selector)) {
+      control.setAttribute("aria-haspopup", "dialog");
+      control.setAttribute("aria-expanded", expanded);
+    }
+  }
+}
+
 function createController(root: HTMLElement): Controller | null {
   const dialog = root.querySelector<HTMLElement>(".emvb-popup__dialog");
   if (!dialog) return null;
@@ -143,6 +171,7 @@ function createController(root: HTMLElement): Controller | null {
     root,
     dialog,
     lastFocus: null,
+    openers: [],
     opened: false,
     open() {
       ctrl.lastFocus = document.activeElement as HTMLElement | null;
@@ -150,12 +179,14 @@ function createController(root: HTMLElement): Controller | null {
       lockScroll();
       root.hidden = false;
       ctrl.opened = true;
+      markOpeners(ctrl);
       dialog.focus({ preventScroll: true });
     },
     close() {
       if (!ctrl.opened) return;
       root.hidden = true;
       ctrl.opened = false;
+      markOpeners(ctrl);
       unlockScroll();
       const prev = ctrl.lastFocus;
       if (prev && typeof prev.focus === "function") prev.focus({ preventScroll: true });
@@ -326,6 +357,11 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
   const arm = (ARM as Record<string, Arm<OpenTrigger["type"]> | undefined>)[trigger.type];
   const byClick = trigger.type === "click";
   arm?.(() => openOnce(ctrl, config, byClick), trigger as never);
+  const selector = byClick ? String(trigger.selector ?? "").trim() : "";
+  if (selector && isValidSelector(selector)) {
+    ctrl.openers.push(selector);
+    markOpeners(ctrl);
+  }
 }
 
 /**

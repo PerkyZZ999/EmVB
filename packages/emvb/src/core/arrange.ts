@@ -28,6 +28,7 @@ import {
   newNodeId,
   nodeChildren,
   removeNode,
+  someNode,
   starterLayout,
   updateNode,
 } from "./tree-ops.ts";
@@ -66,6 +67,7 @@ export const REASONS = {
   top: "It's already at the top level.",
   noContainerAbove: "There's no container just above it to move into.",
   nestedForm: "A form can't go inside another form.",
+  searchInForm: "A Search form can't go inside a form.",
   fieldOutsideForm: "Form fields must be placed inside a form.",
   formIntoField: "A form can only go inside a layout container.",
   tabOutsideTabs: "Tab panels can only go inside Tabs.",
@@ -204,6 +206,8 @@ export function parentChildRefusal(
   }
   if (parent.type === "hotspots" && child.type !== "hotspot") return REASONS.onlyHotspots;
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
+  // W-1073: a Search form is a <form> too; inside a form its button sent that form.
+  if (child.type === "search-form" && inForm) return REASONS.searchInForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
 }
@@ -295,8 +299,19 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
   const moving = dragged(layout, source, parentId);
   if (!moving.ok) return moving;
   if (!isParentNode(into.node)) return refuse(REASONS.notContainer);
-  const placed = parentChildRefusal(into.node, moving.node, underForm(layout, into.node.id));
+  const inForm = underForm(layout, into.node.id);
+  const placed = parentChildRefusal(into.node, moving.node, inForm);
   if (placed) return refuse(placed);
+  // A box holding a form or Search form can't go into a form either: the save would refuse it.
+  if (inForm) {
+    const inner = nodeChildren(moving.node).find((child) =>
+      someNode(child, (n) => isFormNode(n) || n.type === "search-form"),
+    );
+    if (inner) {
+      const nested = someNode(inner, isFormNode);
+      return refuse(nested ? REASONS.nestedForm : REASONS.searchInForm);
+    }
+  }
   const drop: Drop = { layout, node: moving.node, into, isNew: source.kind === "new" };
   const broken = DROP_RULES.find(([breaks]) => breaks(drop));
   return broken ? refuse(broken[1]) : { ok: true };

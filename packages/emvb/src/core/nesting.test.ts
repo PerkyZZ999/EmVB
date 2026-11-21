@@ -60,3 +60,16 @@ describe("save-time nesting check (W-225)", () => {
     expect(nestingIssues(page(...strays), 3)).toHaveLength(3);
   });
 });
+
+test("a Search form inside a form is refused on save (W-1073)", () => {
+  const form = el("form", "form0001", [
+    el("container", "cont0001", [el("search-form", "srch0001")]),
+  ]);
+  expect(nestingIssues(page(form)).map((i) => [i.path, i.message])).toEqual([
+    [
+      "root.children[0].children[0].children[0]",
+      "A Search form can't go inside a form. (search-form srch0001)",
+    ],
+  ]);
+  expect(nestingIssues(page(el("search-form", "srch0002")))).toEqual([]);
+});
