@@ -53820,6 +53820,20 @@
         "a dragenter on the tab alone"
       ],
       "expect": "\\(fail\\).*a dragenter on the tab alone"
+    },
+    {
+      "id": "W-1087/section-proto-part",
+      "requirement": "W-1087",
+      "description": "A synced section whose part id is \"constructor\" reads Object.prototype and the render throws.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/section.ts",
+          "search": "    partId && dynamic?.sectionTemplates && Object.hasOwn(dynamic.sectionTemplates, partId)\n      ? dynamic.sectionTemplates[partId]\n      : undefined;",
+          "replace": "    partId && dynamic?.sectionTemplates ? dynamic.sectionTemplates[partId] : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
+      "expect": "\\(fail\\).*Object.prototype key"
     }
   ]
 }

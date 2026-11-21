@@ -36,7 +36,9 @@ export function renderSection(
   const partId = node.props.partId?.trim() ?? "";
   const stack = dynamic?.sectionStack ?? [];
   const template =
-    partId && dynamic?.sectionTemplates ? dynamic.sectionTemplates[partId] : undefined;
+    partId && dynamic?.sectionTemplates && Object.hasOwn(dynamic.sectionTemplates, partId)
+      ? dynamic.sectionTemplates[partId]
+      : undefined;
   if (!partId) {
     return ELEMENTS["part-ref"].build(node as never, attrs, ctx.children(node.children, dynamic));
   }

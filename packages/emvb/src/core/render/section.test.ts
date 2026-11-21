@@ -24,6 +24,14 @@ const layout = (children: LayoutNode[]): Layout => ({
 const sectionPart = (text: string): Layout => layout([heading("parthead", text)]);
 
 describe("synced sections", () => {
+  test("a part id naming an Object.prototype key renders as a missing part", () => {
+    for (const partId of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+      const page = layout([{ id: "sec00009", type: "part-ref", props: { partId }, children: [] }]);
+      const { html } = renderPage(page, emptyDesign(), { dynamic: { sectionTemplates: {} } });
+      expect(html).toContain("emvb-section");
+    }
+  });
+
   test("a synced section renders the part, not the local heading", () => {
     const page = layout([
       {

@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **Synced section with an odd part id (W-1087).** A synced section whose stored part id happened to be a built-in name such as `constructor` stopped the page from rendering; it now renders like a missing section.
 - **Publishing while a save is running no longer reports a conflict with yourself (W-1052).** Pressing Ctrl+S (or Undo then Ctrl+S) while Publish was still saving your changes could make Publish fail with "This page was changed somewhere else". The editor now sends its own saves, publishes and schedules one at a time, each with the revision the one before it left.
 - **Publishing right after a save (W-1052).** Publish (or a save, or a schedule) started just after the previous save or publish finished, before the editor had updated, could still send the old revision and report a conflict with yourself. Each write now starts from the revision the last one left.
 - **Restore after Undo (W-1053).** After deleting two elements and pressing Undo, the second deletion's Restore button could bring back the first element. A deletion's toast now closes once Undo brings its element back, and Restore only ever restores its own deletion.
