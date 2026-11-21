@@ -43,6 +43,9 @@ export default defineConfig({
           extensions: [hello],
           // The e2e sends Cloudflare's country header to this local server (S-10, W-999).
           trustGeoHeaders: true,
+          // W-1092: the returning-visitor cookie waits for this consent cookie (e2e sets it).
+          visitorCookie: "consent",
+          visitorCookieConsent: { cookie: "emvb_demo_consent" },
         }),
       ],
     }),

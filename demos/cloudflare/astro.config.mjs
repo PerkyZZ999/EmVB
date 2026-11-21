@@ -32,7 +32,14 @@ export default defineConfig({
       plugins: [
         formsPlugin(),
         // W-1086: the sample extension is bundled into the Worker through its `module`.
-        emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"], extensions: [hello] }),
+        emvb({
+          canvasStyles: ["/site.css"],
+          canvasCollections: ["pages"],
+          extensions: [hello],
+          // W-1092: the returning-visitor cookie waits for this consent cookie (e2e sets it).
+          visitorCookie: "consent",
+          visitorCookieConsent: { cookie: "emvb_demo_consent" },
+        }),
       ],
     }),
   ],

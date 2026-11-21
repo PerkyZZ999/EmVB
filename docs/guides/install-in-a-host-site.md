@@ -168,8 +168,38 @@ const theme = await resolveThemeParts(Astro, undefined, { visitor }); // theme p
 - `segments`: names your editors type in Visitors → Segments (a lowercase letter or digit, then lowercase letters, digits, `:`, `_` or `-`, up to 64 characters, so `plan:pro` works). A name that doesn't fit is dropped. A rule matches a visitor in any of its segments.
 - `country` (two letters), `device` (`mobile`, `tablet`, `desktop`) and `returning` (true or false) replace what EmVB detects from the request, when your site knows better.
 - Pages with Visitors rules are sent with `Cache-Control: private, no-store`, so one visitor's version is never cached for another.
+- Only a new or returning rule uses a cookie (`emvb_seen`); see [Cookies and browser storage](#cookies-and-browser-storage) to hold it back until a visitor consents.
 - **Visitors rules are presentation, not access control.** A visitor controls their own cookies (A/B arm, returning visitor), and off Cloudflare and Vercel they can also send the country headers. Never hide something with a Visitors rule that a visitor mustn't see.
 - **Country detection (since 1.1.2).** EmVB reads `cf-ipcountry` only on Cloudflare Workers and `x-vercel-ip-country` only on Vercel, where the edge sets them, plus Cloudflare's `request.cf`. Behind your own proxy that sets one of these headers and strips the visitor's copy, add `emvb({ trustGeoHeaders: true })`; `false` never reads them. Or pass `country` yourself as above.
+
+### Cookies and browser storage
+
+EmVB stores nothing in a visitor's browser unless a page uses a feature that needs it. Pages without these features set no cookie and stay cacheable. This is the full list:
+
+| Name | Kind | Set when | Kept for | What for |
+|---|---|---|---|---|
+| `emvb_seen` | Cookie (first-party, HttpOnly, SameSite=Lax) | The first visit to a page with a **new or returning visitor** Visitors rule. Country, device, segment and time rules never set it. | 1 year | Tells new visitors from returning ones |
+| `emvb_ab_<test>` | Cookie (first-party, HttpOnly, SameSite=Lax) | The first visit to a page with an A/B test | 30 days | Keeps the visitor on the same version |
+| `emvb-theme` | `localStorage` | A visitor clicks a Theme toggle | Until cleared | Their light or dark choice |
+| `emvb-popup-shown:<id>` | `localStorage` | A popup opens by itself (not from a click) | Until cleared | Counts openings for **Show at most** |
+| `emvb-float-closed:<id>` | `sessionStorage` | A visitor closes a float | This visit | Keeps it closed |
+
+None of them is sent to anyone else. EmDash's own sign-in cookies, for editors, are EmDash's.
+
+**Holding back the returning-visitor cookie (since 1.4.1).** If your site asks for consent before setting non-essential cookies, set `visitorCookie`:
+
+```js
+emvb({
+  visitorCookie: "consent", // or "never"; the default is "always"
+  visitorCookieConsent: { cookie: "cookie_consent", value: "yes" },
+});
+```
+
+- `"always"` (the default, as before 1.4.1) sets `emvb_seen` on a first visit to a page with a new or returning rule.
+- `"consent"` sets and reads it only when the request carries your consent cookie. `cookie` is the name of a first-party cookie your consent banner sets when the visitor accepts. `value` is the value (or a list of values) that means "accepted", matched exactly. Without `value`, `1`, `true`, `yes`, `granted`, `accepted`, `allow` and `all` count, in any case. Your banner must set this cookie where the server can see it (a normal cookie, not `localStorage`). If your banner stores its choice in another format, have its "accepted" callback also set a small cookie of your own, such as `document.cookie = "cookie_consent=yes; path=/; max-age=31536000; samesite=lax"`. Without a valid `visitorCookieConsent`, `"consent"` acts as `"never"` and the build prints a warning.
+- `"never"` never sets or reads it.
+
+When the cookie isn't allowed, **every visitor counts as new**: "New visitors" rules show to everyone and "Returning visitors" rules to no one. A cookie left from before is cleared on the next page with such a rule. If your site knows who is returning (a signed-in member, say), pass `returning` yourself as above; that always wins. EmVB loads no consent tool and talks to none. The option covers `emvb_seen` only; an A/B test still keeps its 30-day cookie, so leave A/B tests off pages for visitors who haven't consented if that cookie needs consent on your site.
 
 ### Moving your site from EmDash 1.4 to 1.5
 

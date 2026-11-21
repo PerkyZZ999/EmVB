@@ -190,7 +190,7 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "      plugins: [\n        formsPlugin(),\n        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),\n      ],",
+          "search": "      plugins: [\n        formsPlugin(),\n        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n          // W-1092: the returning-visitor cookie waits for this consent cookie (e2e sets it).\n          visitorCookie: \"consent\",\n          visitorCookieConsent: { cookie: \"emvb_demo_consent\" },\n        }),\n      ],",
           "replace": "      plugins: [\n        formsPlugin(),\n      ],"
         }
       ],
@@ -28780,8 +28780,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/visitor.ts",
-          "search": "requestCookie(astro, SEEN_COOKIE) === \"1\"",
-          "replace": "astro.cookies.get(SEEN_COOKIE)?.value === \"1\""
+          "search": "const seen = requestCookie(astro, SEEN_COOKIE);",
+          "replace": "const seen = astro.cookies.get(SEEN_COOKIE)?.value;"
         }
       ],
       "command": [
@@ -40748,8 +40748,8 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),",
-          "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),"
+          "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n          // W-1092: the returning-visitor cookie waits for this consent cookie (e2e sets it).\n          visitorCookie: \"consent\",\n          visitorCookieConsent: { cookie: \"emvb_demo_consent\" },\n        }),",
+          "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n          // W-1092: the returning-visitor cookie waits for this consent cookie (e2e sets it).\n          visitorCookie: \"consent\",\n          visitorCookieConsent: { cookie: \"emvb_demo_consent\" },\n        }),"
         },
         {
           "file": "packages/emvb/src/server/hooks.ts",
@@ -55584,6 +55584,107 @@
         "-g",
         "W-1091"
       ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1092/never-mode-ignored",
+      "requirement": "W-1092",
+      "description": "visitorCookie: \"never\" (or no consent) still reads and sets emvb_seen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "    const cookieAllowed = visitorCookieAllowed(visitorCookie(), (name) =>\n      requestCookie(astro, name),\n    );\n",
+          "replace": "    const cookieAllowed = Boolean(visitorCookie());\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor-cookie.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/any-audience-sets-cookie",
+      "requirement": "W-1092",
+      "description": "A country, device, segment or time rule sets the emvb_seen cookie too, as only a new/returning rule should.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "  if (astro.cookies && layoutUsesVisitorRule(layout)) {",
+          "replace": "  if (astro.cookies && layoutUsesVisitorRule(layout) !== undefined) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor-cookie.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/refusal-counts-as-consent",
+      "requirement": "W-1092",
+      "description": "In consent mode any value of the consent cookie counts, so \"denied\" sets emvb_seen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/visitor-cookie.ts",
+          "search": "  return DEFAULT_CONSENT_VALUES.has(sent.trim().toLowerCase());",
+          "replace": "  return sent.trim() !== \"\" || DEFAULT_CONSENT_VALUES.size === 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor-cookie.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/stale-cookie-kept",
+      "requirement": "W-1092",
+      "description": "Without consent, an emvb_seen cookie left from before is kept instead of cleared.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "    if (cookieAllowed ? !visitor.returning : seen !== undefined) {",
+          "replace": "    if (cookieAllowed && !visitor.returning) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor-cookie.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/option-dropped",
+      "requirement": "W-1092",
+      "description": "emvb() drops visitorCookie and visitorCookieConsent, so the plugin never sees them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "      ...cookie,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/visitor-cookie-option.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/plugin-ignores-option",
+      "requirement": "W-1092",
+      "description": "createPlugin ignores visitorCookie, so the renderer stays on \"always\" (no consent wait on Node or Cloudflare).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  setVisitorCookie(options.visitorCookie, options.visitorCookieConsent);\n",
+          "replace": "  void setVisitorCookie;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/visitor-cookie-option.test.ts"],
+      "expect": "\\(fail\\).*W-1092"
+    },
+    {
+      "id": "W-1092/plugin-ignores-option-e2e",
+      "requirement": "W-1092",
+      "description": "The demos' visitorCookie: \"consent\" never reaches the renderer, so a visitor without consent gets emvb_seen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  setVisitorCookie(options.visitorCookie, options.visitorCookieConsent);\n",
+          "replace": "  void setVisitorCookie;\n"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/visitor-cookie.e2e.ts", "--project=node"],
       "env": {
         "CI": "1"
       },

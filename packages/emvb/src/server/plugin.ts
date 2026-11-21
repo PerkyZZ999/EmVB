@@ -1,5 +1,6 @@
 import { setLoopCollections } from "../core/loop-collections.ts";
 import { setGeoTrust } from "../core/geo-trust.ts";
+import { setVisitorCookie } from "../core/visitor-cookie.ts";
 import {
   proposalCreateRoute,
   proposalGetRoute,
@@ -53,9 +54,12 @@ export function createPlugin(
     extensions?: unknown;
     trustGeoHeaders?: unknown;
     loopCollections?: unknown;
+    visitorCookie?: unknown;
+    visitorCookieConsent?: unknown;
   } = {},
 ) {
   setGeoTrust(options.trustGeoHeaders);
+  setVisitorCookie(options.visitorCookie, options.visitorCookieConsent);
   setLoopCollections(options.loopCollections);
   setCanvasCollections(options.canvasCollections);
   const canvasStyles = canvasStyleUrls(options.canvasStyles);

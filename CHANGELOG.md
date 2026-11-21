@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Hold back the returning-visitor cookie (W-1092, #34).** `emvb({ visitorCookie: "consent", visitorCookieConsent: { cookie: "cookie_consent" } })` sets the `emvb_seen` cookie only once your consent banner's own first-party cookie says yes; `visitorCookie: "never"` never sets it. Until then every visitor counts as new, and a cookie left from before is cleared. The default (`"always"`) keeps today's behaviour, and as before only a page with a new or returning Visitors rule uses the cookie: country, device, segment and time rules never do. The install guide now lists every cookie and browser storage key EmVB uses, when, and how to turn them off ([Cookies and browser storage](docs/guides/install-in-a-host-site.md#cookies-and-browser-storage)).
+
 ### Fixed
 
 - **1.1.1 and 1.1.2 on npm (W-1093, #25).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0.

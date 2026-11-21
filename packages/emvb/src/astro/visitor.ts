@@ -1,4 +1,5 @@
 import { geoTrust } from "../core/geo-trust.ts";
+import { visitorCookie, visitorCookieAllowed } from "../core/visitor-cookie.ts";
 import {
   AUDIENCE_SEGMENT,
   abCookieName,
@@ -190,7 +191,8 @@ export function hostVisitorFacts(host: HostVisitor | undefined): Partial<Visitor
 
 /**
  * What the server knows about this visitor, for visitor-aware elements (W-313): country from
- * the edge, device from the User-Agent, new or returning from a first-party cookie, and the time.
+ * the edge, device from the User-Agent, new or returning from a first-party cookie (when
+ * `emvb({ visitorCookie })` allows it, W-1092), and the time.
  * Facts the host passes (W-329) win over detected ones. Only read when the layout has a rule.
  */
 export function visitorFor(
@@ -205,13 +207,20 @@ export function visitorFor(
   if (country) visitor.country = country;
   const device = deviceFromUserAgent(headers?.get("user-agent"), headers?.get("sec-ch-ua-mobile"));
   if (device) visitor.device = device;
+  // W-1092 (#34): only a new/returning rule reads or sets the cookie, and only when
+  // `emvb({ visitorCookie })` allows it for this request. Otherwise everyone counts as new.
   if (astro.cookies && layoutUsesVisitorRule(layout)) {
-    visitor.returning = requestCookie(astro, SEEN_COOKIE) === "1";
-    if (!visitor.returning) {
+    const cookieAllowed = visitorCookieAllowed(visitorCookie(), (name) =>
+      requestCookie(astro, name),
+    );
+    const seen = requestCookie(astro, SEEN_COOKIE);
+    visitor.returning = cookieAllowed && seen === "1";
+    if (cookieAllowed ? !visitor.returning : seen !== undefined) {
       try {
-        astro.cookies.set(SEEN_COOKIE, "1", {
+        // Without consent (or in "never" mode) a cookie left from before is cleared.
+        astro.cookies.set(SEEN_COOKIE, cookieAllowed ? "1" : "", {
           path: "/",
-          maxAge: SEEN_DAYS * 86_400,
+          maxAge: cookieAllowed ? SEEN_DAYS * 86_400 : 0,
           sameSite: "lax",
           httpOnly: true,
           secure: astro.url.protocol === "https:",

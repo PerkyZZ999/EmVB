@@ -4,6 +4,11 @@ import { canvasCollectionSlugs } from "./core/canvas-collections.ts";
 import { canvasStyleUrls } from "./core/canvas-styles.ts";
 import { loopCollectionSlugs } from "./core/loop-collections.ts";
 import {
+  visitorCookieOptions,
+  type VisitorCookieConsent,
+  type VisitorCookieMode,
+} from "./core/visitor-cookie.ts";
+import {
   listedExtensionManifests,
   rememberExtensions,
   type EmVBExtension,
@@ -45,6 +50,20 @@ export type EmVBOptions = {
    * any collection, so set it if you keep a collection published but not meant to be listed.
    */
   loopCollections?: string[];
+  /**
+   * W-1092 (#34): when EmVB may keep the `emvb_seen` cookie (one year, first-party, HttpOnly)
+   * that tells new visitors from returning ones. Only pages with a new/returning Visitors rule
+   * ever read or set it. `"always"` (default) sets it on a first visit; `"consent"` only once
+   * the request carries `visitorCookieConsent`; `"never"` never. When it isn't allowed, everyone
+   * counts as a new visitor and a cookie left from before is cleared.
+   */
+  visitorCookie?: VisitorCookieMode;
+  /**
+   * W-1092: for `visitorCookie: "consent"`, the first-party cookie your consent banner sets, and
+   * the value (or values) that mean "accepted". Without `value`, `1`, `true`, `yes`, `granted`,
+   * `accepted`, `allow` or `all` count (any case). Missing or invalid, "consent" acts as "never".
+   */
+  visitorCookieConsent?: VisitorCookieConsent;
 };
 
 /** Descriptor that host sites add to `emdash({ plugins: [...] })` in astro.config. */
@@ -62,6 +81,13 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   for (const warning of build.warnings) {
     // oxlint-disable-next-line no-console -- build-time notice for the site owner (W-1086)
     console.warn(`[emvb] extension ${warning}`);
+  }
+  const cookie = visitorCookieOptions(options.visitorCookie, options.visitorCookieConsent);
+  if (options.visitorCookie === "consent" && cookie.visitorCookie !== "consent") {
+    // oxlint-disable-next-line no-console -- build-time notice for the site owner (W-1092)
+    console.warn(
+      '[emvb] visitorCookie: "consent" needs visitorCookieConsent: { cookie: "<name>" }; until then the visitor cookie is never set',
+    );
   }
   const ids = new Set(accepted.map((m) => m.id));
   const extensions = listedExtensionManifests().filter((m) => ids.has(m.id));
@@ -82,6 +108,7 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
       ...(typeof options.trustGeoHeaders === "boolean"
         ? { trustGeoHeaders: options.trustGeoHeaders }
         : {}),
+      ...cookie,
     },
   };
 }
@@ -93,7 +120,7 @@ export { createPlugin };
 /** W-1086: used by the server entry `emvb()` generates for extensions; not for site code. */
 export { registerBundledExtensions } from "./core/extensions/index.ts";
 
-export type { EmVBExtension, ExtensionManifest };
+export type { EmVBExtension, ExtensionManifest, VisitorCookieConsent, VisitorCookieMode };
 export {
   defineExtension,
   EXTENSION_API_VERSION,

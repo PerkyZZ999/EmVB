@@ -277,7 +277,7 @@ Any node may set `variant`: `{ test, arm, split? }`. `test` is a name of lowerca
 
 - `countries`: two-letter codes, 1–50
 - `devices`: `mobile`, `tablet`, `desktop`
-- `visitor`: `new` or `returning`
+- `visitor`: `new` or `returning`, from the first-party `emvb_seen` cookie (one year, HttpOnly). Only a page with this rule reads or sets it. `emvb({ visitorCookie: "consent" | "never" })` holds it back (W-1092), and then everyone counts as `new`
 - `hours`: `{ from, to }` (0–23 and 0–24; wraps past midnight when `to` < `from`) and `days` (0 = Sunday), in `timeZone` (an IANA name; unset = UTC)
 - `segments` (W-329): 1–20 names the host passes (`member`, `pro`), lowercase letters, digits, `-` and `_`
 
