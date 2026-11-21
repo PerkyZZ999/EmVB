@@ -1,4 +1,7 @@
-# Extensions API 1.0
+# Extensions API 1.x reference
+
+New to extensions? Start with the [Extensions guide](guides/extensions.md), which explains how
+they work and walks through writing one. This page lists every key and limit.
 
 EmVB's Extensions API lets a **site owner** add custom elements, editor panels and
 read-only data sources at build time (W-927, D-066). Editors cannot install

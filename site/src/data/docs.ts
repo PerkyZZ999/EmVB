@@ -127,12 +127,12 @@ export const DOC_GROUPS: DocGroup[] = [
         slug: "extensions",
         title: "Extensions",
         summary:
-          "Custom elements, editor panels and data sources, in code, with their own styles and scripts.",
+          "How extensions work, and how to write one: your own elements with their own classes, stylesheet and script.",
       },
       {
         slug: "extensions-api",
         title: "Extensions API reference",
-        summary: "The Extensions API 1.x contract.",
+        summary: "Every key and limit of the Extensions API 1.x, and its stability rules.",
       },
       {
         slug: "performance",
