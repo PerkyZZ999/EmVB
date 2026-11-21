@@ -1,7 +1,8 @@
 import { Tabs } from "@cloudflare/kumo";
 import * as React from "react";
-import type { ElementType, Layout } from "../../../core/index.ts";
+import type { DesignSystem, ElementType, Layout } from "../../../core/index.ts";
 import { AddPanel } from "./AddPanel.tsx";
+import { TemplatesPanel } from "./TemplatesPanel.tsx";
 import { LayersPanel } from "./LayersPanel.tsx";
 import { CoDesignPanel } from "./CoDesignPanel.tsx";
 import type { CoDesign } from "../useCoDesign.ts";
@@ -13,6 +14,7 @@ import { TAB_SPRING_MS } from "../dnd/layer-drop.ts";
 import type { LayersDropCallbacks } from "./use-layers-drop.ts";
 
 const SESSION_KEY = "emvb-left-tab";
+const ADD_VIEW_KEY = "emvb-add-view";
 
 const overLayersTab = (target: EventTarget | null) =>
   target instanceof Element && target.closest('[role="tab"]')?.textContent?.trim() === "Layers";
@@ -24,6 +26,8 @@ export function LeftPanel({
   onSelect,
   onAdd,
   onRecipe,
+  onTemplate,
+  design,
   saved,
   onDuplicate,
   onMoveUp,
@@ -43,6 +47,9 @@ export function LeftPanel({
   onAdd: (type: ElementType | string) => void;
   /** Adds a section recipe (W-320). */
   onRecipe?: (id: string) => void;
+  /** Inserts a starter section template (W-1068); with `design`, the Add tab offers Templates. */
+  onTemplate?: (id: string) => void;
+  design?: DesignSystem;
   /** My sections (W-876). */
   saved?: SavedSectionActions;
   onDuplicate: (id: string) => void;
@@ -66,6 +73,27 @@ export function LeftPanel({
       return "add";
     }
   });
+  const [addView, setAddView] = React.useState(() => {
+    try {
+      return sessionStorage.getItem(ADD_VIEW_KEY) === "templates" ? "templates" : "elements";
+    } catch {
+      return "elements";
+    }
+  });
+  const changeAddView = (value: string) => {
+    const next = value === "templates" ? "templates" : "elements";
+    setAddView(next);
+    try {
+      sessionStorage.setItem(ADD_VIEW_KEY, next);
+    } catch {
+      /* private mode */
+    }
+  };
+  const addSwitch = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    addSwitch.current?.querySelector('[role="tablist"]')?.setAttribute("aria-label", "Add");
+  });
+  const templates = onTemplate && design ? { onTemplate, design } : null;
   const changeTab = (value: string) => {
     setTab(value);
     try {
@@ -128,8 +156,34 @@ export function LeftPanel({
   const showAdd = !showAgent && tab === "add";
   const addPanel = (
     <>
-      <AddPanel onAdd={onAdd} onRecipe={onRecipe} saved={saved} formsAvailable={formsAvailable} />
-      <ExtensionPanels />
+      {templates && (
+        <div ref={addSwitch} className="emvb-add-switch" data-emvb-add-view={addView}>
+          <Tabs
+            variant="segmented"
+            size="sm"
+            className="emvb-add-switch-tabs"
+            tabs={[
+              { value: "elements", label: "Elements" },
+              { value: "templates", label: "Templates" },
+            ]}
+            value={addView}
+            onValueChange={changeAddView}
+          />
+        </div>
+      )}
+      {templates && addView === "templates" ? (
+        <TemplatesPanel design={templates.design} onInsert={templates.onTemplate} />
+      ) : (
+        <>
+          <AddPanel
+            onAdd={onAdd}
+            onRecipe={onRecipe}
+            saved={saved}
+            formsAvailable={formsAvailable}
+          />
+          <ExtensionPanels />
+        </>
+      )}
     </>
   );
   return (

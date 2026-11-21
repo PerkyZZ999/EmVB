@@ -1,7 +1,9 @@
 import { PlusIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
-import { newElement } from "../dnd/new-element.ts";
+import { templateSectionNode } from "../../../core/index.ts";
+import { newElement, templateIdOf } from "../dnd/new-element.ts";
+import { isSharedPart } from "../panels/settings/heading-warning.ts";
 import type { EditorAction, EditorState } from "../store.ts";
 
 /** The canvas of a page with no layout yet: a prompt and a drop zone that starts one (R-002). */
@@ -30,7 +32,14 @@ export function EmptyCanvas({
         queueMicrotask(() => {
           const layout = latest.current.page.layout;
           if (!layout) return;
-          const node = newElement(type);
+          // W-1068: a starter template takes the site's styles, as when dropped on a page.
+          const template = templateIdOf(type);
+          const node =
+            template === null
+              ? newElement(type)
+              : templateSectionNode(template, latest.current.design, layout, {
+                  noH1: isSharedPart(latest.current.page.partType),
+                });
           if (!node) return;
           dispatch({ type: "add-node", node, parentId: layout.root.id, index: 0 });
         });

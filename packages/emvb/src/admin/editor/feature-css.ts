@@ -150,6 +150,19 @@ export const FEATURE_CSS = `
 .emvb-recipe-tile:hover, .emvb-recipe-tile:focus-visible { border-color: var(--color-kumo-brand); }
 .emvb-recipe-name { font-weight: 600; font-size: 13px; }
 .emvb-recipe-desc { font-size: 12px; color: var(--text-color-kumo-subtle); }
+/* W-1068: Add panel Elements | Templates, and the starter template tiles with their pictures. */
+.emvb-add-switch-tabs { width: 100%; }
+.emvb-add-switch-tabs [role="tablist"] { width: 100%; height: var(--emvb-control); min-height: var(--emvb-control); }
+.emvb-add-switch-tabs [role="tab"] { flex: 1 1 0; justify-content: center; height: 100%; font-size: 13px; line-height: 18px; }
+.emvb-template-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.emvb-template-tile { position: relative; display: grid; gap: 2px; padding: 0 0 8px; border-radius: 8px; border: 1px solid var(--color-kumo-line); background: var(--color-kumo-base, transparent); overflow: hidden; }
+.emvb-template-tile:hover, .emvb-template-tile:has(.emvb-template-insert:focus-visible) { border-color: var(--color-kumo-brand); }
+.emvb-template-tile:has(.emvb-template-insert:focus-visible) { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
+.emvb-template-preview { position: relative; height: 104px; overflow: hidden; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-recessed, transparent); }
+.emvb-template-preview iframe { position: absolute; top: 0; left: 0; width: 1280px; height: 640px; border: 0; transform-origin: 0 0; pointer-events: none; }
+.emvb-template-insert { all: unset; padding: 6px 10px 0; font-weight: 600; font-size: 13px; line-height: 18px; cursor: grab; }
+.emvb-template-insert::after { content: ""; position: absolute; inset: 0; }
+.emvb-template-desc { margin: 0; padding: 0 10px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 /* W-876: My sections, names only (D-060). */
 .emvb-saved-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .emvb-saved-row { display: flex; align-items: center; gap: 2px; min-width: 0; }

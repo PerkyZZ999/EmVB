@@ -572,6 +572,18 @@ export {
   type RecipeTokens,
 } from "./recipes/index.ts";
 export {
+  PAGE_TEMPLATES,
+  SECTION_TEMPLATES,
+  TEMPLATE_FALLBACKS,
+  pageTemplate,
+  resolveTemplateNode,
+  sectionTemplate,
+  templatePageLayout,
+  templateSectionNode,
+  type PageTemplate,
+  type SectionTemplate,
+} from "./templates/index.ts";
+export {
   decodeSharedPage,
   encodeSharedPage,
   LONG_LINK_CHARS,

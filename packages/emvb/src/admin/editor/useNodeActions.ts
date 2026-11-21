@@ -19,6 +19,7 @@ import {
   moveUp,
   parentOf,
   recipeNode,
+  templateSectionNode,
   withFreshIds,
   subtreeSize,
   type Arranged,
@@ -30,6 +31,7 @@ import { adminExtensionDefaults } from "./extension-manifests.ts";
 import { newElement, withLoopPostTitleLevel, withPageHeadingLevel } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import type { ItemActions } from "./panels/settings/ItemList.tsx";
+import { isSharedPart } from "./panels/settings/heading-warning.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 
 const MOVES = new Set<unknown>([moveUp, moveDown, moveIn, moveOut]);
@@ -300,6 +302,29 @@ export function useNodeActions({
     },
   };
 
+  /**
+   * W-1068: a starter template's section, in the site's styles, placed like a recipe (click) or
+   * where it was dropped. Either is one ordinary layout edit, so one Undo takes it back.
+   */
+  const buildTemplate = (id: string, layout: Layout) =>
+    templateSectionNode(id, latest.current.design, layout, {
+      noH1: isSharedPart(latest.current.page.partType),
+    });
+  const addTemplate = (id: string) => {
+    const layout = latest.current.page.layout ?? startingLayout();
+    const node = buildTemplate(id, layout);
+    if (!node) return;
+    place(layout, node, `${node.editorLabel ?? "Template"} section`, true);
+  };
+  const dropTemplate = (id: string, parentId: string, index: number) => {
+    const layout = latest.current.page.layout;
+    if (!layout) return;
+    const node = buildTemplate(id, layout);
+    if (!node) return;
+    dispatch({ type: "add-node", node, parentId, index });
+    announce(`${node.editorLabel ?? "Template"} section added`);
+  };
+
   return {
     layersDrop,
     deleteAsk,
@@ -313,6 +338,8 @@ export function useNodeActions({
     wrap,
     addFromPanel,
     addRecipe,
+    addTemplate,
+    dropTemplate,
     items,
   };
 }

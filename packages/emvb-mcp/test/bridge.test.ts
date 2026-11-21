@@ -84,6 +84,7 @@ describe("stdio bridge (W-461, W-462)", () => {
       list_element_types: { type: "heading" },
       get_site_styles: {},
       list_section_recipes: {},
+      list_templates: {},
       describe_page: { pageId },
       get_accessibility_findings: { pageId },
       list_versions: { pageId },

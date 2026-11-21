@@ -1,5 +1,7 @@
 import {
   defaultElement,
+  emptyDesign,
+  templateSectionNode,
   updateNode,
   ELEMENTS,
   isExtensionType,
@@ -159,6 +161,15 @@ export function newGalleryImage(random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
 }
 
+const TEMPLATE_PREFIX = "template:";
+
+/** W-1068: the drag type of a starter section template, carried like a new element's type. */
+export const templateDragType = (id: string) => `${TEMPLATE_PREFIX}${id}`;
+
+/** The template id a drag type names, or null for an element type. */
+export const templateIdOf = (type: string): string | null =>
+  type.startsWith(TEMPLATE_PREFIX) ? type.slice(TEMPLATE_PREFIX.length) : null;
+
 /**
  * Default node for a new element from the Add panel. Only new inserts get starter children;
  * saved Accordions and Tabs with no items keep working as they are (W-130).
@@ -168,6 +179,11 @@ export function newElement(
   random?: () => number,
   extensionDefaults?: Record<string, unknown>,
 ): LayoutNode | null {
+  // W-1068: a dragged starter template. Drops build it again with the site's styles.
+  const template = templateIdOf(type);
+  if (template !== null) {
+    return templateSectionNode(template, emptyDesign(), null, random ? { random } : {}) ?? null;
+  }
   // W-927: extension elements are stored as UnknownNodes with namespaced types.
   if (isExtensionType(type)) {
     return {

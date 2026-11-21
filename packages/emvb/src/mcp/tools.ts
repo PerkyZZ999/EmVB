@@ -93,6 +93,17 @@ const READ_TOOLS: ToolDef[] = [
     run: () => read.listSectionRecipes(),
   }),
   tool({
+    name: "list_templates",
+    title: "List starter templates",
+    description:
+      "Lists the starter section templates (hero, features, pricing, faq, team, testimonials, cta, contact, footer, …) that insert_template adds, and the page templates create_page can start from.",
+    input: read.ListTemplatesInput,
+    output: read.ListTemplatesOutput,
+    readOnly: true,
+    destructive: false,
+    run: () => read.listTemplates(),
+  }),
+  tool({
     name: "describe_page",
     title: "Describe a page",
     description:
@@ -143,7 +154,7 @@ const WRITE_TOOLS: ToolDef[] = [
     name: "create_page",
     title: "Create a page",
     description:
-      "Creates a new unpublished EmVB page with a starter layout, optionally followed by section recipes (hero, features, …). Returns the page id and rev.",
+      "Creates a new unpublished EmVB page with a starter layout, optionally followed by section recipes (hero, features, …), or from a starter page template (template: see list_templates). Returns the page id and rev.",
     input: write.CreatePageInput,
     output: write.CreatePageOutput,
     readOnly: false,
@@ -203,6 +214,17 @@ const WRITE_TOOLS: ToolDef[] = [
     readOnly: false,
     destructive: false,
     run: (ports, input) => write.applySectionRecipe(ports, input),
+  }),
+  tool({
+    name: "insert_template",
+    title: "Add a starter template section",
+    description:
+      "Adds a starter section template (see list_templates), styled with the site's variables and classes, at parentId/index (default: end of the page). Its H1 becomes an H2 when the page already has one.",
+    input: write.InsertTemplateInput,
+    output: write.WriteOutput,
+    readOnly: false,
+    destructive: false,
+    run: (ports, input) => write.insertTemplate(ports, input),
   }),
   tool({
     name: "update_site_styles",

@@ -62,3 +62,12 @@ test("W-867: a Visitors row with a single text field spans the full panel width"
     /\.emvb-bind-row > \.emvb-bind-label \+ \.emvb-field:last-child \{ grid-column: 1 \/ -1; \}/,
   );
 });
+
+test("W-1068: a template tile shows the keyboard focus ring of its insert button, in Kumo colours", () => {
+  expect(FEATURE_CSS).toContain(
+    ".emvb-template-tile:has(.emvb-template-insert:focus-visible) { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }",
+  );
+  const rules = FEATURE_CSS.split("\n").filter((line) => line.includes("emvb-template"));
+  // Scoped to the panel's own classes: nothing styles the admin's global elements.
+  expect(rules.every((line) => line.trimStart().startsWith(".emvb-"))).toBe(true);
+});

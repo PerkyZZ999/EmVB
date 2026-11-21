@@ -33,6 +33,11 @@ export const DOC_GROUPS: DocGroup[] = [
           "Star rating, alert, boxes, testimonial, social icons, gallery, carousel, and since 1.3 counters, progress bars, countdowns, maps, price tables and lists, calls to action, flip boxes, animated headlines, share buttons and hotspots.",
       },
       {
+        slug: "starter-templates",
+        title: "Starter templates",
+        summary: "Ready-made sections and pages in your Site styles, from Add → Templates.",
+      },
+      {
         slug: "saved-sections",
         title: "Saved sections",
         summary: "Save any element and reuse it, as a copy or synced everywhere.",

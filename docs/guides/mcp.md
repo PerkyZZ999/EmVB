@@ -75,7 +75,7 @@ the token, never the token. Calls signed in without a token are counted per user
 
 | Read | Write (draft only) | Publish (only when allowed) | Proposals (reviewed in the editor) |
 | --- | --- | --- | --- |
-| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
+| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `list_templates`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `insert_template`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
 
 - `list_element_types` lists every element with its settings, including the 1.3 marketing widgets
   (Counter, Progress bar, Countdown, Map, Price table, Price list, Call to action, Flip box,
@@ -86,7 +86,10 @@ the token, never the token. Calls signed in without a token are counted per user
   `rev`: pass that one to the next write.
 - Style references to a site variable can leave out `from`; EmVB fills it in from the variable's
   kind and refuses ids and classes that don't exist, listing the ones that do.
-- `create_page` uses the slug EmDash derives from the title and refuses a taken one.
+- `create_page` uses the slug EmDash derives from the title and refuses a taken one. It starts
+  from section `recipes` or from a starter page `template` (`list_templates`), not both.
+- `insert_template` adds a starter section template in the site's styles with new ids; its H1
+  becomes an H2 when the page already has one. See [Starter templates](starter-templates.md).
 - `update_site_styles` changes the style draft only, and refuses to remove a variable a page or class
   still uses unless `force: true`.
 - Saved sections ([guide](saved-sections.md)): `save_section` stores a copy of an element in

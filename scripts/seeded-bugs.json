@@ -32000,8 +32000,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
-          "search": "templates.length > 0 || hasUnlistedTemplate",
-          "replace": "templates.length > 0"
+          "search": "{hasUnlistedTemplate && (",
+          "replace": "{false && ("
         }
       ],
       "command": [
@@ -32020,7 +32020,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
-          "search": "          renderValue={(value: unknown) =>\n            !value || value === NONE\n              ? \"Blank page\"\n              : (templates.find((part) => part.id === value)?.title ??\n                \"Previously selected template\")\n          }\n",
+          "search": "        renderValue={(value: unknown) =>\n          !value || value === NONE\n            ? \"Blank page\"\n            : (templates.find((part) => part.id === value)?.title ??\n              (starter ? starterName(starter.name) : \"Previously selected template\"))\n        }\n",
           "replace": ""
         }
       ],
@@ -32056,12 +32056,12 @@
     {
       "id": "W-712/browser-hidden-selection",
       "requirement": "W-098",
-      "description": "The dialog hides its selected template when the refreshed catalog is empty",
+      "description": "The dialog drops its selected template from the list when the refreshed catalog is empty",
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
-          "search": "templates.length > 0 || hasUnlistedTemplate",
-          "replace": "templates.length > 0"
+          "search": "{hasUnlistedTemplate && (",
+          "replace": "{false && ("
         }
       ],
       "command": [
@@ -32073,7 +32073,7 @@
         "-g",
         "W-712"
       ],
-      "expect": "toContainText"
+      "expect": "toBeVisible"
     },
     {
       "id": "W-713/empty-on-failure",
@@ -53834,6 +53834,408 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
       "expect": "\\(fail\\).*Object.prototype key"
+    },
+    {
+      "id": "W-1068/template-ids-kept",
+      "requirement": "W-1068",
+      "description": "An inserted template keeps the template's own node ids.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "  return withFreshIds(layout ?? emptyPage(), node, opts.random);\n",
+          "replace": "  return node;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "new ids every time"
+      ],
+      "expect": "\\(fail\\).*new ids every time"
+    },
+    {
+      "id": "W-1068/second-h1",
+      "requirement": "W-1068",
+      "description": "A template's H1 stays an H1 on a page that already has one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "  const demote = opts.noH1 === true || (layout ? hasH1(layout.root) : false);",
+          "replace": "  const demote = opts.noH1 === true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "becomes an H2"
+      ],
+      "expect": "\\(fail\\).*becomes an H2"
+    },
+    {
+      "id": "W-1068/accent-not-site",
+      "requirement": "W-1068",
+      "description": "Templates ignore the site's brand colour.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "      return t.accent ?? TEMPLATE_FALLBACKS.accent;",
+          "replace": "      return TEMPLATE_FALLBACKS.accent;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "site's colours"
+      ],
+      "expect": "\\(fail\\).*site's colours"
+    },
+    {
+      "id": "W-1068/dark-unreadable",
+      "requirement": "W-1068",
+      "description": "The call to action ignores the site's On brand colour, so its text is unreadable on the dark brand colour.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "      return t.accent ? (t.onAccent ?? TEMPLATE_FALLBACKS.onAccent) : TEMPLATE_FALLBACKS.onAccent;",
+          "replace": "      return TEMPLATE_FALLBACKS.onAccent;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "branded dark"
+      ],
+      "expect": "\\(fail\\).*branded dark"
+    },
+    {
+      "id": "W-1068/class-keeps-skin",
+      "requirement": "W-1068",
+      "description": "A site card class does not take over the template's inline border and background.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "  if (skinned && isRecord(out[\"style\"])) {",
+          "replace": "  if (false && skinned && isRecord(out[\"style\"])) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "site's colours"
+      ],
+      "expect": "\\(fail\\).*site's colours"
+    },
+    {
+      "id": "W-1068/vague-link",
+      "requirement": "W-1068",
+      "description": "The hero's second button says only \"Learn more\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/sections.ts",
+          "search": "text: \"See how it works\", href: \"#\"",
+          "replace": "text: \"Learn more\", href: \"#\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/templates/templates.test.ts",
+        "-t",
+        "page landing"
+      ],
+      "expect": "\\(fail\\).*page landing"
+    },
+    {
+      "id": "W-1068/preview-not-pinned",
+      "requirement": "W-1068",
+      "description": "The template picture is not pinned to a scheme, so dark Site styles can land on a white page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TemplatesPanel.tsx",
+          "search": "<html data-emvb-theme=\"${scheme}\">",
+          "replace": "<html>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/templates-panel.test.tsx",
+        "-t",
+        "pinned"
+      ],
+      "expect": "\\(fail\\).*pinned"
+    },
+    {
+      "id": "W-1068/preview-focusable",
+      "requirement": "W-1068",
+      "description": "The template picture takes keyboard focus.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TemplatesPanel.tsx",
+          "search": "          tabIndex={-1}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/templates-panel.test.tsx",
+        "-t",
+        "keyboard button"
+      ],
+      "expect": "\\(fail\\).*keyboard button"
+    },
+    {
+      "id": "W-1068/add-switch-unlabelled",
+      "requirement": "W-1068",
+      "description": "The Elements | Templates tab list has no name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "?.setAttribute(\"aria-label\", \"Add\");",
+          "replace": "?.setAttribute(\"data-unused\", \"Add\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/templates-panel.test.tsx",
+        "-t",
+        "Elements \\| Templates"
+      ],
+      "expect": "\\(fail\\).*Elements \\| Templates"
+    },
+    {
+      "id": "W-1068/add-view-forgotten",
+      "requirement": "W-1068",
+      "description": "The Add panel forgets that Templates was open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LeftPanel.tsx",
+          "search": "      sessionStorage.setItem(ADD_VIEW_KEY, next);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/templates-panel.test.tsx",
+        "-t",
+        "Elements \\| Templates"
+      ],
+      "expect": "\\(fail\\).*Elements \\| Templates"
+    },
+    {
+      "id": "W-1068/drag-type-lost",
+      "requirement": "W-1068",
+      "description": "A dragged template is not recognised as a template on drop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "  type.startsWith(TEMPLATE_PREFIX) ? type.slice(TEMPLATE_PREFIX.length) : null;",
+          "replace": "  type.startsWith(\"tpl:\") ? type.slice(TEMPLATE_PREFIX.length) : null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/templates-panel.test.tsx",
+        "-t",
+        "drag type"
+      ],
+      "expect": "\\(fail\\).*drag type"
+    },
+    {
+      "id": "W-1068/focus-ring-gone",
+      "requirement": "W-1068",
+      "description": "A focused template tile shows no focus ring.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-template-tile:has(.emvb-template-insert:focus-visible) { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "W-1068"
+      ],
+      "expect": "\\(fail\\).*W-1068"
+    },
+    {
+      "id": "W-1068/new-page-starter-blank",
+      "requirement": "W-1068",
+      "description": "New page with a starter page template creates a blank page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "          layout = templatePageLayout(starter.id, design) ?? layout;",
+          "replace": "          layout = (templatePageLayout(starter.id, design) && null) ?? layout;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-1068"
+      ],
+      "expect": "\\(fail\\).*W-1068"
+    },
+    {
+      "id": "W-1068/mcp-list-templates",
+      "requirement": "W-1068",
+      "description": "list_templates lists no section templates.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/read.ts",
+          "search": "  sections: SECTION_TEMPLATES.map((t) => ({ id: t.id, name: t.name, description: t.description })),",
+          "replace": "  sections: [],"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-read.test.ts", "-t", "W-1068"],
+      "expect": "\\(fail\\).*W-1068"
+    },
+    {
+      "id": "W-1068/mcp-second-h1",
+      "requirement": "W-1068",
+      "description": "insert_template keeps the hero's H1 on a page that has one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "    const node = templateSectionNode(input.templateId, design, layout);",
+          "replace": "    const node = templateSectionNode(input.templateId, design, null);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-write.test.ts", "-t", "W-1068"],
+      "expect": "\\(fail\\).*W-1068"
+    },
+    {
+      "id": "W-1068/mcp-create-ignores-template",
+      "requirement": "W-1068",
+      "description": "create_page ignores its page template.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "    (input.template && templatePageLayout(input.template, design)) || starterLayout(input.title);",
+          "replace": "    starterLayout(input.title);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-write.test.ts", "-t", "W-1068"],
+      "expect": "\\(fail\\).*W-1068"
+    },
+    {
+      "id": "W-1068/e2e-second-h1",
+      "requirement": "W-1068",
+      "description": "In the editor, an inserted hero keeps its H1 on a page that has one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/templates/index.ts",
+          "search": "  const demote = opts.noH1 === true || (layout ? hasH1(layout.root) : false);",
+          "replace": "  const demote = opts.noH1 === true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/templates.e2e.ts",
+        "--project=node",
+        "-g",
+        "starter templates: browse"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1068/e2e-preview-focusable",
+      "requirement": "W-1068",
+      "description": "In the editor, Tab from the template search lands on a picture, not the template.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TemplatesPanel.tsx",
+          "search": "          tabIndex={-1}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/templates.e2e.ts",
+        "--project=node",
+        "-g",
+        "starter templates: browse"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1068/e2e-new-page-starter-blank",
+      "requirement": "W-1068",
+      "description": "In the admin, New page with a starter page template creates a blank page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "          layout = templatePageLayout(starter.id, design) ?? layout;",
+          "replace": "          layout = (templatePageLayout(starter.id, design) && null) ?? layout;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/templates.e2e.ts",
+        "--project=node",
+        "-g",
+        "New page can start"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1068/e2e-drop-unstyled",
+      "requirement": "W-1068",
+      "description": "A dropped template is built as a plain new element: no site styles, and its H1 stays an H1 on a page that has one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                        if (template !== null) {\n                          dropTemplate(template, parentId, index);\n                          return;\n                        }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/templates.e2e.ts",
+        "--project=node",
+        "-g",
+        "dragged template"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

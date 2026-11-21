@@ -8,7 +8,9 @@ import {
   findNode,
   isParentNode,
   LAYOUT_SCHEMA_VERSION,
+  PAGE_TEMPLATES,
   SECTION_RECIPES,
+  SECTION_TEMPLATES,
   siteTokens,
   validateLayout,
   type DesignSystem,
@@ -248,6 +250,26 @@ export const ListRecipesOutput = z.object({
 
 export const listSectionRecipes = () => ({
   recipes: SECTION_RECIPES.map((r) => ({ id: r.id, name: r.name, description: r.description })),
+});
+
+// ---------------------------------------------------------------- list_templates
+
+export const ListTemplatesInput = z.strictObject({});
+const TemplateSummary = z.object({ id: z.string(), name: z.string(), description: z.string() });
+export const ListTemplatesOutput = z.object({
+  sections: z.array(TemplateSummary),
+  pages: z.array(TemplateSummary.extend({ sections: z.array(z.string()) })),
+});
+
+/** W-1068: the starter templates shipped with EmVB; insert_template and create_page use them. */
+export const listTemplates = () => ({
+  sections: SECTION_TEMPLATES.map((t) => ({ id: t.id, name: t.name, description: t.description })),
+  pages: PAGE_TEMPLATES.map((t) => ({
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    sections: [...t.sections],
+  })),
 });
 
 // ---------------------------------------------------------------- describe_page

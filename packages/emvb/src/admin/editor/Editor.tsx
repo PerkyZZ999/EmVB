@@ -43,7 +43,7 @@ import { EditorOverlay } from "./EditorOverlay.tsx";
 import { EditorToasts } from "./EditorToasts.tsx";
 import { useCanvasStyles, useEditorHost } from "./host.ts";
 import { LiveDataProvider, siteOrigin, useLiveData } from "./live-data.tsx";
-import { newElement } from "./dnd/new-element.ts";
+import { newElement, templateIdOf } from "./dnd/new-element.ts";
 import { editorCommands } from "./editor-commands.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
@@ -228,6 +228,8 @@ function EditorApp({
     addFromPanel,
     addRecipe,
     layersDrop,
+    addTemplate,
+    dropTemplate,
     items: itemActions,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
   // W-876: My sections and Save as section (D-060).
@@ -577,6 +579,8 @@ function EditorApp({
                     onSelect={(id) => dispatch({ type: "select", id })}
                     onAdd={addFromPanel}
                     onRecipe={addRecipe}
+                    onTemplate={addTemplate}
+                    design={state.design}
                     formsAvailable={formsAvailable}
                     onDuplicate={duplicate}
                     onMoveUp={(id) => arrange(id, moveUp)}
@@ -641,6 +645,11 @@ function EditorApp({
                       statePreview={statePreview}
                       refusal={refusalShown ? refusal : null}
                       onDropNew={(elementType, parentId, index) => {
+                        const template = templateIdOf(elementType);
+                        if (template !== null) {
+                          dropTemplate(template, parentId, index);
+                          return;
+                        }
                         const node = newElement(
                           elementType,
                           undefined,

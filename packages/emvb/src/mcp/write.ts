@@ -7,8 +7,12 @@ import {
   MAX_LAYOUT_BYTES,
   nameKey,
   nestingIssues,
+  PAGE_TEMPLATES,
   recipeNode,
   SECTION_RECIPES,
+  SECTION_TEMPLATES,
+  templatePageLayout,
+  templateSectionNode,
   summarizeIssues,
   validateDesign,
   validateLayout,
@@ -327,6 +331,8 @@ export const CreatePageInput = z.strictObject({
     .array(z.enum(SECTION_RECIPES.map((r) => r.id) as [string, ...string[]]))
     .max(12)
     .optional(),
+  /** W-1068: start from a starter page template (see list_templates) instead of recipes. */
+  template: z.enum(PAGE_TEMPLATES.map((t) => t.id) as [string, ...string[]]).optional(),
 });
 export const CreatePageOutput = z.object({ pageId: z.string(), slug: z.string(), rev: z.string() });
 
@@ -372,7 +378,11 @@ export async function createPage(ports: EmvbPorts, input: z.infer<typeof CreateP
   const slug = pageSlug(input.title);
   if (!slug) refused("Give the page a title with letters or digits.");
   const { design } = await ports.getDesign();
-  let layout = starterLayout(input.title);
+  if (input.template && input.recipes?.length) {
+    refused("Use either a page template or recipes, not both.");
+  }
+  let layout =
+    (input.template && templatePageLayout(input.template, design)) || starterLayout(input.title);
   const recipes = input.recipes ?? [];
   if (recipes.length > 0) {
     // W-474: sections sit edge to edge, and a hero first carries the page's one h1 itself
@@ -627,6 +637,36 @@ export async function applySectionRecipe(
       layout: next,
       changed: [node.id],
       summary: `Added the ${input.recipeId} section ${node.id}`,
+    };
+  });
+}
+
+// ---------------------------------------------------------------- insert_template
+
+export const InsertTemplateInput = z.strictObject({
+  pageId: PageId,
+  templateId: z.enum(SECTION_TEMPLATES.map((t) => t.id) as [string, ...string[]]),
+  parentId: NodeIdInput.optional(),
+  index: z.number().int().min(0).optional(),
+  expectedRev: Rev.optional(),
+});
+
+/** W-1068: a starter section template, in the site's styles, with fresh ids. */
+export async function insertTemplate(ports: EmvbPorts, input: z.infer<typeof InsertTemplateInput>) {
+  const { design } = await ports.getDesign();
+  return mutatePage(ports, "insert_template", input.pageId, input.expectedRev, (layout) => {
+    const node = templateSectionNode(input.templateId, design, layout);
+    if (!node) return refused(`Unknown template ${input.templateId}.`);
+    const next = arranged(
+      addNode(layout, node, {
+        parentId: input.parentId ?? layout.root.id,
+        index: input.index ?? Number.MAX_SAFE_INTEGER,
+      }),
+    );
+    return {
+      layout: next,
+      changed: [node.id],
+      summary: `Added the ${input.templateId} template ${node.id}`,
     };
   });
 }

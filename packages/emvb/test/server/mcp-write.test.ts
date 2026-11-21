@@ -153,6 +153,41 @@ describe("EmVB MCP write tools (W-457, W-458)", () => {
     expect(error.message).toContain("taken");
   });
 
+  test("W-1068 create_page starts from a page template; insert_template adds a section with new ids", async () => {
+    const out = await call<{ pageId: string }>("create_page", {
+      title: "Launch",
+      template: "landing",
+    });
+    const created = await layoutOf(out.pageId);
+    const sections = created.layout.root.children ?? [];
+    expect(sections.length).toBe(8);
+    const json = JSON.stringify(created.layout);
+    expect(json.includes("tpl-")).toBe(false);
+    expect(json.match(/"level":1/g)?.length).toBe(1);
+    expect(
+      (await fail("create_page", { title: "Both", template: "about", recipes: ["hero"] })).code,
+    ).toBe("REFUSED");
+    expect((await fail("create_page", { title: "Nope", template: "nope" })).code).not.toBe("");
+
+    const added = await call<{ changed: string[]; rev: string }>("insert_template", {
+      pageId: out.pageId,
+      templateId: "hero",
+      index: 0,
+      expectedRev: created.rev,
+    });
+    const after = await layoutOf(out.pageId);
+    const first = after.layout.root.children?.[0];
+    expect(first?.id).toBe(added.changed[0]);
+    expect(sections.some((s) => s.id === first?.id)).toBe(false);
+    // The page already has the landing hero's H1, so the new hero's heading is an H2.
+    expect(JSON.stringify(after.layout).match(/"level":1/g)?.length).toBe(1);
+    const ids = JSON.stringify(after.layout).match(/"id":"[^"]+"/g) ?? [];
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(
+      (await fail("insert_template", { pageId: out.pageId, templateId: "nope" })).code,
+    ).not.toBe("");
+  });
+
   test("create_page finds a taken slug past the first 50 pages (W-537)", async () => {
     await call("create_page", { title: "Oldest page" });
     for (let i = 0; i < 55; i++) {

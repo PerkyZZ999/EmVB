@@ -1,6 +1,6 @@
 import { afterEach, expect, spyOn, test } from "bun:test";
 import { act } from "react";
-import type { Layout } from "../../core/index.ts";
+import { DESIGN_SCHEMA_VERSION, validateLayout, type Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { cleanup, mount, rerender, settle } from "../../../test/dom/mount.ts";
 import { NewPageDialog } from "./NewPageDialog.tsx";
@@ -167,5 +167,52 @@ for (const refresh of ["empty", "offline", "replaced"] as const) {
     await submit();
     expect(posted.length).toBe(1);
     expect(JSON.stringify(posted[0]?.data.layout)).toContain("New page title");
+  });
+}
+
+for (const design of ["loaded", "offline"] as const) {
+  test(`W-1068: a starter page template creates its sections in the site's styles (design ${design})`, async () => {
+    const posted: { data: { title: string; layout: Layout } }[] = [];
+    const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+    restoreNavigation = () => navigation.mockRestore();
+    const fetcher: Fetcher = async (path, init) => {
+      if (init?.method === "POST") {
+        posted.push(JSON.parse(String(init.body)) as (typeof posted)[number]);
+        return Response.json({ data: { item: { id: "new-page" } } }, { status: 201 });
+      }
+      if (path.includes("/design/draft")) {
+        if (design === "offline") throw new TypeError("Failed to fetch");
+        return Response.json({
+          data: {
+            design: {
+              schemaVersion: DESIGN_SCHEMA_VERSION,
+              variables: {
+                colors: [{ id: "brand", name: "Brand", value: "#1d4ed8" }],
+                fonts: [],
+                fontSizes: [],
+                spacings: [],
+              },
+              classes: [],
+            },
+          },
+        });
+      }
+      return Response.json({ data: { items: [] } });
+    };
+    await mount(<NewPageDialog open fetcher={fetcher} onOpenChange={() => undefined} />);
+    await settle();
+    await choose("Landing page (starter)");
+    await title("Launch");
+    await submit();
+    expect(posted.length).toBe(1);
+    const layout = posted[0]?.data.layout;
+    expect(validateLayout(layout).ok).toBe(true);
+    const json = JSON.stringify(layout);
+    // Booleans, so a failure doesn't print the whole page.
+    expect(json.includes("Say what you do in one clear line")).toBe(true);
+    expect(json.includes('"editorLabel":"Pricing"')).toBe(true);
+    expect(json.includes("tpl-")).toBe(false);
+    expect(json.includes('{"var":"brand"}')).toBe(design === "loaded");
+    expect(navigation.mock.calls.length).toBe(1);
   });
 }

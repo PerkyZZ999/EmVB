@@ -58,6 +58,7 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
       list_element_types: { type: "heading" },
       get_site_styles: {},
       list_section_recipes: {},
+      list_templates: {},
       describe_page: { pageId: id },
       get_accessibility_findings: { pageId: id },
       list_versions: { pageId: id },
@@ -83,6 +84,16 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
     results.forEach((result, i) => {
       expect(reads[i]?.output.safeParse(data(result)).success).toBe(true);
     });
+  });
+
+  test("W-1068 list_templates lists the starter sections and pages", async () => {
+    const out = data<{ sections: { id: string }[]; pages: { id: string; sections: string[] }[] }>(
+      await t.mcp("list_templates", {}),
+    );
+    expect(out.sections.map((s) => s.id)).toEqual(
+      expect.arrayContaining(["hero", "features", "pricing", "faq", "team", "contact", "footer"]),
+    );
+    expect(out.pages.find((p) => p.id === "landing")?.sections[0]).toBe("hero");
   });
 
   test("list_pages lists EmVB pages with ids and titles", async () => {
