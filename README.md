@@ -17,14 +17,14 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 1.3.0 (see the [changelog](CHANGELOG.md)). It adds the marketing widgets (Counter, Progress bar, Countdown, Map, Price table, Price list, Call to action, Flip box, Animated headline, Share buttons, Hotspots) and imports them from Elementor, with Slides and Testimonial Carousel as a Carousel. Everything is additive: 1.x pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). Public pages load no script unless an element opts in. See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 1.4.0 (see the [changelog](CHANGELOG.md)). It adds the design system and site-wide features: light and dark Site styles with a Theme toggle, custom fonts served from your own site, starter templates, a mega menu, off-canvas panels, sticky header effects, a Search form, forms in steps, and import from WordPress and HTML. Everything is additive: 1.x pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). Public pages load no script unless an element opts in. See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4 and 1.5.** EmVB 1.3.0 is built and tested against EmDash 1.5.0 and tested on EmDash 1.4.0 (CI runs both; every release is installed on a stock 1.4.0 and 1.5.0 site). Its peer range is `emdash` >=1.4.0 <2.
+- **EmDash 1.4 and 1.5.** EmVB 1.4.0 is built and tested against EmDash 1.5.0 and tested on EmDash 1.4.0 (CI runs both; every release is installed on a stock 1.4.0 and 1.5.0 site). Its peer range is `emdash` >=1.4.0 <2.
 - **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7 (7.4.8 since 2026-11-09, also verified).
 - **React 19**, `@cloudflare/kumo` 2.6.0 (EmDash 1.4) or 2.15.0 (EmDash 1.5) and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
-- **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
+- **Optional:** `@emdash-cms/plugin-forms` for forms: 0.2.13 on EmDash 1.5, 0.2.9 to 0.2.12 on EmDash 1.4 (each pins its EmDash's Kumo).
 - **AI agents need EmDash 1.2 or later** with `mcp: true`. The local bridge needs Node 20 or later on the agent's computer.
 
 ## Install
@@ -69,7 +69,7 @@ EMVB_TOKEN=<token> npx -y @perkyzz/emvb-mcp --site https://your.site
 - **Turn it on:** an admin enables agents in **Pages VisualBuilder → AI agents** (off by default) and approves the EmVB tools on EmDash's Plugins screen.
 - **Token:** an EmDash API token with the `mcp:tools:emvb` scope, for an editor. Never give an agent an admin token.
 - **Limits:** agents change drafts only, unless an admin allows publishing. Each token may make 300 reads and 60 changes a minute and 10 publishes an hour. Every agent change shows in the version timeline with an **Agent** badge.
-- **Agent Skill:** the bridge ships the `emvb-page-builder` skill with its references (in [`packages/emvb-mcp/skill/`](packages/emvb-mcp/skill/)), along with the layout and style schemas and prompts such as `build_landing_page` and `fix_accessibility`.
+- **Agent Skill:** the bridge ships the `emvb-page-builder` skill with its references (in [`packages/emvb-mcp/skill/`](packages/emvb-mcp/skill/)), along with the layout and style schemas and prompts such as `build_landing_page`, `fix_accessibility` and `draft_whole_page`.
 
 See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/guides/mcp.md).
 
@@ -85,13 +85,18 @@ See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/gu
 
 - Layout: sections, containers (flexbox or CSS Grid), dividers and spacers.
 - Content: headings, text, lists, links, buttons (with an optional icon), images, video and icons.
-- Interactive: tabs, accordions, a table of contents, menus, popups, floating bars and forms.
+- Widgets: star rating, alert, icon and image boxes, testimonial, social icons, gallery, carousel, counters, progress bars, countdowns, maps, price tables and lists, calls to action, flip boxes, animated headlines, share buttons and hotspots. See the [widgets guide](docs/guides/widgets.md).
+- Interactive: tabs, accordions, a table of contents, menus with mega menu panels, a search form, a light and dark Theme toggle, popups and off-canvas panels, floating bars and forms.
 - Data: loops, pagination, and post fields for theme templates.
 
 **Styles and classes**
 
-- Site styles: variables (including fluid type and spacing), classes in a clear priority order, and tag defaults. Changes are staged until **Publish styles**, and you can import and export them as JSON.
-- Per element: Hover, Focus and Active states with transitions, per-device styles and hide on device, container queries, text direction, backgrounds (image, video, gradient, overlay), entrance animations and scroll motion, custom attributes and print styles.
+- Site styles: variables (including fluid type and spacing, dark mode colours, and custom fonts served from your own site), classes in a clear priority order, and tag defaults. Changes are staged until **Publish styles**, and you can import and export them as JSON.
+- Per element: Hover, Focus and Active states with transitions, per-device styles and hide on device, container queries, text direction, backgrounds (image, video, gradient, overlay), entrance animations and scroll motion, sticky header effects, custom attributes and print styles.
+
+**Starter templates**
+
+Ready-made sections (hero, features, pricing, FAQ, team, contact, footer and more) in **Add → Templates**, and Landing, About and Contact page templates for **New page**, all in your Site styles. See the [starter templates guide](docs/guides/starter-templates.md).
 
 **Your own pages**
 
@@ -99,7 +104,7 @@ Give entries in your own collections an EmVB layout: **Edit with EmVB** from the
 
 **Import from Elementor**
 
-Bring pages and templates over from Elementor: choose the exported `.json`, see what will be kept, changed or left out, and get a draft page or theme part. Containers, sections and the core widgets map faithfully; Pro, theme-builder and third-party widgets keep what EmVB can show. See the [Elementor import guide](docs/guides/elementor-import.md).
+Bring pages and templates over from Elementor: choose the exported `.json`, see what will be kept, changed or left out, and get a draft page or theme part. Containers, sections and the core widgets map faithfully; Pro, theme-builder and third-party widgets keep what EmVB can show. See the [Elementor import guide](docs/guides/elementor-import.md). WordPress block content (Gutenberg) and any HTML page import the same way with **Import HTML**; see the [WordPress and HTML import guide](docs/guides/html-import.md).
 
 **Export and leaving EmVB**
 
@@ -115,11 +120,11 @@ Edit a library picture without leaving the admin: crop, adjust, filters, curves,
 
 **Icons**
 
-An Icon library of 14,480 icons from Lucide, Font Awesome Free, Tabler and Remix Icon, plus your own uploads. Icons can be styled and animated with CSS; Loop forever keeps a spinner turning. See the [icon library guide](docs/guides/icon-library.md).
+An Icon library of 15,017 icons from Lucide, Font Awesome Free, Tabler and Remix Icon, plus your own uploads. Icons can be styled and animated with CSS; Loop forever keeps a spinner turning. See the [icon library guide](docs/guides/icon-library.md).
 
 **Theme Builder**
 
-Headers, footers, Error 404, Search Results, Single Page, Single Post, Archive, Loop Item, synced sections, page templates, popups and floating bars, each with display conditions.
+Headers, footers, Error 404, Search Results, Single Page, Single Post, Archive, Loop Item, synced sections, page templates, popups and floating bars, each with display conditions. Popups can slide in from the edge as off-canvas panels and be limited to page addresses and dates; see the [popups guide](docs/guides/popups.md).
 
 **Live data and personalization**
 
@@ -132,7 +137,7 @@ Bind text and images to a post, a site setting or a URL parameter. Show content 
 
 **Light public pages**
 
-Published pages are plain HTML and CSS. The only EmVB scripts on the public site are the small runtimes for popups, floating bars, tabs and menus, and each loads only on pages that use it. Forms use the forms plugin's own script.
+Published pages are plain HTML and CSS. The only EmVB scripts on the public site are small runtimes, each loaded only on pages that use it: popups and off-canvas panels, floating bars, tabs, menus, and widgets with an opt-in script (a carousel with buttons, a live countdown, a Theme toggle and so on). Forms use the forms plugin's own script.
 
 ## Development
 
@@ -156,7 +161,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 | Seeded bugs (prove the tests catch real defects) | `bun run seeded-bugs`                                        |
 | Project site (source in `site/`)                 | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, pull requests and troubleshooting.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers pull requests and common problems.
 
 ## Docs
 
@@ -165,14 +170,22 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 - [Edit your own pages](docs/guides/native-page-editing.md)
 - [AI agents (MCP)](docs/guides/mcp.md)
 - [Co-design with an AI agent](docs/guides/co-design.md)
+- [Widgets](docs/guides/widgets.md)
+- [Starter templates](docs/guides/starter-templates.md)
+- [Forms in steps, number and date boxes](docs/guides/forms.md)
+- [Popups and off-canvas panels](docs/guides/popups.md)
+- [Schedule publishing](docs/guides/scheduled-publishing.md)
 - [Import from Elementor](docs/guides/elementor-import.md)
+- [Import from WordPress or HTML](docs/guides/html-import.md)
 - [Languages](docs/guides/languages.md)
 - [Motion](docs/guides/motion.md)
 - [Extensions](docs/guides/extensions.md)
 - [Saved sections](docs/guides/saved-sections.md)
 - [Image editor](docs/guides/image-editor.md)
 - [Icon library](docs/guides/icon-library.md)
+- [Custom fonts](docs/guides/custom-fonts.md)
 - [Leaving EmVB](docs/guides/leaving-emvb.md)
+- [Performance on large pages](docs/guides/performance.md)
 - [Layout format](docs/system/layout-format.md): how pages and the design system are stored.
 - [Schema contract](docs/SCHEMA.md), [Extensions API](docs/EXTENSIONS.md): the stored formats kept stable through 1.x, with JSON Schema exports in docs/schema/.
 - [Theme parts](docs/system/theme-parts.md): theme parts, conditions, triggers and dynamic data.
