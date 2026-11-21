@@ -54996,6 +54996,20 @@
         "goes through the steps"
       ],
       "expect": "\\d+ failed"
+    },
+    {
+      "id": "W-1083/theme-toggle-not-a-public-hook",
+      "requirement": "W-1083",
+      "description": "The public hook list forgets the Theme toggle's data-emvb-theme-toggle, so a public page with a toggle looks like it leaks an editor attribute and the docs list is wrong.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/public-attributes.ts",
+          "search": "  \"data-emvb-theme-toggle\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/public-hooks.test.ts", "-t", "W-1083"],
+      "expect": "\\(fail\\).*W-1083"
     }
   ]
 }

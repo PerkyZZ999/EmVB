@@ -198,6 +198,8 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 ```
 
 - Colour ids are 1–40 of `a-z 0-9 -`, names 1–60 characters, values hex as above. At most 200 colours.
+- A colour may set `dark` (a hex, 1.4, W-1067): its value when the visitor's system prefers dark and no Theme toggle chose light, and whenever one chose dark. The page CSS repeats those variables (with `color-scheme: dark`) under `@media (prefers-color-scheme: dark)` for `.emvb-root` outside `[data-emvb-theme="light"]`, and for `.emvb-root` inside `[data-emvb-theme="dark"]`. Colours without `dark` are the same in both.
+- A font may set `family`, `faces` and `source` (1.4, W-1072): its own WOFF2 files, written as `@font-face` rules on pages whose CSS uses the variable. [SCHEMA.md](../SCHEMA.md) has the limits and checks, [Custom fonts](../guides/custom-fonts.md) the editor side.
 - The document is at most 256 KiB (`MAX_DESIGN_BYTES`).
 - A font size or spacing variable may set `fluid: { min, max }` (px, 0–1000). It is emitted as `clamp()` between `fluidRange` (unset is 360 to 1280 px; `minWidth` must be less than `maxWidth`). `value` stays the fixed fallback (W-316).
 - `direction` is `ltr`, `rtl` or `auto` (unset is left to right). It is `dir` on every EmVB root, and hosts get it back for `<html dir>` (W-230).
@@ -218,10 +220,10 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 ## Rendered output
 
 - The root gets `emvb-root`, each node `emvb-<type>` and, when its style, a state, a device override or a hide flag yields a rule, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`). An unknown node still keeps `dir`, `container` and `query` (W-352), so a later version that understands the type still has them.
-- The CSS is, in order: `@font-face` rules for the custom font variables the CSS uses (W-1072, see [Custom fonts](../guides/custom-fonts.md)), variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021). Each class and local rule is followed by its state rules, then the tablet media query, the mobile media query and the hide queries (see [Per-device styles](#per-device-styles-w-096)). A reduced-motion block closes the CSS when a transition is set (see [State styles](#state-styles-w-089)).
+- The CSS is, in order: `@font-face` rules for the custom font variables the CSS uses (W-1072, see [Custom fonts](../guides/custom-fonts.md)), variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings) and the colours' dark values (W-1067), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021). Each class and local rule is followed by its state rules, then the tablet media query, the mobile media query and the hide queries (see [Per-device styles](#per-device-styles-w-096)). A reduced-motion block closes the CSS when a transition is set (see [State styles](#state-styles-w-089)).
 - **Style classes** (`design.classes[]`): `{ id, name, style, states?, devices?, hiddenOn? }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in that order. When two classes set the same property, the one later in `design.classes` wins, because its rule comes later in the stylesheet. Local `.emvb-e-<id>` rules come after every class, so local styles win. `classStylesInListOrder` feeds `resolveCascade` in that list order.
 - Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`). Offsets (`top`, `right`, `bottom`, `left`) take spacing variables; the shadow colour takes a colour variable.
-- Text and attributes are escaped by the serializer. Public output has no scripts and no editor `data-emvb-*` attributes (such as `data-emvb-id`). The only `data-emvb-*` attributes it carries are these public hooks (`PUBLIC_DATA_ATTRIBUTES` in `core/public-attributes.ts`, kept in step with this list by a test): `data-emvb-theme-part` on a theme part's wrapper ([theme-parts.md](theme-parts.md#public-render)); `data-emvb-loop-item` (the post id) on each Loop item; `data-emvb-popup`, `data-emvb-popup-config` and `data-emvb-popup-dismiss` on popup chrome; `data-emvb-float`, `data-emvb-float-dismiss` and `data-emvb-float-edge` on float chrome. The popup, float and menu runtimes may add their own state attributes after load (`data-emvb-menu-dismissed`).
+- Text and attributes are escaped by the serializer. Public output has no scripts and no editor `data-emvb-*` attributes (such as `data-emvb-id`). The only `data-emvb-*` attributes it carries are these public hooks (`PUBLIC_DATA_ATTRIBUTES` in `core/public-attributes.ts`, kept in step with this list by a test): `data-emvb-theme-part` on a theme part's wrapper ([theme-parts.md](theme-parts.md#public-render)); `data-emvb-loop-item` (the post id) on each Loop item; `data-emvb-popup`, `data-emvb-popup-config` and `data-emvb-popup-dismiss` on popup chrome; `data-emvb-float`, `data-emvb-float-dismiss` and `data-emvb-float-edge` on float chrome; `data-emvb-menu-empty` on an empty Menu; the widget hooks their opt-in runtimes read: `data-emvb-alert-dismiss` (Alert), `data-emvb-lightbox` (Gallery), `data-emvb-arrows`, `data-emvb-dots`, `data-emvb-autoplay` and `data-emvb-loop` (Carousel), `data-emvb-counter` (Counter), `data-emvb-countdown` (Countdown), `data-emvb-map` (Map), `data-emvb-rotate` (Animated headline), `data-emvb-share-list` and `data-emvb-share` (Share buttons); `data-emvb-theme-toggle` on a Theme toggle (W-1067); `data-emvb-sticky-hide` on an element that hides while scrolling down (W-1070); and `data-emvb-ext` (the element type) on an extension element's wrapper. The runtimes may add their own state attributes after load (`data-emvb-menu-dismissed`, `data-emvb-ready`, `data-emvb-shown`, and `data-emvb-theme` on `<html>`).
 
 ## Changing the format
 
@@ -369,7 +371,7 @@ the page (see Unknown element types above). Each renders without script.
 elements asked for (sorted; empty for most pages). `renderStored` and `resolveThemeParts` set it only
 when it is not empty. `EmVBPage` mounts them itself; a site layout mounts its theme parts' with
 `<EmVBWidgetRuntimes names={theme.runtimes} />` from `@perkyzz/emvb/astro/widgets`. The HTML/CSS
-export writes each one next to the pages that use it (`assets/emvb-alerts.js`, `assets/emvb-lightbox.js`, `assets/emvb-carousel.js`).
+export writes each one next to the pages that use it (`assets/emvb-alerts.js`, `assets/emvb-lightbox.js`, `assets/emvb-carousel.js`). The names are `alerts`, `lightbox` and `carousel` (1.2); `counter`, `countdown`, `map`, `headline` and `share` (1.3); `sticky` (Hide while scrolling down) and `theme` (Theme toggle) (1.4); and `ext:<package>` for an extension's own runtime ([EXTENSIONS.md](../EXTENSIONS.md), 1.4).
 
 ## 1.3 marketing widgets (W-1038–W-1048)
 
@@ -393,5 +395,27 @@ scripts are listed in `runtimes`.
 | `share-link` (W-1047) | `network` (`facebook`, `x`, `linkedin`, `whatsapp`, `telegram`, `reddit`, `bluesky`, `threads`, `email`), optional `label` (≤ 80) | none; only inside `share-buttons` | `<li class="emvb-share-<network>"><a href="…" aria-label="Share on Facebook" target="_blank" rel="noopener noreferrer">` with the network's `aria-hidden` icon; the address is the service's own share link with the page URL encoded in it (email: `mailto:?body=…`, same tab). The page URL comes from the host as `dynamic.pageUrl` (`resolveEmVBPage` and `resolveThemeParts` fill it with the request's origin and path when a layout has Share buttons); without it a public page renders no share links, and the editor uses `https://example.com/`. No tracking script |
 | `hotspots` (W-1048) | `src` and `alt` with an Image's picture keys and `decorative`, optional `label` (≤ 80, unset "Points on the picture") | `children: Node[]`, Hotspots only, at most 20 | `<div class="emvb-hotspots">` with the picture (`loading="lazy"`; the accessibility check wants its alt text as for an Image) and `<ol class="emvb-hotspots-list" aria-label="…">` of markers numbered by a CSS counter |
 | `hotspot` (W-1048) | `title` (1–120), optional `text` (≤ 1000), `x` and `y` (0–100 %), optional `xTablet`, `yTablet`, `xMobile`, `yMobile` (unset: the wider device's) | none; only inside `hotspots` | `<li>` placed by its own CSS rule (`left`/`top` in percent, tablet and phone values in their media queries), holding `<button type="button" popovertarget="emvb-hotspot-<id>" aria-label="title">` and `<div id="emvb-hotspot-<id>" popover="auto">` with the title and note. The native Popover API opens and closes it (Escape, click outside) with no script; where `position-area` is supported the note sits by its marker, elsewhere in the middle of the screen. `popover`, `popovertarget` and `popovertargetaction` joined the markup attribute allowlist |
+
+## 1.4 additions (W-1067–W-1086)
+
+Additive, as in 1.2 and 1.3: layout schema 18 and design schema 17 stay, a page that uses a new
+element type can't be shown by EmVB 1.3, which keeps it on save, and every new key is optional.
+Two new element types:
+
+| Type | `props` | Children | Renders as |
+| --- | --- | --- | --- |
 | `search-form` (W-1073) | optional `action` (≤ 500; a site path or web address, unset or refused `/search`), `label` (≤ 80, unset "Search"), `placeholder` (≤ 120), `buttonText` (≤ 40, unset "Search") | none | `<form role="search" aria-label="…" method="get" action="…">` with `<input type="search" name="q" aria-label="…">` and `<button type="submit">`. No script: the browser sends `?q=` to the search page, as EmDash's own Search widget does. Never inside a `form` (the save refuses it, as a form in a form) |
 | `theme-toggle` (W-1067) | optional `label` (≤ 40, unset "Dark mode") | none | `<button type="button" aria-pressed="false" data-emvb-theme-toggle>`, shown only once the opt-in `theme` runtime marks it ready. The runtime keeps a choice in `localStorage` (`emvb-theme`) and sets `<html data-emvb-theme="light\|dark">`, which the page CSS reads before the system setting; `aria-pressed` says whether dark is on |
+
+New optional keys on existing records:
+
+- `menu-item` `panelPartId` and `panelWidth`: a mega menu panel (see `menu` / `menu-item` above).
+- `motion.sticky` in a style record: scroll effects for a sticky or fixed element (see the style
+  table above).
+- A colour variable's `dark` and a font variable's `family`, `faces` and `source` (see Design
+  system document above).
+- A popup's triggers: `panel` (off-canvas panel), and `advanced.urlParams`, `advanced.from` and
+  `advanced.until` (see [theme-parts.md](theme-parts.md)).
+
+Extensions may also put allowlisted classes on their output and ship their own stylesheet and
+runtime ([EXTENSIONS.md](../EXTENSIONS.md)); none of that is stored in a layout.

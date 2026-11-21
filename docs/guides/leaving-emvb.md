@@ -93,7 +93,7 @@ embeds and similar elements are left out and named, never guessed at.
 2. Remove EmVB from your site's code:
    - the `resolveEmVBPage` / `EmVBPage` route and any `resolveThemeParts` calls in your layout;
    - the runtime components (`EmVBTabsRuntime`, `EmVBMenuRuntime`, `EmVBPopupsRuntime`,
-     `EmVBFloatsRuntime`, `EmVBFormsRuntime`);
+     `EmVBFloatsRuntime`, `EmVBFormsRuntime`, `EmVBWidgetRuntimes`);
    - `emvb()` from `plugins` in `astro.config`.
 3. Uninstall the package: `bun remove @perkyzz/emvb` (or `npm uninstall @perkyzz/emvb`), then
    rebuild and deploy.

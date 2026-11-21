@@ -22,8 +22,8 @@ Bun on an AMD Ryzen 7 5800XT, median of 15 to 40 runs.
 | 958 | 12 ms | 8 ms | 74 KB | 53 KB | 9 KB |
 | 1,915 | 24 ms | 17 to 19 ms | 149 KB | 103 KB | 17 KB |
 
-- The page ships no script of its own. Popups, floats, tabs and menus add a small script only on
-  pages that use them.
+- The page ships no script of its own. Popups, floats, tabs, menus and widgets with an opt-in
+  script add a small script only on pages that use them.
 - Each styled element has its own small CSS rule, so CSS grows with the page; it compresses well
   (about 6 to 1 with gzip, which hosts apply by default).
 

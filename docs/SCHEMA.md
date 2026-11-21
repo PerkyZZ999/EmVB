@@ -108,6 +108,11 @@ hide? }` (at least one of the last four) or `{ type: "none" }`. Over the page's 
 bottom, a length), as CSS scroll-driven animations; `hide` slides it away while the visitor scrolls
 down (the opt-in `sticky` runtime; down for a bar held at the bottom), per device like the rest. Normal-only, off for reduced motion. It has no 0.x key.
 
+Added in 1.4 (W-1069, W-1073, W-1067, additive): a `menu-item` may have `panelPartId` (a Section
+theme part's id, at most 128 characters) and `panelWidth` (a length): a mega menu panel. Two new
+element types, `search-form` and `theme-toggle` (props in the table below). As with the 1.2 and 1.3
+widgets, EmVB 1.3 keeps them on save without showing them. Neither schema number changes.
+
 Added in 1.1 (W-974, additive): a style record may carry `viewportUnits`, a map from a length key
 (`height`, `minHeight`, `maxHeight` and the other box lengths) to `"dvh"` or `"svh"`. A plain `vh`
 length of that key is then drawn in that unit. The length itself stays `vh`, so 1.0, which keeps

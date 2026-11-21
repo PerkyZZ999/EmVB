@@ -30,7 +30,7 @@ export const DOC_GROUPS: DocGroup[] = [
         slug: "widgets",
         title: "Widgets",
         summary:
-          "Star rating, alert, boxes, testimonial, social icons, gallery, carousel, and since 1.3 counters, progress bars, countdowns, maps, price tables and lists, calls to action, flip boxes, animated headlines, share buttons and hotspots.",
+          "Star rating, alert, boxes, testimonial, social icons, gallery, carousel, the 1.3 marketing widgets, and since 1.4 the search form, mega menus, and light and dark with the Theme toggle.",
       },
       {
         slug: "starter-templates",
@@ -49,9 +49,14 @@ export const DOC_GROUPS: DocGroup[] = [
         summary: "Save any element and reuse it, as a copy or synced everywhere.",
       },
       {
+        slug: "popups",
+        title: "Popups and off-canvas panels",
+        summary: "Popups and slide-in panels, their triggers, and limits by address and date.",
+      },
+      {
         slug: "motion",
         title: "Motion",
-        summary: "Entrance, scroll and hover motion in plain CSS.",
+        summary: "Entrance, scroll and hover motion in plain CSS, and sticky header effects.",
       },
       {
         slug: "icon-library",
@@ -121,12 +126,13 @@ export const DOC_GROUPS: DocGroup[] = [
       {
         slug: "extensions",
         title: "Extensions",
-        summary: "Custom elements, editor panels and data sources, in code.",
+        summary:
+          "Custom elements, editor panels and data sources, in code, with their own styles and scripts.",
       },
       {
         slug: "extensions-api",
         title: "Extensions API reference",
-        summary: "The Extensions API 1.0 contract.",
+        summary: "The Extensions API 1.x contract.",
       },
       {
         slug: "performance",

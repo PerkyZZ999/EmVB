@@ -18,7 +18,7 @@ export const featureGroups: FeatureGroup[] = [
     items: [
       {
         title: "Drag, drop, nest",
-        body: "Drop elements from the Add panel onto the canvas, then reorder and nest them in the Layers tree or with the keyboard.",
+        body: "Drop elements from the Add panel onto the canvas or straight into the Layers tree, then reorder and nest them there or with the keyboard.",
       },
       {
         title: "Edit text in place",
@@ -51,12 +51,16 @@ export const featureGroups: FeatureGroup[] = [
         body: "Counters, progress bars, countdowns, maps that load on request, price tables and lists, calls to action, flip boxes, animated headlines, share buttons and hotspots, with motion that respects reduced-motion settings and can be paused.",
       },
       {
+        title: "Site widgets",
+        body: "A search form, mega menu panels that hold any layout, off-canvas panels for mobile menus and carts, and a light and dark Theme toggle. Each works from the keyboard and adds a script only if it needs one.",
+      },
+      {
         title: "Schedule publishing",
         body: "Pick the date and time a page or theme part goes live; EmDash publishes it by itself.",
       },
       {
-        title: "Synced sections and templates",
-        body: "A Section element renders a shared part live. New pages can start from a page template.",
+        title: "Templates and synced sections",
+        body: "Ready-made hero, features, pricing, FAQ, team, contact and footer sections in your own Site styles, page templates for new pages, and Section elements that render a shared part live.",
       },
     ],
   },
@@ -81,8 +85,8 @@ export const featureGroups: FeatureGroup[] = [
         body: "Flexbox and CSS Grid containers, with 1 to 12 columns and spans on the children.",
       },
       {
-        title: "Entrance animations",
-        body: "Fade, slide and scale in, with a delay. Reduced motion turns them off.",
+        title: "Motion and sticky headers",
+        body: "Fade, slide and scale in, scroll effects, and sticky headers that shrink, change colour or hide while scrolling down. Reduced motion turns them off.",
       },
     ],
   },
@@ -92,7 +96,7 @@ export const featureGroups: FeatureGroup[] = [
     items: [
       {
         title: "Variables",
-        body: "Colours, fonts, font sizes and spacings, published as CSS custom properties.",
+        body: "Colours with an optional dark mode value, fonts with your own or Google font files served from your site, font sizes and spacings, published as CSS custom properties.",
       },
       {
         title: "Classes with a clear order",
@@ -108,7 +112,7 @@ export const featureGroups: FeatureGroup[] = [
       },
       {
         title: "Import and export",
-        body: "Move a design between sites as JSON.",
+        body: "Move a design between sites as JSON. Pages come over from Elementor, WordPress blocks or plain HTML as drafts, with a report.",
       },
     ],
   },

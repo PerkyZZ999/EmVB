@@ -82,6 +82,11 @@ the token, never the token. Calls signed in without a token are counted per user
   Animated headline, Share buttons, Hotspots). Like Social links and Gallery pictures, Price list
   items, Share links and Hotspots go only inside their own parent: add the parent with its
   `children`, or add them to it.
+- Since 1.4 it also lists the Search form (`search-form`) and the Theme toggle (`theme-toggle`). A
+  Menu item takes `panelPartId`, the id of a published Section theme part, to open it as a mega
+  menu panel (agents can't create the Section itself), and `panelWidth`. A sticky element's style
+  takes `motion.sticky` (scroll effects), and a colour variable in `update_site_styles` takes a
+  `dark` value for dark mode.
 - Writes take an optional `expectedRev`; a stale one returns `CONFLICT`. Every write returns a new
   `rev`: pass that one to the next write.
 - Style references to a site variable can leave out `from`; EmVB fills it in from the variable's

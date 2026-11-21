@@ -16,6 +16,12 @@ Recipes and `get_site_styles` `tokens` find variables by these names, so use the
 | Spacings   | `space-xs` 8, `space-s` 16, `space-m` 24, `space-l` 40, `space-2xl` 64, `space-3xl` 96–120                                                               | Multiples of 8 only. `space-3xl` is the vertical padding of a band.                                                                                                      |
 | Classes    | Button (`btn`), a ghost button, Card (`card`), Eyebrow                                                                                                   | Recipes put Button and Card on their buttons and cards.                                                                                                                  |
 
+A colour may also have a `dark` hex: visitors whose device prefers dark mode see it instead (and a
+Theme toggle element lets them choose). Give Surface, Card, Ink and Muted dark values together, and
+check the same contrast pairs in both. A font that has `faces` was given font files by a person in
+Site styles; agents can't add font files. `update_site_styles` keeps the keys you don't send, so
+change only its `value` (the stack, with the family first) and leave `family`, `faces` and `source`.
+
 Tag defaults (`defaults.h1…h3, p, a`) set the display font, ink colour and line heights
 (headings 1.1–1.3, body 1.5–1.7) once, so elements need fewer local styles.
 

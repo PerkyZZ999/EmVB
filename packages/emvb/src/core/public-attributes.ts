@@ -12,6 +12,23 @@ export const PUBLIC_DATA_ATTRIBUTES: readonly string[] = [
   "data-emvb-float",
   "data-emvb-float-dismiss",
   "data-emvb-float-edge",
+  // W-1083: the widget and site hooks their opt-in runtimes read (1.2 to 1.4), and an empty Menu.
+  "data-emvb-menu-empty",
+  "data-emvb-alert-dismiss",
+  "data-emvb-lightbox",
+  "data-emvb-arrows",
+  "data-emvb-dots",
+  "data-emvb-autoplay",
+  "data-emvb-loop",
+  "data-emvb-counter",
+  "data-emvb-countdown",
+  "data-emvb-map",
+  "data-emvb-rotate",
+  "data-emvb-share-list",
+  "data-emvb-share",
+  "data-emvb-theme-toggle",
+  "data-emvb-sticky-hide",
+  "data-emvb-ext",
 ];
 
 /**

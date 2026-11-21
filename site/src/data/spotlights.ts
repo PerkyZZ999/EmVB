@@ -40,7 +40,7 @@ export const spotlights: Spotlight[] = [
     title: "One design system for the whole site",
     body: "Variables, classes and tag defaults live in the Site styles drawer, next to the canvas. Changes wait as a draft until you press Publish styles, then reach every published page without republishing them.",
     points: [
-      "Colour, font, font size and spacing variables",
+      "Colour, font, font size and spacing variables, with dark mode colours",
       "Classes with states; the lower class in the list wins",
       "Design import and export as JSON",
     ],
