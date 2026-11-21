@@ -27,6 +27,9 @@ setUpEmvbOnce();
 async function dragHeadingTo(page: Page, pageX: number, pageY: number) {
   const tile = overlay(page).locator('[data-emvb-add-tile="heading"]');
   await expect(tile).toBeVisible();
+  // W-1068's Elements/Templates switch pushed the Content tiles down: at 1280×720 the Heading
+  // tile starts below the window, and a press there never reaches it.
+  await tile.scrollIntoViewIfNeeded();
   const tileBox = await tile.boundingBox();
   if (!tileBox) throw new Error("Add tile has no box");
   await page.mouse.move(tileBox.x + tileBox.width / 2, tileBox.y + tileBox.height / 2);
