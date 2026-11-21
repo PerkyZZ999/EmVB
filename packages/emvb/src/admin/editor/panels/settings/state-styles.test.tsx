@@ -111,7 +111,12 @@ async function choose(label: string, option: string) {
   const options = [...document.querySelectorAll<HTMLElement>('[role="option"]')];
   await act(async () => {
     options.find((o) => o.textContent === option)?.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    // Base UI closes the popup on timers; under load they can outlast a fixed pause and update
+    // outside act() (W-1094). Wait inside act() until the options are gone.
+    for (let waited = 0; waited < 2000; waited += 10) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      if (!document.querySelector('[role="option"]')) break;
+    }
   });
   return options.map((o) => o.textContent);
 }
