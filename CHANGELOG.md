@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-21
+
 Design system and site-wide features: light and dark Site styles, custom fonts, starter templates, a mega menu, off-canvas panels, sticky header effects, a search form, forms in steps, import from WordPress and HTML, and more for extensions and agents. Everything is additive: new optional keys and three new element types only (Search form, Theme toggle, Form step), so pages saved by 1.3 open and save unchanged (layout schema 18, design schema 17), and EmVB 1.3 keeps the new elements on save without showing them. Public pages still load no script unless an element opts in, and motion respects reduced motion. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. If you already mount `<EmVBWidgetRuntimes names={theme.runtimes} />` for theme parts, the new scripts come through it too. The MCP tool list changed (`list_templates`, `insert_template`, `get_page_brief`), so after updating an admin approves EmVB's tools again on EmDash's Plugins screen; until then agents don't see them.
 
 ### Added
@@ -858,7 +860,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.1...v1.1.2
