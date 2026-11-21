@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **1.1.1 and 1.1.2 on npm (W-1093).** The changelog now says those two security releases were tagged on GitHub but reached npm only as part of 1.2.0. From now on every tagged release, security fixes included, is published to npm the same day.
+
 ## [1.4.0] - 2026-11-21
 
 Design system and site-wide features: light and dark Site styles, custom fonts, starter templates, a mega menu, off-canvas panels, sticky header effects, a search form, forms in steps, import from WordPress and HTML, and more for extensions and agents. Everything is additive: new optional keys and three new element types only (Search form, Theme toggle, Form step), so pages saved by 1.3 open and save unchanged (layout schema 18, design schema 17), and EmVB 1.3 keeps the new elements on save without showing them. Public pages still load no script unless an element opts in, and motion respects reduced motion. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. If you already mount `<EmVBWidgetRuntimes names={theme.runtimes} />` for theme parts, the new scripts come through it too. The MCP tool list changed (`list_templates`, `insert_template`, `get_page_brief`), so after updating an admin approves EmVB's tools again on EmDash's Plugins screen; until then agents don't see them.
@@ -104,6 +108,8 @@ The common widgets, the first part of a fuller Elementor import, scheduled publi
 
 ## [1.1.2] - 2026-11-13
 
+> **On npm:** 1.1.1 and 1.1.2 were tagged on GitHub but not published to npm. Their fixes reached npm in 1.2.0 (13 November 2026), which includes all of them; update to 1.2.0 or later (W-1093, issue #25).
+
 The rest of the 1.1.0 security audit. No schema change: pages and designs saved by 1.1.1 open and save unchanged, and the new options are off unless you set them. It installs on EmDash 1.4 with no change to your site and is tested on EmDash 1.5. Three behaviour changes to check: on a plain Node host, Visitors country rules no longer read the country headers unless you add `emvb({ trustGeoHeaders: true })` (Cloudflare and Vercel are unaffected); `emvb-mcp` refuses a token file other users can read; and Export pages leaves links to files (a PDF link) as links instead of copying them.
 
 ### Security
@@ -127,6 +133,8 @@ The rest of the 1.1.0 security audit. No schema change: pages and designs saved 
 - **Editors get the site's styles in the canvas (W-1001).** The `editor/config` route had no permission, so EmDash kept it to administrators and an editor's canvas loaded without the `canvasStyles` and extensions; editors can read it now.
 
 ## [1.1.1] - 2026-11-12
+
+> **On npm:** 1.1.1 and 1.1.2 were tagged on GitHub but not published to npm. Their fixes reached npm in 1.2.0 (13 November 2026), which includes all of them; update to 1.2.0 or later (W-1093, issue #25).
 
 A security patch from an audit of 1.1.0. Update if editors, contributors or agents you don't fully trust can reach your site, and before anyone runs `emvb-mcp watch`. No schema change: pages and designs saved by 1.1.0 open and save unchanged. It installs on EmDash 1.4 with no change to your site and works with EmDash 1.5. One behaviour change: a request written in the editor's Agent tab now goes only to its author's own agent.
 
