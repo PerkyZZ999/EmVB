@@ -22,6 +22,11 @@
       "evidence": "W-003 (miniflare `this.#runtimeDispatcher?.close is not a function` under `bun --bun playwright test`)"
     },
     {
+      "script": ".#e2e:smoke",
+      "reason": "Same as `.#e2e` (W-1063: CI's per-PR smoke set on the Node demo).",
+      "evidence": "W-003, W-1063"
+    },
+    {
       "script": ".#e2e:prod",
       "reason": "Same as `.#e2e`: the runner starts the Cloudflare dev server and `wrangler dev`, which crash or hang under the Bun runtime (S0-3). The Node demo's production server still runs on Bun.",
       "evidence": "W-003, spike S0-3"
