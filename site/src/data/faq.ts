@@ -12,7 +12,7 @@ export const faqs: Faq[] = [
   },
   {
     q: "Which EmDash version does it need?",
-    a: "EmDash CMS 1.4 or 1.5. EmVB is developed on 1.5.0, every change is tested on 1.4.0 and 1.5.0, and each release is installed on a fresh site of both. EmVB is a native plugin. It adds its own section to the admin sidebar with Pages VisualBuilder and Theme Builder.",
+    a: `EmVB supports EmDash CMS ${project.supportedEmDashVersions}. Release browser tests run on 1.4.0 and 1.6.0. Stock installs are checked on all three versions on Node and Cloudflare. EmVB adds Pages VisualBuilder and Theme Builder to the admin sidebar.`,
   },
   {
     q: "Where does it run?",

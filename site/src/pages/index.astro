@@ -13,12 +13,13 @@ import SiteHeader from "../components/SiteHeader.astro";
 import Styling from "../components/Styling.astro";
 import ThemeBuilder from "../components/ThemeBuilder.astro";
 import Trust from "../components/Trust.astro";
+import { project } from "../data/project";
 import Base from "../layouts/Base.astro";
 ---
 
 <Base
   title="EmVB · a visual page builder for EmDash CMS"
-  description="EmVB is a visual page builder plugin for EmDash CMS 1.4 and 1.5. Design pages, headers, footers and popups on a canvas; publish plain HTML and CSS."
+  description={`EmVB is a visual page builder plugin for EmDash CMS ${project.supportedEmDashVersions}. Design pages, headers, footers and popups on a canvas and publish plain HTML and CSS.`}
 >
   <SiteHeader />
   <main id="content">
