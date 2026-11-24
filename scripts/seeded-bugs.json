@@ -56975,6 +56975,48 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
+    },
+    {
+      "id": "W-1086/ext-id-shadowing-allowed",
+      "requirement": "W-1086",
+      "description": "an extension id that would replace a browser global is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "ID_RULE.test(value) && !isShadowingId(value) && !value.startsWith(\"emvb\")",
+          "replace": "ID_RULE.test(value) && !value.startsWith(\"emvb\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*ids that start with emvb"
+    },
+    {
+      "id": "W-1086/ext-id-foreign-ref-kept",
+      "requirement": "W-1086",
+      "description": "a reference to an id the element does not own is kept, so it points at the host page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "if (mapped !== undefined) attrs[name] = mapped;",
+          "replace": "attrs[name] = mapped ?? value;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*a reference to an id the element does not own is dropped"
+    },
+    {
+      "id": "W-1086/ext-id-not-unique",
+      "requirement": "W-1086",
+      "description": "ids skip the render's uniqueId, so two copies of one element share an id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "owned.set(id, uniqueId(`${ID_BASE}${id}`));",
+          "replace": "owned.set(id, `${ID_BASE}${id}`);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*two copies of one element get different ids"
     }
   ]
 }
