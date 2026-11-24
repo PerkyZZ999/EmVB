@@ -7,8 +7,13 @@ import type { ExtensionAssets, ExtensionClasses } from "./types.ts";
 
 /** A prefix: lowercase words joined by hyphens, ending in `-` (`d-`, `acme-ui-`). */
 const PREFIX = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-$/;
-/** A class name: a lowercase letter, then lowercase letters, digits and hyphens. */
-const CLASS_NAME = /^[a-z][a-z0-9-]*$/;
+/**
+ * A class name (extensionApi 1.5): matched exactly against the static allowlist, nothing parsed. The
+ * characters are the ones compiled kits use: lowercase letters, digits, `-`, and `: / ! . _`, starting
+ * with a letter or digit. No square brackets, spaces, quotes or markup. Whether a name means anything
+ * comes from the kit's own CSS.
+ */
+const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._-]*$/;
 
 const MAX_CLASS_PREFIX_LENGTH = 16;
 const MAX_CLASS_NAME_LENGTH = 64;

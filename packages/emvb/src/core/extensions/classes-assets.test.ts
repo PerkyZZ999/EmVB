@@ -115,6 +115,38 @@ describe("class allowlist at registration (W-1086)", () => {
     expect(normalizeClasses({ prefix: "d-", allow: "d-btn" })).toBeUndefined();
   });
 
+  test("exact names with the compiled-kit characters are kept; brackets, spaces and quotes are dropped", () => {
+    const allow = [
+      "daisy-size-24!",
+      "daisy-w-1/2",
+      "daisy-w-auto!",
+      "daisy-sm:card-side",
+      "daisy-[--value:70]",
+      "daisy-[url(x)]",
+      "daisy-btn d-evil",
+      'daisy-x"onmouseover="y',
+      "daisy-[--value:a b]",
+    ];
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual([
+      "daisy-size-24!",
+      "daisy-w-1/2",
+      "daisy-w-auto!",
+      "daisy-sm:card-side",
+    ]);
+  });
+  test("names are not parsed: any name with the allowed characters and the prefix is kept", () => {
+    const allow = [
+      "daisy-sm:hidden",
+      "daisy-lg:flex",
+      "daisy-max-sm:timeline-vertical",
+      "daisy-xx:hidden",
+      "daisy-!",
+      "daisy-.x",
+      "daisy-_y",
+    ];
+    // Nothing is parsed: a name is kept when it has the prefix and only the allowed characters.
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual(allow);
+  });
   test("the extension's manifest carries the checked allowlist; a bad one is left out", () => {
     const ok = normalizeExtension(kit());
     expect(ok?.manifest.classes?.allow).toEqual(["kit-btn", "kit-btn-primary", "kit-card"]);
