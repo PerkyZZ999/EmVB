@@ -1,5 +1,5 @@
 # W-1015: weekly update PRs for the Bun workspace (root lockfile) and the pinned CI actions.
-# EmDash and Astro are grouped so a host upgrade lands as one PR; CI's EmDash 1.4 and 1.5 jobs
+# EmDash and Astro are grouped so a host upgrade lands as one PR; CI's EmDash 1.4 and development-base jobs
 # decide whether it is compatible. Dev tooling is grouped separately.
 version: 2
 updates:

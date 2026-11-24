@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { findCombobox } from "./combobox.ts";
 import { outline } from "./outline.ts";
 
 // W-1009: the same EmVB markup reads the same under Kumo 2.6 (EmDash 1.4) and 2.15 (EmDash 1.5).
@@ -40,4 +41,15 @@ test("EmVB's own markup stays: emvb- classes, data-emvb, roles, ids it sets, ref
       '    "Local"',
     ].join("\n"),
   );
+});
+
+test("W-1098: referenced Select labels keep the same accessible name in the outline", () => {
+  const direct = host('<div>Place</div><button role="combobox" aria-label="Place">Corner</button>');
+  const referenced = host(
+    '<div id="base-ui-r1">Place</div><button role="combobox" aria-labelledby="base-ui-r1">Corner</button>',
+  );
+  expect(findCombobox("Place", referenced)?.textContent).toBe("Corner");
+  expect(outline(referenced)).toBe(outline(direct));
+  referenced.firstElementChild?.remove();
+  expect(findCombobox("Place", referenced)?.textContent ?? null).toBeNull();
 });

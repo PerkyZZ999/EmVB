@@ -1,6 +1,6 @@
 /**
  * The stock install smoke a release runs (W-1084, W-1095; one command since W-1096): EmVB's packed
- * tarballs installed on four fresh stock EmDash sites (1.4.0 and 1.5.0, Node and Cloudflare, with
+ * tarballs installed on six stock EmDash sites (1.4.0, 1.5.0 and 1.6.0, Node and Cloudflare, with
  * the hello extension), `astro check`, then scripts/stock-smoke/checks.ts on the dev server and on
  * the production build of each. The sites run side by side, each on its own ports.
  *
@@ -24,6 +24,7 @@ import {
   astroConfig,
   createCommands,
   route,
+  stockDependencyProblem,
   templateKey,
 } from "./stock-smoke/sites.ts";
 import type { StockSite } from "./stock-smoke/sites.ts";
@@ -149,6 +150,11 @@ async function smoke(site: StockSite, index: number, tarballs: string[]): Promis
     )) !== 0
   )
     return fail("npm install of the tarballs");
+  const lock = (await Bun.file(join(dir, "package-lock.json")).json()) as {
+    packages: Record<string, { version?: string }>;
+  };
+  const dependencyProblem = stockDependencyProblem(site, lock.packages);
+  if (dependencyProblem) return fail(dependencyProblem);
   await writeFile(join(dir, "astro.config.mjs"), astroConfig(site));
   await mkdir(join(dir, "src/pages/v"), { recursive: true });
   await writeFile(join(dir, "src/pages/v/[slug].astro"), route(site));

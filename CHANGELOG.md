@@ -6,13 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **EmDash 1.6.0 support (W-1098).** EmVB now accepts EmDash 1.6's exact Kumo 2.19.0 pin. Use EmDash Forms 0.2.14 if your 1.6 site needs forms. Stock-install smoke tests cover EmDash 1.4.0, 1.5.0 and 1.6.0 on Node and Cloudflare.
+
 ### Fixed
 
 - **A sticky header part sticks (W-1097, #42).** In a Header theme part, a box set to Position Sticky (as the motion guide's "Sticky headers" describes) scrolled away with the page, with or without Hide while scrolling down: a sticky box can't leave the box around it, and the part's wrapper was only as tall as the header. When the part itself or a box right inside it is sticky, the part's `<header>` wrapper now takes the same Top (or Bottom), Z-index and device settings and stays at the top of the page, and Hide while scrolling down slides the whole header away and back. A Footer part held at the bottom works the same way, and the HTML export does too. Only pages whose header or footer part has such a box change output; the header stays a landmark for screen readers. See [Sticky headers](docs/guides/motion.md#sticky-headers).
 
 ### Changed
 
-- **Every gate in one command, much faster, for contributors (W-1096).** `bun run verify` runs everything `bun run check` runs, the whole e2e suite on both demos and the seeded bugs of the files you changed, side by side within a memory budget (24 GB by default, each part under its own cap), and prints how long each part took and how much memory it used; `bun run verify:release` adds the production-build e2e, the packed tarballs, an install smoke on four fresh stock EmDash sites (`bun run smoke:stock`) and the automated box round (`bun run smoke:box`). `bun run e2e:full` splits each demo over parallel runs, each on its own server and data, and CI's tag e2e runs in three parallel jobs per EmDash version. Seeded-bug e2e lanes stay warm after a restart and accept each seed whose own test passes; folder-wide unit seeds run one at a time with bun's `--parallel`. Three flaky Select tests no longer race Base UI's closing timers.
+- **Every gate in one command, much faster, for contributors (W-1096).** `bun run verify` runs everything `bun run check` runs, the whole e2e suite on both demos and the seeded bugs of the files you changed, side by side within a memory budget (24 GB by default, each part under its own cap), and prints how long each part took and how much memory it used; `bun run verify:release` adds the production-build e2e, the packed tarballs, an install smoke on six stock EmDash sites (`bun run smoke:stock`) and the automated box round (`bun run smoke:box`). `bun run e2e:full` splits each demo over parallel runs, each on its own server and data, and CI's tag e2e runs in three parallel jobs per EmDash version. Seeded-bug e2e lanes stay warm after a restart and accept each seed whose own test passes; folder-wide unit seeds run one at a time with bun's `--parallel`. Three flaky Select tests no longer race Base UI's closing timers.
 
 ## [1.4.1] - 2026-11-21
 

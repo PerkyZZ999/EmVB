@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../test/dom/combobox.ts";
 import { act, useState } from "react";
 import { emptyDesign, type DesignSystem, type Layout } from "../../../core/index.ts";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
@@ -556,7 +557,7 @@ test("UX-058: Defaults names tags in words and puts the tag note under Tag", asy
     (t) => t.textContent === "Defaults",
   );
   await act(async () => defaultsTab?.click());
-  const tag = document.querySelector('[role="combobox"][aria-label="Tag"]');
+  const tag = findCombobox("Tag");
   expect(tag?.textContent?.trim() ?? "no Tag select").toBe("Paragraph (p)");
   const note = document.getElementById(tag?.getAttribute("aria-describedby") ?? "");
   expect(note?.textContent ?? "not described").toBe(

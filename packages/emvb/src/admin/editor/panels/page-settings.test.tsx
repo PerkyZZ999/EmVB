@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../test/dom/combobox.ts";
 import { act } from "react";
 import type { Fetcher } from "../../api.ts";
 import type { PageDraft } from "../../content-api.ts";
@@ -253,7 +254,7 @@ test("UX-061: a Loop Item part says where it is used instead of offering display
 
 test("UX-061: a Float's Place select is described by its note", async () => {
   const view = await settings({ ...PAGE, partType: "float" }, "theme-part");
-  const place = view.host.querySelector('[role="combobox"][aria-label="Place"]');
+  const place = findCombobox("Place", view.host);
   const note = document.getElementById(place?.getAttribute("aria-describedby") ?? "");
   expect(note?.textContent ?? "not described").toBe(
     "A bar stays on that edge and leaves room for the page. A corner sits over the page.",

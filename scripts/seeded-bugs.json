@@ -2859,7 +2859,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
+          "search": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0 || 2.15.0 || 2.19.0\",",
           "replace": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"^2.6.0\","
         }
       ],
@@ -2873,7 +2873,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.15.0\",",
+          "search": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.19.0\",",
           "replace": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.14.0\","
         }
       ],
@@ -46667,7 +46667,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
+          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0 || 2.19.0\",",
           "replace": "\"@cloudflare/kumo\": \"2.6.0\","
         }
       ],
@@ -46681,7 +46681,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
+          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0 || 2.19.0\",",
           "replace": "\"@cloudflare/kumo\": \">=2.6.0 <3\","
         }
       ],
@@ -56891,6 +56891,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/dom/mount.test.ts"],
       "expect": "\\(fail\\).*W-1096: picking a Select option waits for its popup to close"
+    },
+    {
+      "id": "W-1098/old-kumo-peer",
+      "requirement": "W-1098",
+      "description": "The peer omits the exact Kumo version required by a stock EmDash 1.6 site.",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0 || 2.19.0\",",
+          "replace": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*one per supported EmDash"
+    },
+    {
+      "id": "W-1098/demo-adapter-keeps-latest",
+      "requirement": "W-1098",
+      "description": "Switching EmDash versions leaves the Cloudflare adapter on the previous version.",
+      "edits": [
+        {
+          "file": "scripts/use-emdash.ts",
+          "search": "  if (\"@emdash-cms/cloudflare\" in dependencies) dependencies[\"@emdash-cms/cloudflare\"] = version;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*switching the demos to EmDash 1.4"
+    },
+    {
+      "id": "W-1098/stock-allows-duplicate-kumo",
+      "requirement": "W-1098",
+      "description": "The stock install smoke accepts a second Kumo package under the admin.",
+      "edits": [
+        {
+          "file": "scripts/stock-smoke/sites.ts",
+          "search": "kumo.length !== 1 || kumo[0]?.[1].version !== expectedKumo",
+          "replace": "!kumo.some(([, pin]) => pin.version === expectedKumo)"
+        }
+      ],
+      "command": ["bun", "test", "scripts/stock-smoke/sites.test.ts"],
+      "expect": "\\(fail\\).*stock 1.6 uses the exact EmDash version"
+    },
+    {
+      "id": "W-1098/ignore-referenced-select-label",
+      "requirement": "W-1098",
+      "description": "The Select test helper ignores the accessible name supplied by Kumo 2.19.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/combobox.ts",
+          "search": "    .getAttribute(\"aria-labelledby\")",
+          "replace": "    .getAttribute(\"aria-describedby\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/dom/outline.test.ts"],
+      "expect": "\\(fail\\).*W-1098: referenced Select labels"
     }
   ]
 }

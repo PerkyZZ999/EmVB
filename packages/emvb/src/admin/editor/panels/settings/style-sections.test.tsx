@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../../test/dom/combobox.ts";
 import { act } from "react";
 import {
   emptyDesign,
@@ -36,7 +37,8 @@ const row = (styleKey: StyleKey, style: FlatStyleProps = {}) =>
   );
 
 async function choose(label: string, option: string) {
-  const trigger = document.querySelector(`[role="combobox"][aria-label="${label}"]`) as HTMLElement;
+  const trigger = findCombobox(label);
+  if (!trigger) throw new Error(`No ${label} combobox`);
   await act(async () => {
     trigger.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     trigger.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
@@ -436,8 +438,7 @@ describe("Effects section (W-088)", () => {
   });
 
   test("W-306: Position shows Outset or Inset, not the stored keyword", async () => {
-    const trigger = () =>
-      document.querySelector('[role="combobox"][aria-label="Position"]')?.textContent ?? "";
+    const trigger = () => findCombobox("Position")?.textContent ?? "";
     await row("boxShadow", { boxShadow: lifted });
     expect(trigger()).toContain("Outset");
     expect(trigger()).not.toContain("outset");

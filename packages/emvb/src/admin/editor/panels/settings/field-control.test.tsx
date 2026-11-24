@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../../test/dom/combobox.ts";
 import { act, useState } from "react";
 import {
   ELEMENT_DESCRIPTORS,
@@ -30,7 +31,7 @@ async function control(field: FieldDescriptor, props: Record<string, unknown>) {
 }
 
 async function choose(label: string, option: string) {
-  const trigger = document.querySelector<HTMLElement>(`[role="combobox"][aria-label="${label}"]`);
+  const trigger = findCombobox(label);
   if (!trigger) throw new Error(`no ${label} select`);
   await act(async () => {
     trigger.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
@@ -228,7 +229,7 @@ describe("field-name recovery (W-720)", () => {
     // Kumo 2.15's Select picks an option by its index; an option that comes and goes as the
     // name changes made a click choose the field next to the one clicked.
     const listed = async () => {
-      const trigger = document.querySelector<HTMLElement>('[role="combobox"][aria-label="Field"]');
+      const trigger = findCombobox("Field");
       await act(async () => {
         trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
         trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));

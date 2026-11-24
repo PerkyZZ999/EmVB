@@ -1,8 +1,14 @@
 import { expect, test } from "bun:test";
-import { STOCK_SITES, astroConfig, createCommands, route, templateKey } from "./sites.ts";
+import {
+  STOCK_SITES,
+  astroConfig,
+  createCommands,
+  route,
+  stockDependencyProblem,
+  templateKey,
+} from "./sites.ts";
 
-// W-1096: the release's stock install smoke, in the repository: four sites as the install guide
-// sets them up, on EmDash 1.4.0 and 1.5.0, Node and Cloudflare.
+// Release smoke on stock Node and Cloudflare sites.
 
 const site = (name: string) => {
   const found = STOCK_SITES.find((s) => s.name === name);
@@ -10,12 +16,14 @@ const site = (name: string) => {
   return found;
 };
 
-test("W-1096: the floor and the latest EmDash, each on Node and Cloudflare", () => {
+test("W-1096: all supported EmDash versions, each on Node and Cloudflare", () => {
   expect(STOCK_SITES.map((s) => `${s.emdash} ${s.platform}`).toSorted()).toEqual([
     "1.4.0 cloudflare",
     "1.4.0 node",
     "1.5.0 cloudflare",
     "1.5.0 node",
+    "1.6.0 cloudflare",
+    "1.6.0 node",
   ]);
   // Both visitorCookie modes are checked on both platforms.
   expect(new Set(STOCK_SITES.filter((s) => s.platform === "node").map((s) => s.cookie)).size).toBe(
@@ -38,8 +46,8 @@ test("W-1096: each config adds EmVB with the hello extension, as the install gui
     expect(config).toContain(
       s.platform === "node" ? 'sqlite({ url: "file:./data.db" })' : 'd1({ binding: "DB"',
     );
-    // The 1.5 templates keep light-dark() native; the 1.4 ones don't import lightningcss.
-    expect(config.includes("Features.LightDark")).toBe(s.emdash === "1.5.0");
+    // The 1.5 and 1.6 templates keep light-dark() native.
+    expect(config.includes("Features.LightDark")).toBe(s.emdash !== "1.4.0");
   }
 });
 
@@ -69,4 +77,25 @@ test("W-1096: a cached template is named by how it is made", () => {
   expect(templateKey(a)).toBe(templateKey({ ...a }));
   expect(templateKey(a)).not.toBe(templateKey({ ...a, forms: "0.2.13" }));
   expect(templateKey(a).startsWith("stock-14-")).toBe(true);
+});
+
+test("W-1098: stock 1.6 uses the exact EmDash version and one Kumo instance", () => {
+  const cloudflare = site("stock-16-cf");
+  const commands = createCommands(cloudflare)
+    .map((step) => step.command.join(" "))
+    .join("\n");
+  expect(commands).toContain("create-emdash@1.6.0 stock-16-cf --template cloudflare:blog");
+  expect(commands).toContain("--save-exact emdash@1.6.0 @emdash-cms/cloudflare@1.6.0");
+  const packages = {
+    "node_modules/emdash": { version: "1.6.0" },
+    "node_modules/@emdash-cms/cloudflare": { version: "1.6.0" },
+    "node_modules/@cloudflare/kumo": { version: "2.19.0" },
+  };
+  expect(stockDependencyProblem(cloudflare, packages)).toBeUndefined();
+  expect(
+    stockDependencyProblem(cloudflare, {
+      ...packages,
+      "node_modules/@emdash-cms/admin/node_modules/@cloudflare/kumo": { version: "2.15.0" },
+    }),
+  ).toContain("Expected one Kumo 2.19.0");
 });

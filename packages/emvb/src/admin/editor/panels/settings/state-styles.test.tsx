@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../../test/dom/combobox.ts";
 import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type DesignSystem, type LayoutNode } from "../../../../core/index.ts";
@@ -101,7 +102,7 @@ async function commitText(field: HTMLInputElement | null, text: string) {
 const helper = () => document.querySelector("[data-emvb-state-help]")?.textContent ?? null;
 
 async function choose(label: string, option: string) {
-  const trigger = document.querySelector<HTMLElement>(`[role="combobox"][aria-label="${label}"]`);
+  const trigger = findCombobox(label);
   await act(async () => {
     trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));

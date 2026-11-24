@@ -16,7 +16,7 @@ test("W-1002: the EmDash 1.5 set swaps emdash, Kumo and the forms plugin togethe
 });
 
 test("W-1002: the dev versions are one whole EmDash set, and every set's Kumo is a peer", () => {
-  // 1.5 in this repository since W-1008; 1.4 in CI's EmDash 1.4 job, after use-emdash.ts.
+  // CI switches the checkout to 1.4.0 before testing the floor.
   const matching = Object.values(EMDASH_SETS).filter((set) =>
     Object.entries(set).every(([name, version]) => plugin.devDependencies[name] === version),
   );
@@ -24,6 +24,21 @@ test("W-1002: the dev versions are one whole EmDash set, and every set's Kumo is
   const peers = plugin.peerDependencies["@cloudflare/kumo"]?.split(" || ") ?? [];
   for (const set of Object.values(EMDASH_SETS))
     expect(peers).toContain(set["@cloudflare/kumo"] ?? "none");
+});
+
+test("W-1098: switching the demos to EmDash 1.4 also switches Forms and the Cloudflare adapter", () => {
+  const dependencies = {
+    emdash: "1.6.0",
+    "@emdash-cms/cloudflare": "1.6.0",
+    "@emdash-cms/plugin-forms": "0.2.14",
+    astro: "7.4.12",
+  };
+  expect(withEmDash({ dependencies }, "1.4.0", "dependencies")["dependencies"]).toEqual({
+    emdash: "1.4.0",
+    "@emdash-cms/cloudflare": "1.4.0",
+    "@emdash-cms/plugin-forms": "0.2.12",
+    astro: "7.4.12",
+  });
 });
 
 test("W-1008: CI keeps the EmDash 1.4 floor tested: unit and Astro tests on 1.4.0", () => {

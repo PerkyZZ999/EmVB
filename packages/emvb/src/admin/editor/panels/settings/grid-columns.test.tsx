@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../../test/dom/combobox.ts";
 import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
@@ -46,8 +47,7 @@ function Harness({
   );
 }
 
-const trigger = (label: string) =>
-  document.querySelector<HTMLElement>(`[role="combobox"][aria-label="${label}"]`);
+const trigger = findCombobox;
 
 async function choose(label: string, option: string) {
   const box = trigger(label);

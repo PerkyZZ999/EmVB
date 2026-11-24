@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { findCombobox } from "../../../../../test/dom/combobox.ts";
 import { act } from "react";
 import type { FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount, rerender } from "../../../../../test/dom/mount.ts";
@@ -57,7 +58,7 @@ test("UX-078: Add effect is a button whose menu adds the chosen effect", async (
   const root = await mount(
     <MotionControl value={value} onChange={(next) => (value = next)} reset={null} />,
   );
-  expect(root.querySelector('[role="combobox"][aria-label="Add effect"]')).toBeNull();
+  expect(findCombobox("Add effect", root) === null).toBe(true);
   const trigger = root.querySelector<HTMLElement>(".emvb-add-effect");
   await act(async () => {
     trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));

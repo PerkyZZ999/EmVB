@@ -18,10 +18,9 @@ function packageDir(name: string, from: string): string {
 }
 
 /**
- * The Kumo each supported EmDash pins exactly: 1.4 (what this repository builds with) and 1.5
- * (W-993). npm refuses to install EmVB next to a Kumo its peer range doesn't name.
+ * npm refuses to install EmVB next to an exact Kumo pin missing from its peer range.
  */
-const SUPPORTED_KUMO = { "emdash 1.4": "2.6.0", "emdash 1.5": "2.15.0" };
+const SUPPORTED_KUMO = { "emdash 1.4": "2.6.0", "emdash 1.5": "2.15.0", "emdash 1.6": "2.19.0" };
 
 describe("EmDash's exact pins (D-030)", () => {
   test("the Kumo dev version equals the Kumo that @emdash-cms/admin pins, and the peer names it", async () => {

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { comboboxName } from "../../../../test/dom/combobox.ts";
 import { act } from "react";
 import type { TriggersDoc } from "../../../core/index.ts";
 import { cleanup, mount } from "../../../../test/dom/mount.ts";
@@ -28,7 +29,7 @@ describe("popup triggers editor (W-087)", () => {
   test("every trigger's type is labelled: Open when, then Or when", async () => {
     await show(doc([{ type: "page_load" }, { type: "delay", ms: 3000 }, { type: "exit_intent" }]));
     const names = [...document.querySelectorAll(".emvb-trigger-head [role='combobox']")].map(
-      (select) => select.getAttribute("aria-label"),
+      comboboxName,
     );
     expect(names).toEqual(["Open when", "Or when", "Or when"]);
   });

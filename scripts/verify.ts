@@ -267,7 +267,7 @@ if (release) {
     },
     {
       name: "stock",
-      title: "stock EmDash 1.4.0/1.5.0 installs, Node and Cloudflare, dev and production",
+      title: "stock EmDash installs, Node and Cloudflare, dev and production",
       command: [
         "bun",
         "scripts/stock-smoke.ts",

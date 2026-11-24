@@ -1,12 +1,13 @@
 /**
- * The four stock EmDash sites a release installs EmVB on (W-1084, W-1095; W-1096 in the
- * repository): EmDash 1.4.0 (the floor) and 1.5.0 (the latest), each on Node and on Cloudflare,
- * set up as the install guide says, with the packed tarballs and the hello extension.
+ * Stock EmDash sites for release smoke tests on Node and Cloudflare. Each uses the packed
+ * tarballs and the hello extension as described in the install guide.
  */
+
+import { EMDASH_SETS } from "../use-emdash.ts";
 
 export type StockSite = {
   name: string;
-  emdash: "1.4.0" | "1.5.0";
+  emdash: "1.4.0" | "1.5.0" | "1.6.0";
   platform: "node" | "cloudflare";
   /** The visitorCookie the site's config sets ("always" is EmVB's default), which the smoke checks. */
   cookie: "always" | "never";
@@ -19,6 +20,8 @@ export const STOCK_SITES: readonly StockSite[] = [
   { name: "stock-15", emdash: "1.5.0", platform: "node", cookie: "always", forms: "0.2.13" },
   { name: "stock-14-cf", emdash: "1.4.0", platform: "cloudflare", cookie: "always" },
   { name: "stock-15-cf", emdash: "1.5.0", platform: "cloudflare", cookie: "never" },
+  { name: "stock-16", emdash: "1.6.0", platform: "node", cookie: "never", forms: "0.2.14" },
+  { name: "stock-16-cf", emdash: "1.6.0", platform: "cloudflare", cookie: "always" },
 ];
 
 /**
@@ -58,12 +61,30 @@ export function createCommands(site: StockSite): { cwd: "parent" | "site"; comma
             "i",
             "--no-audit",
             "--no-fund",
+            "--save-exact",
             `@emdash-cms/plugin-forms@${site.forms}`,
           ],
         },
       ]
     : [];
-  if (site.emdash === "1.5.0") return [create("1.5.0", "--install"), ...forms];
+  if (site.emdash !== "1.4.0") {
+    return [
+      create(site.emdash, "--no-install"),
+      {
+        cwd: "site",
+        command: [
+          "npm",
+          "install",
+          "--no-audit",
+          "--no-fund",
+          "--save-exact",
+          `emdash@${site.emdash}`,
+          ...(site.platform === "cloudflare" ? [`@emdash-cms/cloudflare@${site.emdash}`] : []),
+        ],
+      },
+      ...forms,
+    ];
+  }
   const repo = site.platform === "node" ? "blog" : "blog-cloudflare";
   return [
     // For its .env (the site's secrets); the template itself comes from the pinned commit.
@@ -87,6 +108,28 @@ export function createCommands(site: StockSite): { cwd: "parent" | "site"; comma
     { cwd: "site", command: ["npm", "install", "--no-audit", "--no-fund"] },
     ...forms,
   ];
+}
+
+export function stockDependencyProblem(
+  site: StockSite,
+  packages: Record<string, { version?: string }>,
+): string | undefined {
+  for (const [name, expected] of [
+    ["emdash", site.emdash],
+    ["@emdash-cms/cloudflare", site.platform === "cloudflare" ? site.emdash : undefined],
+    ["@emdash-cms/plugin-forms", site.forms],
+  ]) {
+    if (!expected) continue;
+    const installed = packages[`node_modules/${name}`]?.version;
+    if (installed !== expected) return `Expected ${name} ${expected}, found ${installed ?? "none"}`;
+  }
+  const expectedKumo = EMDASH_SETS[site.emdash]?.["@cloudflare/kumo"];
+  const kumo = Object.entries(packages).filter(([path]) =>
+    path.endsWith("node_modules/@cloudflare/kumo"),
+  );
+  if (kumo.length !== 1 || kumo[0]?.[1].version !== expectedKumo) {
+    return `Expected one Kumo ${expectedKumo}, found ${kumo.map(([path, pin]) => `${pin.version} at ${path}`).join(", ") || "none"}`;
+  }
 }
 
 const FONTS = `	fonts: [
@@ -117,7 +160,7 @@ const LIGHT_DARK = `	vite: {
 /** The site's astro.config.mjs: its template's, with EmVB and the extension added as the guide says. */
 export function astroConfig(site: StockSite): string {
   const options = `{ extensions: [hello]${site.cookie === "never" ? ', visitorCookie: "never"' : ""} }`;
-  const latest = site.emdash === "1.5.0";
+  const lightDark = site.emdash !== "1.4.0";
   const head =
     site.platform === "node"
       ? `import node from "@astrojs/node";
@@ -152,7 +195,7 @@ import emdash from "emdash/astro";
 			storage: r2({ binding: "MEDIA" }),
 			plugins: [emvb(${options})],
 		}),`;
-  return `${head}${latest ? 'import { Features } from "lightningcss";\n' : ""}
+  return `${head}${lightDark ? 'import { Features } from "lightningcss";\n' : ""}
 export default defineConfig({
 	output: "server",
 	adapter: ${site.platform === "node" ? 'node({\n\t\tmode: "standalone",\n\t})' : "cloudflare()"},
@@ -160,7 +203,7 @@ export default defineConfig({
 		layout: "constrained",
 		responsiveStyles: true,
 	},
-${latest ? LIGHT_DARK : ""}	integrations: [
+${lightDark ? LIGHT_DARK : ""}	integrations: [
 		react(),
 ${emdash}
 	],

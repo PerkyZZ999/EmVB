@@ -35,11 +35,11 @@ jobs:
       - run: bun run test:astro
 
   emdash-1-4:
-    # W-1008: development runs on EmDash 1.5 + Astro 7.4; EmVB still installs on stock EmDash 1.4
+    # W-1008: development runs on EmDash 1.6 + Astro 7.4; EmVB still installs on stock EmDash 1.4
     # (the floor). The same unit and Astro tests run here on EmDash 1.4.0 (Kumo 2.6.0, forms
     # 0.2.12, zod 4.5.4), still on Astro 7.4. The repository-level script tests don't depend on
-    # EmDash and run in the main job. Every release is also installed on a stock EmDash 1.4.0
-    # and 1.5.0 site.
+    # EmDash and run in the main job. Every release also gets stock-install smoke tests on 1.4.0,
+    # 1.5.0 and 1.6.0.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,7 +55,7 @@ jobs:
       - run: bun audit --audit-level=high --ignore=GHSA-mrhx-c7xc-m3w5
 
   audit:
-    # Separate from the offline checks: needs the advisory database (W-890). The 1.5 base brings
+    # Separate from the offline checks: needs the advisory database (W-890). The dev base uses
     # zod 4.6.7, which has no open advisory: nothing is ignored (W-1007, W-1008).
     runs-on: ubuntu-latest
     steps:
