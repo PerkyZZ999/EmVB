@@ -14,7 +14,11 @@
  *                  lane keeps one Node dev server up, with each mutation and restore proven on it
  *                  by a dev-only probe
  *   [--one-lane-e2e] e2e seeds one at a time in the repo itself (the old way)
- *   [--cache]      skip seeds already caught with the same seed, files and tests (dev loops only)
+ *   [--cache]      reuse caught seeds for the same checkout inputs and runtime
+ *   [--port-base <p>] e2e lane n's demo servers listen on p + 100n (node) and one above (default 4411)
+ *   [--kind unit|e2e] only the seeds that don't start the demos, or only those that do
+ *   [--heavy-parallel <n>] a seed that runs a whole folder of unit tests runs alone, split over n
+ *                  bun test processes (default 4); one not caught that way runs again as written
  *
  * W-985: e2e seeds run in parallel lanes, each with its own worktree and demo ports, and each
  * seed exactly as before (its own fresh server, its settings). Unit seeds run in parallel
@@ -31,8 +35,8 @@
 import { createLogger, initLogger } from "evlog";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { availableParallelism, tmpdir } from "node:os";
+import { copyFile, lstat, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
 
 export type Seed = {
@@ -52,7 +56,7 @@ export type SeedResult = {
   status: "caught" | "not-caught" | "stale" | "wrong-failure";
   exitCode: number | null;
   detail: string;
-  /** The command's output, for the warm e2e lane's clean re-run (W-985). */
+  /** The command's output, whenever it ran (W-985: the warm e2e lane reads which tests failed). */
   output?: string;
 };
 
@@ -130,7 +134,7 @@ export async function runSeed(
     ]).finally(() => running.delete(proc));
     const output = `${out}\n${err}`;
     if (exitCode === 0)
-      return { id: seed.id, status: "not-caught", exitCode, detail: "command passed" };
+      return { id: seed.id, status: "not-caught", exitCode, detail: "command passed", output };
     const match = output.match(new RegExp(seed.expect, "m"));
     if (!match) {
       return {
@@ -138,6 +142,7 @@ export async function runSeed(
         status: "wrong-failure",
         exitCode,
         detail: output.trim().split("\n").slice(-5).join(" | "),
+        output,
       };
     }
     return {
@@ -199,15 +204,20 @@ export async function verifySeeds(root: string, seeds: readonly Seed[]): Promise
   return problems;
 }
 
-/** Seeds matching `only` (a substring of the id) and, when `files` is given, editing one of them. */
+/**
+ * Seeds matching `only` (a substring of the id) and, when `files` is given, editing one of them.
+ * W-1096: `kind` "unit" keeps the seeds that don't start the demos, "e2e" those that do, so a run
+ * can split them into two jobs that fit the machine at different times.
+ */
 export function selectSeeds(
   seeds: readonly Seed[],
-  { only, files }: { only?: string; files?: ReadonlySet<string> },
+  { only, files, kind }: { only?: string; files?: ReadonlySet<string>; kind?: "unit" | "e2e" },
 ): Seed[] {
   return seeds.filter(
     (s) =>
       (!only || s.id.includes(only)) &&
-      (!files || [...(s.edits ?? []), ...(s.creates ?? [])].some((edit) => files.has(edit.file))),
+      (!files || [...(s.edits ?? []), ...(s.creates ?? [])].some((edit) => files.has(edit.file))) &&
+      (!kind || startsDemos(s) === (kind === "e2e")),
   );
 }
 
@@ -223,6 +233,15 @@ function arg(name: string): string | undefined {
   return i === -1 ? undefined : process.argv[i + 1];
 }
 
+/**
+ * W-1096: a seed whose command starts the demos (an e2e script or Playwright): it needs its own
+ * ports. A unit test whose file name says e2e (`bun test ./scripts/e2e-shards.test.ts`) is not one.
+ */
+export function startsDemos(seed: Seed): boolean {
+  const cmd = seed.command.join(" ");
+  return /\bbun run e2e(:[\w-]+)?(\s|$)/.test(cmd) || /\bplaywright test\b/.test(cmd);
+}
+
 /** W-985: an e2e seed that can share a warm dev server (not the production suite). */
 export function warmPlatform(seed: Seed): "node" | "cloudflare" | "both" | null {
   const cmd = seed.command.join(" ");
@@ -234,13 +253,17 @@ export function warmPlatform(seed: Seed): "node" | "cloudflare" | "both" | null 
 }
 
 const DEMOS = {
-  node: { dir: "demos/node", port: 4411 },
-  cloudflare: { dir: "demos/cloudflare", port: 4412 },
+  node: { dir: "demos/node", offset: 0 },
+  cloudflare: { dir: "demos/cloudflare", offset: 1 },
 } as const;
 
-/** W-985: e2e lane n uses ports 4411/4412 plus 100 × n, so lanes never share a server. */
+/**
+ * W-985: e2e lane n uses ports 4411/4412 plus 100 × n, so lanes never share a server. W-1096:
+ * `--port-base` moves them all, so a seed run can share the machine with an e2e:full run.
+ */
+const portBase = Number(arg("port-base") ?? 4411) || 4411;
 const lanePort = (platform: "node" | "cloudflare", lane: number) =>
-  DEMOS[platform].port + 100 * lane;
+  portBase + DEMOS[platform].offset + 100 * lane;
 /** W-1035: a warm lane's demo data, kept for its runs and removed when the lane ends. */
 const laneData = (laneRoot: string, lane: number) => join(laneRoot, "e2e/.data", `lane-${lane}`);
 /**
@@ -321,12 +344,57 @@ async function stopDemo(proc: { pid: number; exited: Promise<number> } | undefin
   }
 }
 
+/** W-1096: names the run using a seed worktree (`<pid> <checkout>`); `git clean` removes it. */
+const OWNER = ".emvb-seed-owner";
+
+/**
+ * W-1096: why a seed worktree can't be used by this run (pid `pid`), given its owner file: another
+ * live run holds it. Seed worktrees are shared by every checkout, and a second run resets them
+ * under the first one's seeds (2026-11-21: one run outside the heavy-run lock turned a release
+ * run's 13 seeds stale). No file, a dead owner or this run: no problem.
+ */
+export function ownerConflict(
+  marker: string | undefined,
+  pid: number,
+  alive: (pid: number) => boolean,
+): string | undefined {
+  const [owner = "", ...where] = (marker ?? "").trim().split(" ");
+  const ownerPid = Number(owner);
+  if (!ownerPid || ownerPid === pid || !alive(ownerPid)) return undefined;
+  return `in use by another seeded-bug run (pid ${ownerPid}, ${where.join(" ") || "unknown checkout"})`;
+}
+
+const alive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const readOwner = (dir: string) => readFile(join(dir, OWNER), "utf8").catch(() => undefined);
+
+/** W-1096: throws when another run has taken `dir` over since this run prepared it. */
+async function assertOwned(dir: string) {
+  const marker = await readOwner(dir);
+  if (Number((marker ?? "").split(" ")[0]) !== process.pid)
+    throw new Error(
+      `another seeded-bug run reset ${dir} under this one (its owner file is ${marker ? `"${marker.trim()}"` : "gone"}): its results can't be trusted; run seeds under the heavy-run lock`,
+    );
+}
+
 /**
  * A detached git worktree of HEAD with the working tree's uncommitted changes copied in, and its
- * own `bun install`, under the system temp dir. Reused (reset) by later runs.
+ * own dependencies on the repository's disk. Reused (reset) by later runs; refused while
+ * another live run holds it (W-1096).
  */
 async function prepareWorktree(root: string, name: string): Promise<string> {
-  const dir = join(tmpdir(), `emvb-seed-worktrees`, name);
+  const gitDir = (
+    await sh(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], root)
+  ).trim();
+  const dir = join(dirname(gitDir), "scratch", "seed-worktrees", name);
+  const conflict = ownerConflict(await readOwner(dir), process.pid, alive);
+  if (conflict) throw new Error(`${dir} is ${conflict}: run seeds under the heavy-run lock`);
   const head = (await sh(["git", "rev-parse", "HEAD"], root)).trim();
   if (existsSync(join(dir, ".git"))) {
     await sh(["git", "checkout", "-q", "--detach", "-f", head], dir);
@@ -352,23 +420,38 @@ async function prepareWorktree(root: string, name: string): Promise<string> {
       await rm(to, { force: true });
     }
   }
+  const store = "node_modules/.bun";
+  if (!existsSync(join(dir, store)) && existsSync(join(root, store))) {
+    await mkdir(join(dir, "node_modules"), { recursive: true });
+    await sh(["cp", "-a", "--reflink=auto", join(root, store), join(dir, store)], root);
+  }
   await sh(["bun", "install", "--frozen-lockfile"], dir);
+  await writeFile(join(dir, OWNER), `${process.pid} ${root}\n`);
   return dir;
 }
 
-/** W-985: the cache key of a seed: the seed itself, the files it edits and the files it runs. */
-async function cacheKey(root: string, seed: Seed): Promise<string> {
-  const hash = createHash("sha256").update(JSON.stringify(seed));
-  const files = new Set([
-    ...(seed.edits ?? []).map((e) => e.file),
-    ...seed.command
-      .filter((part) => /\.(ts|tsx|js|mjs|json)$/.test(part))
-      .map((p) => p.replace(/^\.\//, "")),
+// Browser specs and scripts can read assets or load modules dynamically. Hash the checkout
+// inputs once, including lockfiles and config, so a partial import graph cannot hide an escape.
+export async function cacheInputs(root: string): Promise<string | undefined> {
+  const [paths, node] = await Promise.all([
+    sh(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], root),
+    sh(["node", "--version"], root),
   ]);
-  for (const file of [...files].toSorted()) {
+  const environment = Object.entries(process.env)
+    .filter(([name]) => /^(EMVB_|ASTRO_|BUN_|NODE_|CI$|TZ$|LANG$)/.test(name))
+    .toSorted(([a], [b]) => a.localeCompare(b));
+  const hash = createHash("sha256").update(
+    JSON.stringify([Bun.version, node.trim(), process.platform, process.arch, environment]),
+  );
+  for (const file of [...new Set(paths.split("\0").filter(Boolean))].toSorted()) {
     const path = join(root, file);
-    // oxlint-disable-next-line no-await-in-loop -- a few files per seed
-    hash.update(file).update(existsSync(path) ? await readFile(path) : "missing");
+    // oxlint-disable-next-line no-await-in-loop -- bound open files in large checkouts
+    const info = await lstat(path, { throwIfNoEntry: false });
+    hash.update(JSON.stringify([file, info?.mode, info?.size]));
+    if (!info) continue;
+    if (!info.isFile()) return undefined;
+    // oxlint-disable-next-line no-await-in-loop -- bound open files in large checkouts
+    hash.update(await readFile(path));
   }
   return hash.digest("hex");
 }
@@ -393,6 +476,65 @@ export function failedTest(output: string): string | undefined {
   const match = output.match(/✘\s+\d+\s+\[([^\]]+)\]\s+›\s+(\S+?\.ts:\d+)(?::\d+)?\s+›/);
   if (!match || match[1]?.endsWith("-setup")) return undefined;
   return match[2];
+}
+
+/**
+ * W-1096: which of `tests` (`file:line`, as failedTest gives them) passed in a Playwright run's
+ * list output: at least one ✓ at that line and no ✘. A clean re-run of several seeds' tests then
+ * accepts each seed whose own test passed, instead of sending the whole group to cold runs when
+ * one test fails.
+ */
+export function passedTests(output: string, tests: readonly string[]): Set<string> {
+  const seen = new Map<string, { passed: boolean; failed: boolean }>();
+  for (const match of output.matchAll(
+    /^\s+([✓✘])\s+\d+\s+\[([^\]]+)\]\s+›\s+(\S+?\.ts:\d+):\d+\s+›/gm,
+  )) {
+    const [, mark, project = "", location = ""] = match;
+    if (project.endsWith("-setup")) continue;
+    const state = seen.get(location) ?? { passed: false, failed: false };
+    if (mark === "✓") state.passed = true;
+    else state.failed = true;
+    seen.set(location, state);
+  }
+  return new Set(tests.filter((t) => seen.get(t)?.passed === true && !seen.get(t)?.failed));
+}
+
+/**
+ * W-1096: a seed whose command runs a whole folder of unit tests (`bun test ./packages/emvb/src/admin`)
+ * holds the whole folder's modules in one process, several GB: two or three at once ran a 14 GB cap
+ * out of memory in the 1.4.0 release run. They run one at a time; single test files run in parallel.
+ */
+export function isHeavySeed(seed: Seed): boolean {
+  const [bin, verb, ...rest] = seed.command;
+  if (bin !== "bun" || verb !== "test") return false;
+  // The values of -t (a test name) and --timeout aren't paths.
+  const paths = rest.filter(
+    (part, i) =>
+      !part.startsWith("-") && !/^(-t|--test-name-pattern|--timeout)$/.test(rest[i - 1] ?? ""),
+  );
+  return paths.length === 0 || paths.some((p) => !/\.(test|spec)\.[cm]?[jt]sx?$/.test(p));
+}
+
+/**
+ * W-1096: a heavy seed's command with bun's own `--parallel`, so the folder's test files run in
+ * `workers` processes (each file on a fresh global, as `bun run check` runs them) instead of one.
+ * Only a speed-up: a seed not caught this way runs again exactly as written.
+ */
+export function inParallel(seed: Seed, workers: number): Seed {
+  const [bin, verb, ...rest] = seed.command;
+  if (!isHeavySeed(seed) || workers < 2 || rest.some((p) => p.startsWith("--parallel")))
+    return seed;
+  return { ...seed, command: [bin ?? "bun", verb ?? "test", `--parallel=${workers}`, ...rest] };
+}
+
+/**
+ * W-1096: the next seed a unit lane takes from `queue`: the first one, unless it is heavy and the
+ * heavy slot is taken, then the first light one; undefined when only heavy seeds are left and the
+ * slot is busy (the lane waits for it).
+ */
+export function nextSeed(queue: Seed[], heavyBusy: boolean): Seed | undefined {
+  const index = queue.findIndex((s) => !heavyBusy || !isHeavySeed(s));
+  return index === -1 ? undefined : queue.splice(index, 1)[0];
 }
 
 /**
@@ -502,6 +644,33 @@ async function waitForProbe(
   throw new Error(`the warm server didn't show the ${what} within ${ms / 1000} s`);
 }
 
+/**
+ * W-1096: a warm lane's dev server. `ready()` starts it if it isn't up and signs in (once more if
+ * the first try fails); after `stop()`, the next `ready()` starts it and signs in again: the
+ * setup is also what warms a fresh server up. Resolves to whether the server is signed in.
+ */
+export function warmServer(hooks: {
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  signIn: () => Promise<boolean>;
+}) {
+  const state = { up: false, signedIn: false };
+  return {
+    async ready(): Promise<boolean> {
+      if (state.up) return state.signedIn;
+      await hooks.start();
+      state.up = true;
+      state.signedIn = (await hooks.signIn()) || (await hooks.signIn());
+      return state.signedIn;
+    },
+    async stop(): Promise<void> {
+      if (state.up) await hooks.stop();
+      state.up = false;
+      state.signedIn = false;
+    },
+  };
+}
+
 type Done = { seed: Seed; result: SeedResult; ms: number; lane: string };
 
 type Servers = Partial<Record<"node" | "cloudflare", Awaited<ReturnType<typeof startDemo>>>>;
@@ -532,11 +701,17 @@ if (import.meta.main) {
   }
   const since = arg("changed-since");
   const files = since === undefined ? undefined : await changedSince(root, since);
-  const selected = selectSeeds(seeds, { only, files });
+  const kind = arg("kind");
+  if (kind !== undefined && kind !== "unit" && kind !== "e2e") throw new Error("--kind unit|e2e");
+  const selected = selectSeeds(seeds, { only, files, kind });
   if (process.argv.includes("--list")) {
     for (const seed of selected) process.stdout.write(`${seed.id}\n`);
     process.stdout.write(`seeded bugs: ${selected.length} selected, none run\n`);
     process.exit(0);
+  }
+  if (selected.length === 0) {
+    process.stdout.write("seeded bugs: no matching seeds\n");
+    process.exit(only ? 1 : 0);
   }
   const started = performance.now();
   // An interrupted run stops its demo servers and the commands it started.
@@ -549,20 +724,36 @@ if (import.meta.main) {
   // W-986: warm e2e lanes by default; --cold-e2e gives every e2e seed its own fresh server.
   const warmMode = !process.argv.includes("--cold-e2e");
   const useCache = process.argv.includes("--cache");
+  /** Each worktree is prepared once per run, even if the self-check uses it first. */
+  const prepared = new Map<string, Promise<string>>();
+  const worktree = (name: string) => {
+    const ready = prepared.get(name) ?? prepareWorktree(root, name);
+    prepared.set(name, ready);
+    return ready;
+  };
+  // The first lane's worktree of the kind this run has (with --kind e2e, the unit worktrees may
+  // be another run's).
+  const selfCheckRoot = () => worktree(selected.some((s) => !startsDemos(s)) ? "unit-0" : "e2e-0");
   const jobs = Math.max(
     1,
     Number(arg("jobs") ?? Math.min(4, Math.floor(availableParallelism() / 4))) || 1,
   );
-  const cachePath = join(root, ".seeded-bug-cache.json");
-  const cache: Record<string, true> =
-    useCache && existsSync(cachePath) ? JSON.parse(await readFile(cachePath, "utf8")) : {};
+  const inputs = useCache ? await cacheInputs(root) : undefined;
+  const cachePath = join(root, ".seeded-bug-cache");
+  if (inputs) await mkdir(cachePath, { recursive: true });
+  const cacheKey = (seed: Seed) =>
+    createHash("sha256")
+      .update(JSON.stringify([inputs, seed]))
+      .digest("hex");
 
   // Self-check first, on a unit seed (seconds): the runner must still see a difference.
   const known =
     selected.find((s) => /^bun test\b/.test(s.command.join(" "))) ??
     seeds.find((s) => s.id === "W-984/no-wrap");
   if (known) {
-    const problem = await selfCheck(root, known);
+    // W-1096: in a worktree whenever there are any, never in this checkout: its demo servers (an
+    // e2e run beside this one) would pick the self-check's mutation up.
+    const problem = await selfCheck(jobs === 1 ? root : await selfCheckRoot(), known);
     if (problem) {
       process.stderr.write(`seeded bugs: self-check failed: ${problem}\n`);
       process.exit(1);
@@ -572,16 +763,10 @@ if (import.meta.main) {
 
   const todo: Seed[] = [];
   let skipped = 0;
-  const keys = new Map<string, string>();
   for (const seed of selected) {
-    if (useCache) {
-      // oxlint-disable-next-line no-await-in-loop -- hashing a few files per seed
-      const key = await cacheKey(root, seed);
-      keys.set(seed.id, key);
-      if (cache[key]) {
-        skipped += 1;
-        continue;
-      }
+    if (inputs && existsSync(join(cachePath, cacheKey(seed)))) {
+      skipped += 1;
+      continue;
     }
     todo.push(seed);
   }
@@ -602,10 +787,6 @@ if (import.meta.main) {
     process.stdout.write(
       `${mark}${String(results.length).padStart(4)}/${total} ${done.seed.id} ${done.result.status} ${Math.round(done.ms)} ms [${done.lane}]${done.result.status === "caught" ? "" : ` — ${done.result.detail}`}\n`,
     );
-    if (useCache && done.result.status === "caught") {
-      const key = keys.get(done.seed.id);
-      if (key) cache[key] = true;
-    }
   };
   const timed = async (lane: string, laneRoot: string, seed: Seed, settle = 0) => {
     const t = performance.now();
@@ -616,13 +797,36 @@ if (import.meta.main) {
   // Unit (and cold e2e) seeds: one queue, `jobs` worktrees (or the repo itself for one job).
   const queue = [...rest];
   const unitLanes = Array.from({ length: Math.min(jobs, Math.max(1, queue.length)) }, (_, i) => i);
+  // W-1096: folder-wide unit seeds take GBs each; one at a time, light ones around them, each
+  // split over `--heavy-parallel` bun test processes (default 4; 1 runs them as written).
+  let heavyBusy = false;
+  const heavyWorkers = Math.max(1, Number(arg("heavy-parallel") ?? 4) || 1);
   const unit = async (lane: number) => {
     if (queue.length === 0) return;
-    const laneRoot = jobs === 1 ? root : await prepareWorktree(root, `unit-${lane}`);
-    for (let seed = queue.shift(); seed; seed = queue.shift()) {
-      // Cold e2e seeds start their own demo server; never two at once on the same port.
-      // oxlint-disable-next-line no-await-in-loop -- one seed at a time per worktree
-      report(await timed(`unit-${lane}`, laneRoot, seed));
+    const laneRoot = jobs === 1 ? root : await worktree(`unit-${lane}`);
+    while (queue.length > 0) {
+      const seed = nextSeed(queue, heavyBusy);
+      if (!seed) {
+        // oxlint-disable-next-line no-await-in-loop -- waits for the heavy slot
+        await Bun.sleep(200);
+        continue;
+      }
+      // oxlint-disable-next-line no-await-in-loop -- one cheap read per seed
+      if (laneRoot !== root) await assertOwned(laneRoot);
+      const heavy = isHeavySeed(seed);
+      if (heavy) heavyBusy = true;
+      try {
+        // Cold e2e seeds start their own demo server; never two at once on the same port.
+        // oxlint-disable-next-line no-await-in-loop -- one seed at a time per worktree
+        let done = await timed(`unit-${lane}`, laneRoot, inParallel(seed, heavyWorkers));
+        if (heavy && heavyWorkers > 1 && done.result.status !== "caught") {
+          // oxlint-disable-next-line no-await-in-loop -- rare: the seed exactly as written
+          done = await timed(`unit-${lane} (as written)`, laneRoot, seed);
+        }
+        report({ ...done, seed });
+      } finally {
+        if (heavy) heavyBusy = false;
+      }
     }
   };
 
@@ -645,7 +849,7 @@ if (import.meta.main) {
   );
   const e2e = async (lane: number) => {
     if (e2eQueue.length === 0) return;
-    const laneRoot = jobs === 1 && lane === 0 ? root : await prepareWorktree(root, `e2e-${lane}`);
+    const laneRoot = jobs === 1 && lane === 0 ? root : await worktree(`e2e-${lane}`);
     if (!warmMode) {
       // Each seed exactly as it always ran (CI=1: its own fresh demo server), on this lane's
       // ports so lanes never meet.
@@ -674,24 +878,19 @@ if (import.meta.main) {
     await copyFile(join(root, "scripts/seed-probe.ts"), probe);
     const servers: Servers = {};
     liveServers.push(servers);
-    // The lane signs in once (Playwright's setup project) on its warm server, which keeps that
-    // session: every later run skips the setup with --no-deps.
+    // The lane signs in (Playwright's setup project) on its warm server, which keeps that session:
+    // every later run skips the setup with --no-deps. W-1096: again after every restart (a cold
+    // run, a probe timeout): the setup is also what warms a new server up (Vite's first dependency
+    // optimisation, the admin's first hydration), and without it the first runs on a restarted
+    // server failed for those reasons, so every later group's clean re-run failed and went cold.
     const onWarm = (seed: Seed): Seed => ({
       ...seed,
       env: { ...seed.env, ...ports, EMVB_REUSE_SERVER: "1" },
       command: [...seed.command, "--no-deps"],
     });
-    const startServer = async () => {
-      servers.node ??= await startDemo(laneRoot, "node", lane);
-    };
-    const stopServer = async () => {
-      await stopDemo(servers.node);
-      delete servers.node;
-    };
-    /** Runs `command` on the clean code on the warm server: true when it passes. */
-    const passesClean = async (command: string[], noDeps = true): Promise<boolean> => {
-      await startServer();
-      const run = await runSeed(laneRoot, {
+    /** Runs `command` on the clean code on the running warm server. */
+    const runClean = (command: string[], noDeps = true) =>
+      runSeed(laneRoot, {
         id: "warm/clean",
         requirement: "",
         description: "",
@@ -699,62 +898,75 @@ if (import.meta.main) {
         env: { ...ports, EMVB_REUSE_SERVER: "1" },
         expect: "$^",
       });
-      return run.status === "not-caught";
-    };
-    const signedIn =
-      (await passesClean(["bun", "run", "e2e", "--project=node-setup"], false)) ||
-      (await passesClean(["bun", "run", "e2e", "--project=node-setup"], false));
+    const laneServer = warmServer({
+      start: async () => {
+        servers.node = await startDemo(laneRoot, "node", lane);
+      },
+      stop: async () => {
+        await stopDemo(servers.node);
+        delete servers.node;
+      },
+      signIn: async () =>
+        (await runClean(["bun", "run", "e2e", "--project=node-setup"], false)).status ===
+        "not-caught",
+    });
+    /** The warm server, started, signed in and warmed up if it isn't up; false if it can't sign in. */
+    const startServer = () => laneServer.ready();
+    const stopServer = () => laneServer.stop();
     try {
+      await startServer();
       for (let group = e2eQueue.shift(); group; group = e2eQueue.shift()) {
-        const warmable = signedIn ? group.filter((s) => warmPlatform(s) === "node") : [];
+        const warmable = group.filter((s) => warmPlatform(s) === "node");
         const redo: [Seed, string][] = group
           .filter((s) => !warmable.includes(s))
-          .map((s) => [
-            s,
-            isProd(s)
-              ? "production build"
-              : signedIn
-                ? "needs another platform"
-                : "the warm lane couldn't sign in",
-          ]);
+          .map((s) => [s, isProd(s) ? "production build" : "needs another platform"]);
         const caught: (Done & { test: string })[] = [];
         {
           for (const seed of warmable) {
+            // oxlint-disable-next-line no-await-in-loop -- one cheap read per seed
+            if (laneRoot !== root) await assertOwned(laneRoot);
             const paths = servedFiles(laneRoot, seed);
             const t = performance.now();
             try {
               // oxlint-disable-next-line no-await-in-loop -- one seed at a time per lane
-              await startServer();
+              if (!(await startServer())) {
+                redo.push([seed, "the warm lane couldn't sign in"]);
+                continue;
+              }
               // oxlint-disable-next-line no-await-in-loop -- same
               const base = await waitForProbe(port, paths, () => true, "clean code");
-              let before: ProbeState | undefined;
+              /** The seed with `command` on the warm server, each change proven by the probe. */
+              const attempt = async (command: string[]) => {
+                let before: ProbeState | undefined;
+                return runSeed(
+                  laneRoot,
+                  onWarm({ ...seed, command: [...command, "--max-failures=1"] }),
+                  {
+                    applied: async () => {
+                      await waitForProbe(
+                        port,
+                        paths,
+                        (now) => probeShows("applied", base, base, now, paths),
+                        "mutation",
+                      );
+                    },
+                    beforeRestore: async () => {
+                      before = await readProbe(port, paths);
+                    },
+                    restored: async () => {
+                      const from = before ?? base;
+                      await waitForProbe(
+                        port,
+                        paths,
+                        (now) => probeShows("restored", base, from, now, paths),
+                        "restore",
+                      );
+                    },
+                  },
+                );
+              };
               // oxlint-disable-next-line no-await-in-loop -- same
-              const result = await runSeed(
-                laneRoot,
-                onWarm({ ...seed, command: [...seed.command, "--max-failures=1"] }),
-                {
-                  applied: async () => {
-                    await waitForProbe(
-                      port,
-                      paths,
-                      (now) => probeShows("applied", base, base, now, paths),
-                      "mutation",
-                    );
-                  },
-                  beforeRestore: async () => {
-                    before = await readProbe(port, paths);
-                  },
-                  restored: async () => {
-                    const from = before ?? base;
-                    await waitForProbe(
-                      port,
-                      paths,
-                      (now) => probeShows("restored", base, from, now, paths),
-                      "restore",
-                    );
-                  },
-                },
-              );
+              const result = await attempt(seed.command);
               const ms = performance.now() - t;
               const test = result.status === "caught" ? failedTest(result.output ?? "") : undefined;
               if (test) caught.push({ seed, result, ms, lane: `e2e-warm-${lane}`, test });
@@ -773,16 +985,22 @@ if (import.meta.main) {
             }
           }
           // A catch counts only if the very test that failed passes on the clean code, on the
-          // same server, right after the group's seeds (all of them in one run).
+          // same server, right after the group's seeds (all of them in one run). W-1096: each
+          // seed by its own test, so one failing test sends only its own seeds to cold runs.
           const tests = [...new Set(caught.map((d) => d.test))];
-          if (
-            caught.length > 0 &&
-            // oxlint-disable-next-line no-await-in-loop -- once per group
-            !(await passesClean(["bun", "run", "e2e", ...tests, "--project=node"]))
-          ) {
-            redo.push(...caught.map((d): [Seed, string] => [d.seed, "clean re-run failed"]));
-            caught.length = 0;
-          }
+          // oxlint-disable-next-line no-await-in-loop -- once per group
+          const clean =
+            caught.length > 0 && (await startServer())
+              ? await runClean(["bun", "run", "e2e", ...tests, "--project=node"])
+              : undefined;
+          const passed = passedTests(clean?.output ?? "", tests);
+          if (clean?.status === "not-caught") for (const t of tests) passed.add(t);
+          redo.push(
+            ...caught
+              .filter((d) => !passed.has(d.test))
+              .map((d): [Seed, string] => [d.seed, "clean re-run failed"]),
+          );
+          caught.splice(0, caught.length, ...caught.filter((d) => passed.has(d.test)));
         }
         for (const { test: _, ...done } of caught) report(done);
         if (redo.length > 0) {
@@ -807,20 +1025,17 @@ if (import.meta.main) {
   };
 
   // Cold e2e seeds in the unit queue would fight the warm server for the demo ports.
-  if (
-    warm.length > 0 &&
-    rest.some((s) => warmPlatform({ ...s }) !== null || /\be2e\b/.test(s.command.join(" ")))
-  ) {
-    const coldE2e = rest.filter((s) => /\be2e\b/.test(s.command.join(" ")));
+  if (warm.length > 0 && rest.some((s) => warmPlatform({ ...s }) !== null || startsDemos(s))) {
+    const coldE2e = rest.filter(startsDemos);
     for (const s of coldE2e) queue.splice(queue.indexOf(s), 1);
     await Promise.all([
       ...unitLanes.map(unit),
       ...Array.from({ length: e2eLanes }, (_, lane) => e2e(lane)),
     ]);
     for (const seed of coldE2e) report(await timed("e2e-cold", root, seed));
-  } else if (jobs > 1 && rest.some((s) => /\be2e\b/.test(s.command.join(" ")))) {
+  } else if (jobs > 1 && rest.some(startsDemos)) {
     // --one-lane-e2e with several jobs: e2e seeds one at a time after the parallel unit seeds.
-    const coldE2e = rest.filter((s) => /\be2e\b/.test(s.command.join(" ")));
+    const coldE2e = rest.filter(startsDemos);
     for (const s of coldE2e) queue.splice(queue.indexOf(s), 1);
     await Promise.all(unitLanes.map(unit));
     for (const seed of coldE2e) report(await timed("e2e-cold", root, seed));
@@ -832,7 +1047,13 @@ if (import.meta.main) {
   }
 
   for (const seed of timing) report(await timed("timing", root, seed));
-  if (useCache) await writeFile(cachePath, `${JSON.stringify(cache)}\n`);
+  if (inputs) {
+    await Promise.all(
+      results
+        .filter((done) => done.result.status === "caught")
+        .map((done) => writeFile(join(cachePath, cacheKey(done.seed)), "")),
+    );
+  }
   const failed = results.filter((r) => r.result.status !== "caught");
   const seconds = Math.round((performance.now() - started) / 1000);
   const summary = createLogger({ run: "seeded-bugs", manifest: manifestPath });

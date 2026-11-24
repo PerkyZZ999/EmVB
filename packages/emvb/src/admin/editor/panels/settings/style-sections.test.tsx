@@ -7,7 +7,7 @@ import {
   type FlatStyleProps,
 } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 import { StyleRow } from "./StyleRow.tsx";
 import { keysFor, sectionsFor, STYLE_UI, type StyleKey } from "./style-sections.ts";
@@ -47,8 +47,10 @@ async function choose(label: string, option: string) {
   const match = options.find((o) => o.textContent === option) as HTMLElement | undefined;
   await act(async () => {
     match?.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
   });
+  // W-1096: Base UI closes the popup on timers that a fixed pause didn't always outlast under
+  // load (the W-1061 act() check failed about one run in three); wait until it is gone (W-1094).
+  await untilPopupClosed();
   return options.map((o) => o.textContent);
 }
 

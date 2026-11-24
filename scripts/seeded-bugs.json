@@ -56457,6 +56457,440 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*W-1097"
+    },
+    {
+      "id": "W-1096/timings-count-sign-in",
+      "requirement": "W-1096",
+      "description": "e2e:full counts the sign-in setup as a spec file when it splits the files.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "    if (project.endsWith(\"-setup\")) continue;\n    totals[file]",
+          "replace": "    totals[file]"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: file timings sum"
+    },
+    {
+      "id": "W-1096/split-uneven",
+      "requirement": "W-1096",
+      "description": "e2e:full puts every spec file in the first shard instead of the least loaded one.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "    const lightest = groups.reduce((min, g) => (g.total < min.total ? g : min));",
+          "replace": "    const lightest = groups[0] ?? { total: 0, files: new Set<string>() };"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: the split puts every file"
+    },
+    {
+      "id": "W-1096/shard-ports-overlap",
+      "requirement": "W-1096",
+      "description": "Shard servers get ports one apart, so node shard 2 takes Cloudflare shard 1's port.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "  node: base + 10 * shard,",
+          "replace": "  node: base + shard,"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: shard ports keep"
+    },
+    {
+      "id": "W-1096/line-filter-split",
+      "requirement": "W-1096",
+      "description": "A file:line filter is split over shards, which can drop the named test.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "    if (/:\\d+(:\\d+)?$/.test(arg)) lines = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: named files are split"
+    },
+    {
+      "id": "W-1096/starts-not-staggered",
+      "requirement": "W-1096",
+      "description": "A platform's shard runs all start at once, so their dev servers optimise dependencies together.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "    await before;\n    return gate.resolve;",
+          "replace": "    return gate.resolve;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a platform's runs start one after another"
+    },
+    {
+      "id": "W-1096/clean-verdict-ignores-failures",
+      "requirement": "W-1096",
+      "description": "A clean re-run counts a seed's test as passed even when it also failed there.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  return new Set(tests.filter((t) => seen.get(t)?.passed === true && !seen.get(t)?.failed));",
+          "replace": "  return new Set(tests.filter((t) => seen.get(t)?.passed === true));"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a clean re-run accepts each seed"
+    },
+    {
+      "id": "W-1096/folder-seed-light",
+      "requirement": "W-1096",
+      "description": "A seed that runs a whole folder of unit tests counts as light, so several run at once.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  return paths.length === 0 || paths.some((p) => !/\\.(test|spec)\\.[cm]?[jt]sx?$/.test(p));",
+          "replace": "  return paths.length === 0;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a seed that runs a whole folder"
+    },
+    {
+      "id": "W-1096/heavy-slot-ignored",
+      "requirement": "W-1096",
+      "description": "Unit lanes take a heavy seed while another heavy seed runs.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  const index = queue.findIndex((s) => !heavyBusy || !isHeavySeed(s));",
+          "replace": "  const index = queue.findIndex(() => true);"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: while a heavy seed runs"
+    },
+    {
+      "id": "W-1096/parallel-on-light",
+      "requirement": "W-1096",
+      "description": "Every unit seed's command is changed to bun test --parallel, not only folder-wide ones.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  if (!isHeavySeed(seed) || workers < 2 || rest.some((p) => p.startsWith(\"--parallel\")))",
+          "replace": "  if (workers < 2 || rest.some((p) => p.startsWith(\"--parallel\")))"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a heavy seed is sped up"
+    },
+    {
+      "id": "W-1096/restart-skips-sign-in",
+      "requirement": "W-1096",
+      "description": "A warm lane's restarted server is used without signing in and warming up again.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "      state.up = false;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a restarted warm server signs in"
+    },
+    {
+      "id": "W-1096/budget-ignored",
+      "requirement": "W-1096",
+      "description": "verify starts jobs whatever their memory caps add up to.",
+      "edits": [
+        {
+          "file": "scripts/verify-plan.ts",
+          "search": "      mem + reservedMem + job.memGB <= budget.memGB && cpu + reservedCpu + job.cpu <= budget.cpu;",
+          "replace": "      cpu + reservedCpu + job.cpu <= budget.cpu;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/verify-plan.test.ts"],
+      "expect": "\\(fail\\).*W-1096: the caps of running and starting jobs"
+    },
+    {
+      "id": "W-1096/short-past-budget",
+      "requirement": "W-1096",
+      "description": "verify lets a short job start even when it doesn't fit in what is free.",
+      "edits": [
+        {
+          "file": "scripts/verify-plan.ts",
+          "search": "      job.short === true && mem + job.memGB <= budget.memGB && cpu + job.cpu <= budget.cpu;",
+          "replace": "      job.short === true;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/verify-plan.test.ts"],
+      "expect": "\\(fail\\).*W-1096: short jobs use what is free now"
+    },
+    {
+      "id": "W-1096/after-failed-runs",
+      "requirement": "W-1096",
+      "description": "verify runs a job whose prerequisite failed (the stock smoke without tarballs).",
+      "edits": [
+        {
+          "file": "scripts/verify-plan.ts",
+          "search": "    if (after.some((name) => progress.failed.has(name))) {",
+          "replace": "    if (after.length < 0) {"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/verify-plan.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a job waits for its after jobs"
+    },
+    {
+      "id": "W-1096/excludes-one-way",
+      "requirement": "W-1096",
+      "description": "verify runs the box round beside e2e:prod's builds because only e2e:prod names the other.",
+      "edits": [
+        {
+          "file": "scripts/verify-plan.ts",
+          "search": "      (other) => job.excludes?.includes(other.name) || other.excludes?.includes(job.name),",
+          "replace": "      (other) => job.excludes?.includes(other.name),"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/verify-plan.test.ts"],
+      "expect": "\\(fail\\).*W-1096: jobs that share folders never run side by side"
+    },
+    {
+      "id": "W-1096/release-base-is-current",
+      "requirement": "W-1096",
+      "description": "verify:release takes this release's own bump as the base, so it selects almost no seeds.",
+      "edits": [
+        {
+          "file": "scripts/verify-plan.ts",
+          "search": "    if (version && version !== current) return sha;",
+          "replace": "    if (version) return sha;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/verify-plan.test.ts"],
+      "expect": "\\(fail\\).*W-1096: the release base is the newest"
+    },
+    {
+      "id": "W-1096/shared-sign-in",
+      "requirement": "W-1096",
+      "description": "Every e2e:full shard writes and reads the same sign-in file, so shards sign each other out.",
+      "edits": [
+        {
+          "file": "e2e/support/demo-data.ts",
+          "search": "  join(process.env[\"EMVB_E2E_AUTH_DIR\"] ?? \"e2e/.auth\", `${platform}.json`);",
+          "replace": "  join(\"e2e/.auth\", `${platform}.json`);"
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1096: each parallel e2e:full run signs in"
+    },
+    {
+      "id": "W-1096/shared-vite-cache",
+      "requirement": "W-1096",
+      "description": "The node demo ignores EMVB_VITE_CACHE, so parallel dev servers share one dependency cache.",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "    ...(viteCache ? { cacheDir: viteCache } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1096: both demos keep a Vite cache"
+    },
+    {
+      "id": "W-1096/stock-cookie-mode-lost",
+      "requirement": "W-1096",
+      "description": "The stock smoke sites never set visitorCookie \"never\", so that mode goes unchecked.",
+      "edits": [
+        {
+          "file": "scripts/stock-smoke/sites.ts",
+          "search": "${site.cookie === \"never\" ? ', visitorCookie: \"never\"' : \"\"}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./scripts/stock-smoke/sites.test.ts"],
+      "expect": "\\(fail\\).*W-1096: each config adds EmVB"
+    },
+    {
+      "id": "W-1096/stock-14-not-pinned",
+      "requirement": "W-1096",
+      "description": "The EmDash 1.4 stock sites keep the template's emdash version instead of 1.4.0.",
+      "edits": [
+        {
+          "file": "scripts/stock-smoke/sites.ts",
+          "search": "j.dependencies.emdash=\"1.4.0\";",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./scripts/stock-smoke/sites.test.ts"],
+      "expect": "\\(fail\\).*W-1096: the 1.4 sites use the template"
+    },
+    {
+      "id": "W-1096/kept-popup-waits",
+      "requirement": "W-1096",
+      "description": "untilPopupClosed() waits its full 2 s for a Select popup Kumo keeps on the page, hidden.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/mount.ts",
+          "search": "const shown = (el: Element) => !el.closest(\"[hidden], [data-closed]\");",
+          "replace": "const shown = (el: Element) => el.isConnected;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/dom/mount.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a list that stays on the page, hidden"
+    },
+    {
+      "id": "W-1096/ci-shard-left-out",
+      "requirement": "W-1096",
+      "description": "The tag run splits e2e in three but only runs two of the shards, so a third of the spec files never run in CI.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "        shard: [1, 2, 3]",
+          "replace": "        shard: [1, 2]"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/ci-e2e.test.ts"],
+      "expect": "\\(fail\\).*W-1096: the tag run splits the suite"
+    },
+    {
+      "id": "W-1096/unit-named-e2e-waits",
+      "requirement": "W-1096",
+      "description": "Unit seeds whose test file name says e2e are held back as demo-starting seeds and run one at a time at the end.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  return /\\bbun run e2e(:[\\w-]+)?(\\s|$)/.test(cmd) || /\\bplaywright test\\b/.test(cmd);",
+          "replace": "  return /\\be2e\\b/.test(cmd);"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: only seeds that start the demos"
+    },
+    {
+      "id": "W-1096/shard-server-locked",
+      "requirement": "W-1096",
+      "description": "A second e2e:full run of the node demo starts astro dev without --ignore-lock, so Astro refuses it because one dev server already runs in the folder.",
+      "edits": [
+        {
+          "file": "playwright.config.ts",
+          "search": "        : `bun run --cwd demos/node astro dev --host 127.0.0.1 --port ${nodePort} --ignore-lock`,",
+          "replace": "        : `bun run --cwd demos/node astro dev --host 127.0.0.1 --port ${nodePort}`,"
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1096: parallel runs' dev servers skip"
+    },
+    {
+      "id": "W-1096/stagger-ignored",
+      "requirement": "W-1096",
+      "description": "The split ignores that later runs start later, so the last run of a platform ends a minute after the first.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "    total: stagger * k,",
+          "replace": "    total: 0 * stagger * k,"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: runs that start later get less"
+    },
+    {
+      "id": "W-1096/kind-ignored",
+      "requirement": "W-1096",
+      "description": "--kind is ignored, so verify's unit-seed job also starts e2e lanes beside the e2e suite.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "      (!kind || startsDemos(s) === (kind === \"e2e\")),",
+          "replace": "      (!kind || kind.length > 0),"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: --kind splits a selection"
+    },
+    {
+      "id": "W-1096/lazy-deps-not-prebundled",
+      "requirement": "W-1096",
+      "description": "The node demo no longer pre-bundles the image editor's photocn, so a fresh dev server reloads the page mid-test when the editor opens.",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "        \"@perkyzz/emvb > photocn/dom\",",
+          "replace": "        \"photocn/dom\","
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1096: both demos pre-bundle"
+    },
+    {
+      "id": "W-1096/worktree-owner-ignored",
+      "requirement": "W-1096",
+      "description": "A seed run takes over seed worktrees another live run is using, so that run's seeds go stale or run on the wrong files.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  if (!ownerPid || ownerPid === pid || !alive(ownerPid)) return undefined;",
+          "replace": "  if (!ownerPid || ownerPid === pid || alive(ownerPid) || !alive(ownerPid)) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a seed worktree another live run holds"
+    },
+    {
+      "id": "W-1096/start-lock-shared",
+      "requirement": "W-1096",
+      "description": "Every e2e:full run takes the start lock at once, so the demos' servers all start together again.",
+      "edits": [
+        {
+          "file": "scripts/e2e-shards.ts",
+          "search": "\"flock\", \"--exclusive\", path",
+          "replace": "\"flock\", \"--shared\", path"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/e2e-shards.test.ts"],
+      "expect": "\\(fail\\).*W-1096: only one e2e:full run at a time"
+    },
+    {
+      "id": "W-1096/cache-ignores-fixtures",
+      "requirement": "W-1096",
+      "description": "A seed catch stays cached after a test fixture changes.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "    const path = join(root, file);\n    // oxlint-disable-next-line no-await-in-loop -- bound open files in large checkouts",
+          "replace": "    if (file.endsWith(\".txt\")) continue;\n    const path = join(root, file);\n    // oxlint-disable-next-line no-await-in-loop -- bound open files in large checkouts"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: cached catches depend on fixtures"
+    },
+    {
+      "id": "W-1096/empty-batch-fails",
+      "requirement": "W-1096",
+      "description": "Verify fails when one kind has no selected seeds.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "    process.exit(only ? 1 : 0);",
+          "replace": "    process.exit(only ? 1 : 1);"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-1096: a gate with no matching seed batch"
+    },
+    {
+      "id": "W-1096/select-helper-skips-close",
+      "requirement": "W-1096",
+      "description": "The common Select helper returns before the popup closes.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/select.ts",
+          "search": "  await untilPopupClosed();",
+          "replace": "  await wait(10);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/dom/mount.test.ts"],
+      "expect": "\\(fail\\).*W-1096: picking a Select option waits for its popup to close"
     }
   ]
 }

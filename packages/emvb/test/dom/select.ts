@@ -1,4 +1,5 @@
 import { act } from "react";
+import { untilPopupClosed } from "./mount.ts";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -18,8 +19,6 @@ export async function pickOption(scope: Element | null | undefined, value: strin
     .querySelector(`[role="option"] [data-emvb-option="${value}"]`)
     ?.closest<HTMLElement>('[role="option"]');
   if (!option) throw new Error(`No option with the value ${value}`);
-  await act(async () => {
-    option.click();
-    await wait(10);
-  });
+  await act(async () => option.click());
+  await untilPopupClosed();
 }

@@ -46,17 +46,21 @@ export async function cleanup(): Promise<void> {
     if (key.startsWith("emvb-style-sections:")) localStorage.removeItem(key);
 }
 
+/** W-1096: a list still on the page but closed: Kumo's Select keeps its popup, hidden. */
+const shown = (el: Element) => !el.closest("[hidden], [data-closed]");
+
 /**
  * W-1094: waits, inside act(), until an open Base UI Select (or other floating list) has fully
  * closed. Base UI unmounts the popup, its positioner and focus manager on timers after a choice;
  * under load those outlast a fixed short pause and update outside act(), which W-1061 fails.
+ * W-1096: a popup that stays mounted but hidden (Kumo's Select in a StyleRow) counts as closed.
  */
 export async function untilPopupClosed(): Promise<void> {
   await act(async () => {
     for (let waited = 0; waited < 2000; waited += 10) {
       // oxlint-disable-next-line no-await-in-loop -- polls until the popup has closed
       await new Promise((resolve) => setTimeout(resolve, 10));
-      if (!document.querySelector('[role="option"], [role="listbox"]')) break;
+      if (![...document.querySelectorAll('[role="option"], [role="listbox"]')].some(shown)) break;
     }
     // The focus manager and portal settle one step after the list goes.
     await new Promise((resolve) => setTimeout(resolve, 50));

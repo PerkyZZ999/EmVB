@@ -6,7 +6,7 @@ import {
   type LayoutNode,
 } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, settle, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { FieldControl } from "./FieldControl.tsx";
 
 afterEach(cleanup);
@@ -43,8 +43,9 @@ async function choose(label: string, option: string) {
   if (!match) throw new Error(`no ${option} option`);
   await act(async () => {
     match.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
   });
+  // W-1096: wait until Base UI has closed the popup, inside act() (W-1094).
+  await untilPopupClosed();
 }
 
 const LEVEL: FieldDescriptor = {
@@ -241,6 +242,7 @@ describe("field-name recovery (W-720)", () => {
       await act(async () => {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       });
+      await untilPopupClosed();
       return out;
     };
     await boundField("note");

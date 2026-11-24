@@ -1,6 +1,6 @@
 {
   "$schema": "https://fallow.tools/schema.json",
-  "entry": ["demos/*/src/live.config.ts", "scripts/seed-probe.ts"],
+  "entry": ["demos/*/src/live.config.ts", "scripts/seed-probe.ts", "scripts/stock-smoke/checks.ts"],
   "ignorePatterns": [
     "site/**",
     "demos/*/public/**",

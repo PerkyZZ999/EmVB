@@ -43,7 +43,11 @@
     "pack:smoke": "bun scripts/pack-smoke.ts",
     "check:upgrade": "bun scripts/upgrade-check.ts",
     "icons:build": "bun scripts/build-icon-sets.ts",
-    "compat:look": "bun scripts/compat-look.ts"
+    "compat:look": "bun scripts/compat-look.ts",
+    "smoke:stock": "bun scripts/stock-smoke.ts",
+    "smoke:box": "bun scripts/box-round.ts",
+    "verify": "bun scripts/verify.ts",
+    "verify:release": "bun scripts/verify.ts --release"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

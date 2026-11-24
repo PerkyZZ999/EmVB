@@ -36,6 +36,14 @@ export function platformDataDir(platform: string): string {
   return dir;
 }
 
+/**
+ * W-1096: the file a platform's sign-in (the setup project) is saved to and every spec starts
+ * from. `bun run e2e:full` gives each of its parallel runs its own folder (`EMVB_E2E_AUTH_DIR`),
+ * since each signs in to its own demo server.
+ */
+export const authFile = (platform: string) =>
+  join(process.env["EMVB_E2E_AUTH_DIR"] ?? "e2e/.auth", `${platform}.json`);
+
 /** Removes runs that an interrupted Playwright run left behind; never this run's folder. */
 export function pruneStaleRuns(now = Date.now()) {
   let names: string[];

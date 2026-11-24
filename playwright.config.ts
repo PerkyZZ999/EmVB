@@ -1,12 +1,16 @@
 import { defineConfig } from "@playwright/test";
-import { platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
+import { authFile, platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
 import { baseConfig, server } from "./playwright.shared.ts";
 
 // W-1035: this run's own demo data; leftovers of interrupted runs go first.
 platformDataDir("node");
 pruneStaleRuns();
 
-/** W-985: the seeded-bug runner's parallel e2e lanes each use their own demo port. */
+/**
+ * W-985: the seeded-bug runner's parallel e2e lanes each use their own demo port. W-1096: so do
+ * e2e:full's parallel runs, several in one demo folder: Astro 7.4 allows one dev server per folder
+ * unless it is started with --ignore-lock (which also leaves `astro dev stop` to the usual one).
+ */
 const nodePort = Number(process.env["EMVB_E2E_NODE_PORT"] ?? 4411);
 const cfPort = Number(process.env["EMVB_E2E_CF_PORT"] ?? 4412);
 const allPlatforms = [
@@ -16,7 +20,7 @@ const allPlatforms = [
     command:
       nodePort === 4411
         ? "bun run demo:node"
-        : `bun run --cwd demos/node astro dev --host 127.0.0.1 --port ${nodePort}`,
+        : `bun run --cwd demos/node astro dev --host 127.0.0.1 --port ${nodePort} --ignore-lock`,
   },
   {
     name: "cloudflare",
@@ -24,7 +28,7 @@ const allPlatforms = [
     command:
       cfPort === 4412
         ? "bun run demo:cf"
-        : `bun run --cwd demos/cloudflare astro dev --host 127.0.0.1 --port ${cfPort}`,
+        : `bun run --cwd demos/cloudflare astro dev --host 127.0.0.1 --port ${cfPort} --ignore-lock`,
   },
 ] as const;
 
@@ -66,7 +70,7 @@ export default defineConfig({
     {
       name,
       dependencies: [`${name}-setup`],
-      use: { baseURL: `http://127.0.0.1:${port}`, storageState: `e2e/.auth/${name}.json` },
+      use: { baseURL: `http://127.0.0.1:${port}`, storageState: authFile(name) },
     },
   ]),
   webServer: servers.map(({ name, port, command }) =>

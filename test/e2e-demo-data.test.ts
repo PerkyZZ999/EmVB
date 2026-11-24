@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync } from "node:fs"
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import removeRunData, {
+  authFile,
   DATA_ROOT,
   platformDataDir,
   pruneStaleRuns,
@@ -13,7 +14,12 @@ import { server } from "../playwright.shared.ts";
 // W-1035: every e2e run gets its own demo data folder, never the developer's demo databases.
 const saved = { ...process.env };
 afterEach(() => {
-  for (const key of ["EMVB_E2E_DATA", "EMVB_E2E_DATA_OWNED", "EMVB_REUSE_SERVER"]) {
+  for (const key of [
+    "EMVB_E2E_DATA",
+    "EMVB_E2E_DATA_OWNED",
+    "EMVB_REUSE_SERVER",
+    "EMVB_E2E_AUTH_DIR",
+  ]) {
     if (saved[key] === undefined) delete process.env[key];
     else process.env[key] = saved[key];
   }
@@ -67,4 +73,48 @@ test("W-1035: both demos read their data folder from EMVB_DEMO_DATA", async () =
   expect(node).toContain('directory: data ? join(data, "uploads") : "./uploads"');
   const cf = await Bun.file(join(import.meta.dir, "../demos/cloudflare/astro.config.mjs")).text();
   expect(cf).toContain("cloudflare(data ? { persistState: { path: data } } : {})");
+});
+
+test("W-1096: each parallel e2e:full run signs in to its own server and keeps its own sign-in file", () => {
+  delete process.env["EMVB_E2E_AUTH_DIR"];
+  expect(authFile("node")).toBe("e2e/.auth/node.json");
+  process.env["EMVB_E2E_AUTH_DIR"] = "e2e/.auth/shard-2";
+  expect(authFile("cloudflare")).toBe("e2e/.auth/shard-2/cloudflare.json");
+});
+
+test("W-1096: both demos keep a Vite cache per parallel run when EMVB_VITE_CACHE names one", async () => {
+  const configs = await Promise.all(
+    ["node", "cloudflare"].map((demo) =>
+      Bun.file(join(import.meta.dir, `../demos/${demo}/astro.config.mjs`)).text(),
+    ),
+  );
+  for (const config of configs) {
+    expect(config).toContain('const viteCache = process.env["EMVB_VITE_CACHE"];');
+    expect(config).toContain("...(viteCache ? { cacheDir: viteCache } : {}),");
+  }
+});
+
+test("W-1096: parallel runs' dev servers skip Astro's one-dev-server-per-folder lock", async () => {
+  const [e2e, prod] = await Promise.all(
+    ["../playwright.config.ts", "../playwright.prod.config.ts"].map((f) =>
+      Bun.file(join(import.meta.dir, f)).text(),
+    ),
+  );
+  expect(e2e).toContain("astro dev --host 127.0.0.1 --port ${nodePort} --ignore-lock");
+  expect(e2e).toContain("astro dev --host 127.0.0.1 --port ${cfPort} --ignore-lock");
+  expect(prod).toContain("astro dev --host 127.0.0.1 --port ${p.dev} --ignore-lock");
+});
+
+test("W-1096: both demos pre-bundle the dependencies the editor loads lazily", async () => {
+  const configs = await Promise.all(
+    ["node", "cloudflare"].map((demo) =>
+      Bun.file(join(import.meta.dir, `../demos/${demo}/astro.config.mjs`)).text(),
+    ),
+  );
+  for (const config of configs) {
+    // Nested ids: photocn is EmVB's dependency, not the demo's, so a bare id doesn't resolve.
+    for (const id of ["photocn", "photocn/dom", "photocn/react"])
+      expect(config).toContain(`"@perkyzz/emvb > ${id}",`);
+    expect(config).toContain('"@emdash-cms/plugin-forms/client",');
+  }
 });

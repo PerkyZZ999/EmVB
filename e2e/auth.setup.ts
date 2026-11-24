@@ -1,4 +1,5 @@
 import { expect, test as setup } from "@playwright/test";
+import { authFile } from "./support/demo-data.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 
 setup("sign in as the dev admin and warm up the admin", async ({ page }, testInfo) => {
@@ -33,5 +34,5 @@ setup("sign in as the dev admin and warm up the admin", async ({ page }, testInf
       expect(errors).toEqual([]);
     }
   }).toPass({ timeout: 150_000, intervals: [1_000, 2_000, 5_000] });
-  await page.context().storageState({ path: `e2e/.auth/${platform}.json` });
+  await page.context().storageState({ path: authFile(platform) });
 });

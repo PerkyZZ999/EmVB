@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from "bun:test";
 import { emptyDesign, type FlatStyleProps } from "../../../../core/index.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { act } from "react";
 import { StyleRow } from "./StyleRow.tsx";
 
@@ -30,8 +30,9 @@ test("UX-048: an unset select reads Default, and its first option can still be p
   );
   await act(async () => {
     regular?.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
   });
+  // W-1096: wait until Base UI has closed the popup, inside act() (W-1094).
+  await untilPopupClosed();
   expect(patches).toEqual([{ fontWeight: 400 }]);
 });
 

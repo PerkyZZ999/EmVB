@@ -3,7 +3,7 @@ import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 import { IconAnimationControl } from "./IconControls.tsx";
 import { keysFor, sectionsFor, STYLE_UI } from "./style-sections.ts";
@@ -241,8 +241,9 @@ describe("Force single colour and Shape (W-238)", () => {
     );
     await act(async () => {
       none?.click();
-      await new Promise((resolve) => setTimeout(resolve, 10));
     });
+    // W-1096: wait until Base UI has closed the popup, inside act() (W-1094).
+    await untilPopupClosed();
     expect(picks.at(-1)).toEqual({ type: "none" });
     await cleanup();
     await mount(control({ type: "none" }));

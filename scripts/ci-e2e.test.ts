@@ -30,9 +30,18 @@ test("W-1063: the whole e2e suite runs on release tags, on EmDash 1.4 and the la
   const full = ci.jobs["e2e-full"];
   expect(ci.on.push.tags).toContain("v*");
   expect(full?.if ?? "").toContain("refs/tags/v");
-  expect(runs(full)).toContain("bun run e2e:full");
+  expect(runs(full).some((run) => run.startsWith("bun run e2e:full"))).toBe(true);
   expect(full?.strategy?.matrix?.["emdash"]).toEqual(["1.4.0", "latest"]);
   expect(runs(full)).toContain("bun scripts/use-emdash.ts ${{ matrix.emdash }}");
+});
+
+test("W-1096: the tag run splits the suite in shards that together cover every spec file", () => {
+  const full = ci.jobs["e2e-full"];
+  const shards = full?.strategy?.matrix?.["shard"] ?? [];
+  const run = runs(full).find((r) => r.startsWith("bun run e2e:full")) ?? "";
+  expect(run).toBe(`bun run e2e:full --shards ${shards.length} --only-shard \${{ matrix.shard }}`);
+  // One job per shard number, 1 to n: none left out.
+  expect(shards).toEqual(Array.from({ length: shards.length }, (_, i) => i + 1));
 });
 
 test("W-1075: the compat corpus is compared by look on every run, against the base's files", () => {

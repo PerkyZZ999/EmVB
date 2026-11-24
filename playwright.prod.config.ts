@@ -1,5 +1,5 @@
 import { defineConfig } from "@playwright/test";
-import { platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
+import { authFile, platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
 import { baseConfig, server } from "./playwright.shared.ts";
 
 // W-1035: this run's own demo data, shared by each platform's dev and production servers.
@@ -33,7 +33,7 @@ type Platform = (typeof platforms)[number];
 const custom = (p: Platform) => p.dev !== p.defaults[0] || p.prod !== p.defaults[1];
 const devCommand = (p: Platform) =>
   custom(p)
-    ? `bun run --cwd ${p.dir} astro dev --host 127.0.0.1 --port ${p.dev}`
+    ? `bun run --cwd ${p.dir} astro dev --host 127.0.0.1 --port ${p.dev} --ignore-lock`
     : `bun run ${p.script}`;
 /**
  * The node build bakes the run's database path in (its config reads EMVB_DEMO_DATA at build time);
@@ -80,7 +80,7 @@ export default defineConfig({
       testMatch: /.*\.prod\.ts$/,
       dependencies: [`${name}-setup`],
       use: { baseURL: `http://127.0.0.1:${prod}` },
-      metadata: { dev: `http://127.0.0.1:${dev}`, auth: `e2e/.auth/${name}.json` },
+      metadata: { dev: `http://127.0.0.1:${dev}`, auth: authFile(name) },
     },
   ]),
   // Playwright starts these in order. The builds come first: an `astro build` running next to a

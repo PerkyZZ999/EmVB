@@ -3,7 +3,7 @@ import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, untilPopupClosed } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
@@ -60,8 +60,10 @@ async function choose(label: string, option: string) {
   const options = [...document.querySelectorAll<HTMLElement>('[role="option"]')];
   await act(async () => {
     options.find((o) => o.textContent === option)?.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
   });
+  // W-1096: wait until Base UI has closed the popup, inside act() (W-1094); a fixed 10 ms pause
+  // failed the W-1061 act() check under load.
+  await untilPopupClosed();
   return options.map((o) => o.textContent);
 }
 

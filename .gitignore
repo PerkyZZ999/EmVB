@@ -36,5 +36,8 @@ demos/*/emdash-env.d.ts
 e2e/.auth/
 e2e/.results/
 e2e/.data/
+# W-1096: bun run verify / verify:release logs, tarballs and summaries
+.verify/
 .seeded-bug-cache.json
+.seeded-bug-cache/
 upgrade-check.json
