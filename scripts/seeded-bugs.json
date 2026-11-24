@@ -56975,6 +56975,34 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
+    },
+    {
+      "id": "W-1086/class-brackets-allowed",
+      "requirement": "W-1086",
+      "description": "the class rule lets square brackets through, so arbitrary values reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9\\\\[][a-z0-9:/!._\\\\[\\\\]=-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*exact names with the compiled-kit characters are kept"
+    },
+    {
+      "id": "W-1086/class-colon-dropped",
+      "requirement": "W-1086",
+      "description": "the class rule drops names with a colon, so responsive classes lose their layout",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9][a-z0-9/!._-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*names are not parsed"
     }
   ]
 }
