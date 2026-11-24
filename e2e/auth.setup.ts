@@ -1,5 +1,7 @@
 import { expect, test as setup } from "@playwright/test";
-import { authFile } from "./support/demo-data.ts";
+import { existsSync, writeFileSync } from "node:fs";
+import { authFile, platformDataDir } from "./support/demo-data.ts";
+import { prodAuthFiles } from "./support/prod-auth.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 
 setup("sign in as the dev admin and warm up the admin", async ({ page }, testInfo) => {
@@ -35,4 +37,10 @@ setup("sign in as the dev admin and warm up the admin", async ({ page }, testInf
     }
   }).toPass({ timeout: 150_000, intervals: [1_000, 2_000, 5_000] });
   await page.context().storageState({ path: authFile(platform) });
+  if (testInfo.project.metadata["stopDevAfterAuth"] === true) {
+    await page.close();
+    const { release, stopped } = prodAuthFiles(platformDataDir(platform));
+    writeFileSync(release, "");
+    await expect.poll(() => existsSync(stopped), { timeout: 10_000 }).toBe(true);
+  }
 });

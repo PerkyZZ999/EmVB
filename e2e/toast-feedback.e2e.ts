@@ -45,7 +45,10 @@ for (const preference of ["no-preference", "reduce"] as const) {
     await remove();
     const toast = page.getByRole("dialog", { name: "Heading deleted", exact: true });
     await expect(toast).toBeVisible();
-    const content = toast.locator(":scope > .isolate");
+    // Kumo 2.17+ wraps the content in a separate toast surface.
+    const content = toast.locator(
+      ':scope > .isolate, :scope > [data-kumo-part="surface"] > .isolate',
+    );
     await expect(toast).toHaveCSS(
       "transition-duration",
       preference === "reduce" ? "0s" : "0.5s, 0.5s, 0.15s",

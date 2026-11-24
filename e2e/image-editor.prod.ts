@@ -34,12 +34,12 @@ test.use({
   viewport: { width: 1440, height: 900 },
 });
 
-test.beforeAll(async ({ browser }) => {
-  const { dev, auth } = test.info().project.metadata as { dev: string; auth: string };
-  const context = await browser.newContext({ baseURL: dev, storageState: auth });
+test.beforeAll(async ({ browser, baseURL }) => {
+  const { auth } = test.info().project.metadata as { auth: string };
+  const context = await browser.newContext({ baseURL, storageState: auth });
   await ensureEmvbSetup(await context.newPage());
   await context.close();
-  author = await requestFactory.newContext({ baseURL: dev, storageState: auth });
+  author = await requestFactory.newContext({ baseURL, storageState: auth });
   const upload = await author.post("/_emdash/api/media", {
     headers: { "X-EmDash-Request": "1" },
     multipart: {

@@ -6,8 +6,8 @@ import { baseConfig, server } from "./playwright.shared.ts";
 platformDataDir("node");
 pruneStaleRuns();
 
-// Production-output checks (W-011): pages are authored through the dev servers (dev-bypass
-// sign-in) and read back from the production builds, which share the same database.
+// The dev server creates the sign-in session. The production server handles both authoring and
+// reads after sign-in, so separate workerd processes do not contend for the same local D1 file.
 // W-986: the seeded-bug runner's e2e lanes each use their own ports, as in playwright.config.ts.
 const port = (name: string, fallback: number) => Number(process.env[name] ?? fallback);
 const platforms = [
@@ -74,13 +74,14 @@ export default defineConfig({
       name: `${name}-setup`,
       testMatch: /auth\.setup\.ts$/,
       use: { baseURL: `http://127.0.0.1:${dev}` },
+      metadata: { stopDevAfterAuth: true },
     },
     {
       name: `${name}-public`,
       testMatch: /.*\.prod\.ts$/,
       dependencies: [`${name}-setup`],
       use: { baseURL: `http://127.0.0.1:${prod}` },
-      metadata: { dev: `http://127.0.0.1:${dev}`, auth: authFile(name) },
+      metadata: { auth: authFile(name) },
     },
   ]),
   // Playwright starts these in order. The builds come first: an `astro build` running next to a
@@ -94,6 +95,19 @@ export default defineConfig({
         platformDataDir(p.name),
       ),
     ),
-    ...servers.map((p) => server(devCommand(p), p.dev, 180_000, platformDataDir(p.name))),
+    ...servers.map((p) =>
+      Object.assign(
+        server(
+          `bun e2e/support/prod-auth.ts ${devCommand(p)}`,
+          p.dev,
+          180_000,
+          platformDataDir(p.name),
+        ),
+        {
+          reuseExistingServer: false,
+          gracefulShutdown: { signal: "SIGTERM" as const, timeout: 5_000 },
+        },
+      ),
+    ),
   ],
 });

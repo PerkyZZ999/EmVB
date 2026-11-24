@@ -56947,6 +56947,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/dom/outline.test.ts"],
       "expect": "\\(fail\\).*W-1098: referenced Select labels"
+    },
+    {
+      "id": "W-1098/prod-author-uses-dev",
+      "requirement": "W-1098",
+      "description": "A production suite authors through a second server that can lock the same local D1 database.",
+      "edits": [
+        {
+          "file": "e2e/image-editor.prod.ts",
+          "search": "author = await requestFactory.newContext({ baseURL, storageState: auth });",
+          "replace": "author = await requestFactory.newContext({ baseURL: \"http://127.0.0.1:4412\", storageState: auth });"
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1098: production specs use the same server"
+    },
+    {
+      "id": "W-1098/no-auth-handoff",
+      "requirement": "W-1098",
+      "description": "The signing-in server never confirms that it closed before production tests start.",
+      "edits": [
+        {
+          "file": "e2e/support/prod-auth.ts",
+          "search": "  writeFileSync(stopped, \"\");",
+          "replace": "  writeFileSync(release, \"\");"
+        }
+      ],
+      "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1098: the production auth server hands off"
     }
   ]
 }

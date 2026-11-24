@@ -18,12 +18,12 @@ let author: APIRequestContext;
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const { dev, auth } = test.info().project.metadata as { dev: string; auth: string };
-  const context = await browser.newContext({ baseURL: dev, storageState: auth });
+test.beforeAll(async ({ browser, baseURL }) => {
+  const { auth } = test.info().project.metadata as { auth: string };
+  const context = await browser.newContext({ baseURL, storageState: auth });
   await ensureEmvbSetup(await context.newPage());
   await context.close();
-  author = await requestFactory.newContext({ baseURL: dev, storageState: auth });
+  author = await requestFactory.newContext({ baseURL, storageState: auth });
 });
 
 test.afterAll(async () => {

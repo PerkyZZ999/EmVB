@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import removeRunData, {
@@ -10,6 +10,7 @@ import removeRunData, {
   runDataDir,
 } from "../e2e/support/demo-data.ts";
 import { server } from "../playwright.shared.ts";
+import { prodAuthFiles } from "../e2e/support/prod-auth.ts";
 
 // W-1035: every e2e run gets its own demo data folder, never the developer's demo databases.
 const saved = { ...process.env };
@@ -116,5 +117,46 @@ test("W-1096: both demos pre-bundle the dependencies the editor loads lazily", a
     for (const id of ["photocn", "photocn/dom", "photocn/react"])
       expect(config).toContain(`"@perkyzz/emvb > ${id}",`);
     expect(config).toContain('"@emdash-cms/plugin-forms/client",');
+  }
+});
+
+test("W-1098: production specs use the same server to author and read pages", async () => {
+  const specs = await Promise.all(
+    ["extensions", "public", "image-editor"].map((spec) =>
+      Bun.file(join(import.meta.dir, `../e2e/${spec}.prod.ts`)).text(),
+    ),
+  );
+  for (const spec of specs) {
+    expect(spec).toContain("browser.newContext({ baseURL, storageState: auth })");
+    expect(spec).toContain("requestFactory.newContext({ baseURL, storageState: auth })");
+  }
+});
+
+test("W-1098: the production auth server hands off after sign-in", async () => {
+  mkdirSync(DATA_ROOT, { recursive: true });
+  const data = mkdtempSync(join(DATA_ROOT, "prod-auth-"));
+  const authServer = Bun.spawn(
+    [
+      "bun",
+      join(import.meta.dir, "../e2e/support/prod-auth.ts"),
+      "sh",
+      "-c",
+      "printf ready; exec sleep 30",
+    ],
+    { env: { ...process.env, EMVB_DEMO_DATA: data }, stdout: "pipe", stderr: "inherit" },
+  );
+  try {
+    const { release, stopped } = prodAuthFiles(data);
+    const reader = authServer.stdout.getReader();
+    const ready = await reader.read();
+    reader.releaseLock();
+    expect(new TextDecoder().decode(ready.value)).toBe("ready");
+    expect(existsSync(stopped)).toBe(false);
+    writeFileSync(release, "");
+    expect(await authServer.exited).toBe(0);
+    expect(existsSync(stopped)).toBe(true);
+  } finally {
+    authServer.kill("SIGTERM");
+    rmSync(data, { recursive: true, force: true });
   }
 });
