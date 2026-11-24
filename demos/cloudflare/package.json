@@ -22,8 +22,8 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261117.1",
-    "wrangler": "4.164.0"
+    "@cloudflare/workers-types": "^5.20261121.1",
+    "wrangler": "4.166.0"
   },
   "emdash": {
     "label": "EmVB demo (Cloudflare, local only)",
