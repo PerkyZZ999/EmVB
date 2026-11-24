@@ -113,8 +113,11 @@ servers through the plugin options. The module must sit in a package whose `pack
 - `prefix`: 2–16 characters, lowercase letters, digits and single hyphens, ending in `-`
   (`d-`, `acme-ui-`). It may not start with `emvb`. A refused prefix drops the whole allowlist
   (the extension still registers, without classes).
-- `allow`: up to 512 names, each `^[a-z][a-z0-9-]*$`, at most 64 characters, starting with the
-  prefix and longer than it. Other names are dropped one by one.
+- `allow`: up to 512 names, at most 64 characters, starting with the prefix and longer than it.
+  Each name uses only lowercase letters, digits, `-`, and `: / ! . _`, and starts with a letter or
+  digit after the prefix. Square brackets, spaces, quotes and markup are not allowed. Names are
+  matched exactly and never parsed: whatever a name means comes from the kit's CSS. Other names
+  are dropped one by one.
 - A node returned by `render()` may carry `extClasses: string[]`. EmVB keeps only exact names
   from this extension's allowlist, at most 16 per node, without duplicates; anything else (free
   text, names with spaces, quotes or `<`, `emvb-*` names, unlisted names) is dropped. They are
