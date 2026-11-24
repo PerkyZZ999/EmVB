@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-11-24
+
+This patch adds EmDash 1.6.0 support, fixes sticky Header and Footer theme parts, and speeds up the contributor and release checks. EmDash 1.4 and 1.5 remain supported. The layout and design schemas remain 18 and 17.
+
 ### Added
 
 - **EmDash 1.6.0 support (W-1098).** EmVB now accepts EmDash 1.6's exact Kumo 2.19.0 pin. Use EmDash Forms 0.2.14 if your 1.6 site needs forms. Stock-install smoke tests cover EmDash 1.4.0, 1.5.0 and 1.6.0 on Node and Cloudflare.
@@ -907,7 +911,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.4.2...HEAD
+[1.4.2]: https://github.com/PerkyZZ999/EmVB/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/PerkyZZ999/EmVB/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.2.0...v1.3.0

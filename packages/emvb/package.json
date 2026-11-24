@@ -1,6 +1,6 @@
 {
   "name": "@perkyzz/emvb",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Visual page builder plugin for EmDash CMS",
   "keywords": [
     "astro",
@@ -50,7 +50,7 @@
     "test:astro": "bun --bun vitest run"
   },
   "dependencies": {
-    "@perkyzz/emvb-icons": "1.4.1",
+    "@perkyzz/emvb-icons": "1.4.2",
     "photocn": "0.1.2",
     "zod": ">=4.5.4 <5"
   },
