@@ -56983,8 +56983,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/scope-ids.ts",
-          "search": "ID_RULE.test(value) && !isShadowingId(value) && !value.startsWith(\"emvb\")",
-          "replace": "ID_RULE.test(value) && !value.startsWith(\"emvb\")"
+          "search": "  !isShadowingId(value) &&",
+          "replace": "  true &&"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
@@ -57017,6 +57017,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
       "expect": "\\(fail\\).*two copies of one element get different ids"
+    },
+    {
+      "id": "W-1086/ext-id-url-ref-not-scoped",
+      "requirement": "W-1086",
+      "description": "an SVG url(#id) reference keeps the raw id, so the gradient or clip path stops working",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "} else if (URL_REF_ATTRS.has(name) && value.includes(\"url(\")) {",
+          "replace": "} else if (false && URL_REF_ATTRS.has(name) && value.includes(\"url(\")) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*SVG paint references"
+    },
+    {
+      "id": "W-1086/ext-id-repeat-ending-collides",
+      "requirement": "W-1086",
+      "description": "an id that ends in -r2 collides with the second copy of its base id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "  !GENERATED_ENDING.test(value);",
+          "replace": "  true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*ends like a generated repeat"
     }
   ]
 }
