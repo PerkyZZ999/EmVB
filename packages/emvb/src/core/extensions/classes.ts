@@ -3,6 +3,7 @@
  * Pure (no file access): the integration reads the files, this checks what it read.
  */
 
+import { HEX_COLOR, LENGTH_UNITS } from "../css-keywords.ts";
 import { isSafeCssValue } from "../sanitize/css.ts";
 import type { ExtensionAssets, ExtensionClasses } from "./types.ts";
 
@@ -51,8 +52,9 @@ function allowedClassName(name: unknown, prefix: string): name is string {
 }
 
 /**
- * The checked allowlist: undefined when the prefix is refused or no name survives. Names that
- * break the pattern or miss the prefix are dropped one by one; at most MAX_ALLOWED_CLASSES stay.
+ * The checked allowlist: undefined when the prefix is refused or no class name and no variable
+ * survives. Names that break the pattern or miss the prefix are dropped one by one; at most
+ * MAX_ALLOWED_CLASSES stay. A list of `vars` keeps the allowlist even when `allow` is empty.
  */
 export function normalizeClasses(input: unknown): ExtensionClasses | undefined {
   if (!input || typeof input !== "object" || Array.isArray(input)) return undefined;
@@ -64,8 +66,9 @@ export function normalizeClasses(input: unknown): ExtensionClasses | undefined {
     if (kept.size >= MAX_ALLOWED_CLASSES) break;
     if (allowedClassName(name, prefix)) kept.add(name);
   }
-  if (kept.size === 0) return undefined;
   const listed = listedVars(vars);
+  // An extension that only sets variables lists them in `vars` and needs no class (`allow: []`).
+  if (kept.size === 0 && listed.length === 0) return undefined;
   return { prefix, allow: [...kept], ...(listed.length > 0 ? { vars: listed } : {}) };
 }
 
@@ -87,13 +90,42 @@ function isVarName(name: unknown): name is string {
     !name.startsWith("--emvb")
   );
 }
+const NUMBER = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)`;
+const UNITS = LENGTH_UNITS.filter((unit) => unit !== "%").join("|");
+/** One number, optionally with a percent sign, an angle unit or `none`: a colour function argument. */
+const COLOR_ARG = String.raw`(?:${NUMBER}(?:%|deg|grad|rad|turn)?|none)`;
+const VALUE_FORMS: readonly RegExp[] = [
+  new RegExp(`^${NUMBER}$`), // number: 70, -1.5, .5
+  new RegExp(`^${NUMBER}(?:${UNITS})$`, "i"), // length: 12px, 1.5rem, 50vw
+  new RegExp(`^${NUMBER}%$`), // percentage: 50%
+  new RegExp(`^${NUMBER}(?:deg|grad|rad|turn)$`, "i"), // angle: 90deg, .25turn
+  HEX_COLOR, // colour: #fff, #1a2b3c, #1a2b3c80
+  /^(?:transparent|currentcolor)$/i, // colour keywords
+  // colour functions, as kits compile them: rgb(0 0 0 / 50%), oklch(70% 0.2 150)
+  new RegExp(
+    String.raw`^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(\s*${COLOR_ARG}(?:\s*,\s*|\s+)${COLOR_ARG}(?:\s*,\s*|\s+)${COLOR_ARG}(?:\s*[,/]\s*${COLOR_ARG})?\s*\)$`,
+    "i",
+  ),
+];
+/**
+ * Whether `value` is a form `extVars` takes: one number, length, percentage, angle or colour. A
+ * list of tokens (`a b`, `70px 2`), a keyword such as `red`, `var()` and `calc()` are not. It is
+ * checked after `isSafeCssValue`, which keeps braces, quotes, `url(` and comments out.
+ */
+export function isExtensionVarValue(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    isSafeCssValue(value) &&
+    VALUE_FORMS.some((form) => form.test(value))
+  );
+}
 /** What an extension's `extVars` may set: names under its prefix, plus the names it lists. */
 export type ExtensionVarRule = { prefix: string; vars: ReadonlySet<string> };
 /**
  * The custom properties an output node keeps: a name that starts with `--` and the prefix (and has
- * more after it) or is listed, with a string value that passes the style value check
- * (`isSafeCssValue`: no braces, quotes, `url(`, comments or newlines, at most 200 characters). At
- * most MAX_VARS_PER_NODE stay. Without a rule (no class prefix declared) everything drops.
+ * more after it) or is listed, with a value that is one number, length, percentage, angle or colour
+ * (`isExtensionVarValue`). At most MAX_VARS_PER_NODE stay. Without a rule (no class prefix
+ * declared) everything drops.
  */
 export function filterExtensionVars(
   raw: unknown,
@@ -106,7 +138,7 @@ export function filterExtensionVars(
     if (kept >= MAX_VARS_PER_NODE) break;
     const own = name.startsWith(`--${rule.prefix}`) && name.length > rule.prefix.length + 2;
     if (!isVarName(name) || !(own || rule.vars.has(name))) continue;
-    if (typeof value !== "string" || !isSafeCssValue(value)) continue;
+    if (!isExtensionVarValue(value)) continue;
     out[name] = value;
     kept += 1;
   }

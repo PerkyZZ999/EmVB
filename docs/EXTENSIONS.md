@@ -141,16 +141,31 @@ render: (props) => ({
   `classes.vars` (`vars: ["--tw-ring-color"]`, up to 64 names). Any other name is dropped, so an
   extension cannot set a site variable such as `--color-primary`. Names that start with `--emvb`
   are never allowed.
-- A value must pass the same check as a style value: a string of at most 200 characters, with no
+- A value is **one** number, length, percentage, angle or colour, and nothing else:
+  - number: `70`, `-1.5`, `.5`
+  - length: `12px`, `1.5rem`, `50vw` (the units EmVB's own styles take: `px`, `rem`, `em`, `vw`,
+    `vh`, `ch`)
+  - percentage: `50%`
+  - angle: `90deg`, `.25turn` (`deg`, `grad`, `rad`, `turn`)
+  - colour: `#fff`, `#1a2b3c`, `#1a2b3c80`, `transparent`, `currentColor`, or a function with
+    three or four numeric arguments: `rgb(0 0 0 / 50%)`, `hsl(120deg 50% 50%)`,
+    `oklch(70% 0.2 150)` (`rgb`, `rgba`, `hsl`, `hsla`, `hwb`, `lab`, `lch`, `oklab`, `oklch`).
+    Named colours such as `red` are not accepted, as in EmVB's own style colours.
+
+  A list of tokens (`70px 2`, `1px solid red`), `var()`, `calc()`, exponents (`1e3`) and any other
+  keyword are dropped. The value must also pass the style value check: at most 200 characters, no
   `{ } ; < > \ " '`, no backtick, no `url(`, no comments, no newlines. A value that fails is
-  dropped, the rest stay. At most 16 variables stay on one node.
+  dropped and the rest stay. At most 16 variables stay on one node.
 - They are written into the node's own rule, `.emvb-e-<id>{--daisy-value:70}`, never into a
   `style` attribute, so the public page, the editor canvas and the HTML export carry them the same
   way. The value is read when the page is rendered on the server.
 - To change a value in the browser, the extension's own `runtime` calls
   `el.style.setProperty("--daisy-value", n)`. The class allowlist limits only what the server
   writes, not what a script does on the page.
-- An extension with no `classes` declares no prefix, so it can set no variables.
+- An extension with no `classes` declares no prefix, so it can set no variables. One that only
+  sets variables and has no class of its own declares `classes: { prefix, allow: [], vars: [...] }`;
+  a list of `vars` keeps the declaration even though `allow` is empty. With neither a class nor a
+  valid variable, the declaration is dropped.
 - Like `extClasses`, `extVars` is render output, not stored data.
 
 ### `css` and `runtime`

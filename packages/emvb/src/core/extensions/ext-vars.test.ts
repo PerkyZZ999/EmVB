@@ -3,7 +3,7 @@ import { buildSiteExport } from "../export/site.ts";
 import { renderPage } from "../render/index.ts";
 import { emptyDesign } from "../schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../schema/layout.ts";
-import { filterExtensionVars, normalizeClasses } from "./classes.ts";
+import { filterExtensionVars, isExtensionVarValue, normalizeClasses } from "./classes.ts";
 import { defineExtension } from "./define.ts";
 import { clearExtensions, extensionVarRule, rememberExtensions } from "./registry.ts";
 import { extensionVarsOf, safeExtensionOutput, withExtensionClasses } from "./safe-nodes.ts";
@@ -52,15 +52,14 @@ const ruleOf = (css: string, id: string): string | undefined =>
 beforeEach(() => clearExtensions());
 
 describe("which extVars an output node keeps", () => {
-  test("names under the prefix and listed names, with safe string values", () => {
+  test("names under the prefix and listed names, with a value of an agreed form", () => {
     expect(
       filterExtensionVars(
-        { "--kit-value": "70", "--fixed-name": "1.5rem", "--kit-x-y": "a b" },
+        { "--kit-value": "70", "--fixed-name": "1.5rem", "--kit-x-y": "#1a2b3c" },
         rule,
       ),
-    ).toEqual({ "--kit-value": "70", "--fixed-name": "1.5rem", "--kit-x-y": "a b" });
+    ).toEqual({ "--kit-value": "70", "--fixed-name": "1.5rem", "--kit-x-y": "#1a2b3c" });
   });
-
   test("a name outside the prefix and the list is dropped, so it cannot set a site variable", () => {
     expect(
       filterExtensionVars({ "--color-primary": "red", "--other": "1", color: "red" }, rule),
@@ -76,14 +75,90 @@ describe("which extVars an output node keeps", () => {
     ).toEqual({ "--kit-ok": "1" });
   });
 
-  test("values are checked like style values: no braces, quotes, url(), comments, newlines or long text", () => {
-    const bad = ["}", "a;b", 'x"y', "url(x)", "/*c*/", "a\nb", "<b>", "a".repeat(201), "", 7, null];
-    for (const value of bad) {
+  test("a number, length, percentage, angle or colour is accepted, one example per form", () => {
+    const accepted: Record<string, string> = {
+      number: "70",
+      "negative number": "-1.5",
+      "leading-dot number": ".5",
+      length: "1.5rem",
+      "length in px": "12px",
+      "viewport length": "50vw",
+      percentage: "50%",
+      angle: "90deg",
+      "angle in turns": ".25turn",
+      "short hex colour": "#fff",
+      "hex colour": "#1a2b3c",
+      "hex colour with alpha": "#1a2b3c80",
+      "colour keyword": "transparent",
+      "currentcolor keyword": "currentColor",
+      "rgb with slash alpha": "rgb(0 0 0 / 50%)",
+      "rgba with commas": "rgba(0, 0, 0, .5)",
+      hsl: "hsl(120deg 50% 50%)",
+      oklch: "oklch(70% 0.2 150)",
+      "oklch with alpha": "oklch(70% 0.2 150 / 0.5)",
+    };
+    for (const [form, value] of Object.entries(accepted)) {
+      expect({ form, ok: isExtensionVarValue(value) }).toEqual({ form, ok: true });
+      expect(filterExtensionVars({ "--kit-v": value }, rule)).toEqual({ "--kit-v": value });
+    }
+  });
+
+  test("a plain token sequence is dropped, because it is not one value", () => {
+    for (const value of ["a b", "70px 2", "1px solid red", "0 0 4px #000", "70 80", "red blue"]) {
+      expect({ value, ok: isExtensionVarValue(value) }).toEqual({ value, ok: false });
       expect(filterExtensionVars({ "--kit-v": value }, rule)).toEqual({});
     }
-    expect(filterExtensionVars({ "--kit-v": "a".repeat(200) }, rule)).toEqual({
-      "--kit-v": "a".repeat(200),
+  });
+
+  test("a keyword, var(), calc(), an exponent, an unknown unit or a half-written colour is dropped", () => {
+    const bad = [
+      "red",
+      "auto",
+      "var(--x)",
+      "calc(1px + 2px)",
+      "1e3",
+      "12pt",
+      "12 px",
+      "px",
+      "#ggg",
+      "#12345",
+      "rgb(0 0)",
+      "rgb(0 0 0 0 0)",
+      "rgb(0 0 0 /)",
+      "50%%",
+      " 70",
+      "70 ",
+    ];
+    for (const value of bad)
+      expect({ value, ok: isExtensionVarValue(value) }).toEqual({ value, ok: false });
+  });
+
+  test("a value that could leave its rule is dropped before its form is looked at", () => {
+    const bad = [
+      "}",
+      "a;b",
+      'x"y',
+      "url(x)",
+      "/*c*/",
+      "a\nb",
+      "<b>",
+      "70;color:red",
+      "70}body{x:1",
+      "",
+      7,
+      null,
+    ];
+    for (const value of bad) expect(filterExtensionVars({ "--kit-v": value }, rule)).toEqual({});
+  });
+
+  test("a value of an agreed form is still dropped when it is too long or ends in a newline", () => {
+    // Each of these matches a form on its own; only the style value check stops them.
+    expect(filterExtensionVars({ "--kit-v": "1".repeat(200) }, rule)).toEqual({
+      "--kit-v": "1".repeat(200),
     });
+    for (const value of ["1".repeat(201), "1".repeat(250), "70\n", "70\r\n"]) {
+      expect(filterExtensionVars({ "--kit-v": value }, rule)).toEqual({});
+    }
   });
 
   test("at most 16 stay, and a non-object or no rule keeps nothing", () => {
@@ -117,6 +192,24 @@ describe("the vars list in the class allowlist", () => {
     });
   });
 
+  test("an extension with no class but a vars list keeps its allowlist and its rule", () => {
+    expect(normalizeClasses({ prefix: "kit-", allow: [], vars: ["--fixed-name"] })).toEqual({
+      prefix: "kit-",
+      allow: [],
+      vars: ["--fixed-name"],
+    });
+    rememberExtensions([kit({}, { prefix: "kit-", allow: [], vars: ["--fixed-name"] })]);
+    expect(extensionVarRule("emvb-ext-kit")?.prefix).toBe("kit-");
+    expect([...(extensionVarRule("emvb-ext-kit")?.vars ?? [])]).toEqual(["--fixed-name"]);
+  });
+
+  test("no class and no valid variable still leaves nothing, and so does a refused prefix", () => {
+    expect(normalizeClasses({ prefix: "kit-", allow: [] })).toBeUndefined();
+    expect(normalizeClasses({ prefix: "kit-", allow: [], vars: ["color", 5] })).toBeUndefined();
+    expect(normalizeClasses({ prefix: "Kit", allow: [], vars: ["--fixed-name"] })).toBeUndefined();
+    expect(normalizeClasses({ prefix: "kit-", allow: ["other"] })).toBeUndefined();
+  });
+
   test("the registry keeps the rule next to the class allowlist, and clears it with it", () => {
     rememberExtensions([kit({})]);
     expect(extensionVarRule("emvb-ext-kit")?.prefix).toBe("kit-");
@@ -140,6 +233,19 @@ describe("extVars on a rendered page", () => {
     expect(out.html).toContain("emvb-e-ring0001");
     expect(out.html).not.toContain("style=");
     expect(out.html).not.toContain("--kit-value");
+  });
+
+  test("a variable-only extension sets its declared variables on the page, with no placeholder class", () => {
+    rememberExtensions([
+      kit(
+        { "--fixed-name": "70", "--kit-value": "1", "--other": "2" },
+        { prefix: "kit-", allow: [], vars: ["--fixed-name"] },
+      ),
+    ]);
+    const out = renderPage(page(use), emptyDesign());
+    // The declared name and a name under the prefix are kept; an undeclared one is dropped.
+    expect(ruleOf(out.css, "ring0001")).toBe(".emvb-e-ring0001{--fixed-name:70;--kit-value:1}");
+    expect(out.css).not.toContain("--other");
   });
 
   test("an unknown name, an unsafe value and a plain property never reach the page", () => {
