@@ -88,6 +88,61 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
     );
   });
 
+  test("a comma list keeps its commas when a comment sits inside it", () => {
+    expect(scopeExtensionCss("h1/* c */,h2{x:1}", "kit")).toBe(`${W} h1/* c */,${W} h2{x:1}`);
+  });
+
+  test("braces and commas inside strings, urls and comments do not split a rule", () => {
+    const css = 'h1::before{content:"}"}h2{background:url("a,b{c}.svg")}/* { , */h3{x:1}';
+    expect(scopeExtensionCss(css, "kit")).toBe(
+      `${W} h1::before{content:"}"}${W} h2{background:url("a,b{c}.svg")}/* { , */${W} h3{x:1}`,
+    );
+  });
+
+  test("a class that is only inside :not(), :is() or an attribute value does not exempt the selector", () => {
+    expect(scopeExtensionCss("a:not(.b){x:1}", "kit")).toBe(`${W} a:not(.b){x:1}`);
+    expect(scopeExtensionCss(":is(h1,.c){x:1}", "kit")).toBe(`${W} :is(h1,.c){x:1}`);
+    expect(scopeExtensionCss('a[href$=".pdf"]{x:1}', "kit")).toBe(`${W} a[href$=".pdf"]{x:1}`);
+  });
+
+  test("the element a selector styles decides: .card h2 is scoped, h2.title and .btn:hover are not", () => {
+    expect(scopeExtensionCss(".card h2{x:1}", "kit")).toBe(`${W} .card h2{x:1}`);
+    expect(scopeExtensionCss("h2.title{x:1}", "kit")).toBe("h2.title{x:1}");
+    expect(scopeExtensionCss(".btn:hover{x:1}", "kit")).toBe(".btn:hover{x:1}");
+    expect(scopeExtensionCss(".sm\\:flex{x:1}", "kit")).toBe(".sm\\:flex{x:1}");
+  });
+
+  test("a rule under :root or [data-theme] with a bare descendant is scoped after the head", () => {
+    expect(scopeExtensionCss(":root h1{x:1}", "kit")).toBe(`:root ${W} h1{x:1}`);
+    expect(scopeExtensionCss("[data-theme=dark] h1{x:1}", "kit")).toBe(
+      `[data-theme=dark] ${W} h1{x:1}`,
+    );
+    expect(scopeExtensionCss("[data-theme=dark] .btn{x:1}", "kit")).toBe(
+      "[data-theme=dark] .btn{x:1}",
+    );
+  });
+
+  test("statement at-rules are skipped, and the rule after them is still scoped", () => {
+    expect(
+      scopeExtensionCss('@charset "utf-8";@import url("x.css");@layer a,b;h1{x:1}', "kit"),
+    ).toBe(`@charset "utf-8";@import url("x.css");@layer a,b;${W} h1{x:1}`);
+  });
+
+  test("@starting-style is scoped inside, @property and @page are copied", () => {
+    expect(scopeExtensionCss("@starting-style{h1{x:1}}@page{margin:0}", "kit")).toBe(
+      `@starting-style{${W} h1{x:1}}@page{margin:0}`,
+    );
+  });
+
+  test("a Tailwind preflight is scoped without touching its layers", () => {
+    expect(
+      scopeExtensionCss(
+        "@layer theme,base;@layer base{*,::before{margin:0}html,:host{x:1}}",
+        "kit",
+      ),
+    ).toBe(`@layer theme,base;@layer base{${W} *,${W} ::before{margin:0}${W},${W} :host{x:1}}`);
+  });
+
   test("the wrapper class is the one the render writes on the element", () => {
     expect(EXTENSION_WRAPPER_CLASS("kit")).toBe("emvb-ext--kit");
   });
@@ -110,6 +165,19 @@ describe("unprefixed global variables are reported (extensionApi 1.5)", () => {
     expect(unprefixedGlobalVariables("@layer base{@media (x){:root{--bad:1}}}", "kit-")).toEqual([
       "--bad",
     ]);
+  });
+
+  test("a variable in a rule with a class, or in a string or comment, is not a global declaration", () => {
+    expect(
+      unprefixedGlobalVariables(
+        '.a{--x:1}/* :root{--y:1} */h1::after{content:":root{--z:1}"}',
+        "k-",
+      ),
+    ).toEqual([]);
+  });
+
+  test("a statement at-rule before the rules does not hide them", () => {
+    expect(unprefixedGlobalVariables("@layer a,b;:root{--bad:1}", "k-")).toEqual(["--bad"]);
   });
 
   test("with no prefix declared, every global variable is reported", () => {

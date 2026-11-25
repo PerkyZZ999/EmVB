@@ -56983,8 +56983,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "return `${wrapper} ${selector}`;",
-          "replace": "return selector;"
+          "search": "  return `${wrapper} ${orig}`;",
+          "replace": "  return orig;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
@@ -56997,8 +56997,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "if (GLOBAL_SELECTOR.test(selector) || HAS_CLASS.test(selector)) return selector;",
-          "replace": "if (GLOBAL_SELECTOR.test(selector)) return selector;"
+          "search": "  if (hasClass(lastCompound(masked))) return orig;",
+          "replace": "  if (hasClass(lastCompound(masked)) && false) return orig;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
@@ -57011,8 +57011,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const GLOBAL_SELECTOR = /:root|\\[data-theme/;",
-          "replace": "const GLOBAL_SELECTOR = /\\[data-theme/;"
+          "search": "const THEME_HEAD = /^(?::root|\\[data-theme)/;",
+          "replace": "const THEME_HEAD = /^(?:\\[data-theme)/;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
@@ -57031,6 +57031,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
       "expect": "\\(fail\\).*a variable on :root or \\[data-theme\\] without the prefix is reported"
+    },
+    {
+      "id": "W-1086/ext-css-statement-at-rule-hides-rule",
+      "requirement": "W-1086",
+      "description": "a statement at-rule (@layer a,b;) swallows the next rule, so it is not scoped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "if (masked[p] === \"@\" && semi !== -1 && semi < to && (open === -1 || semi < open)) {\n      out += css.slice(i, semi + 1);",
+          "replace": "if (false) {\n      out += css.slice(i, semi + 1);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*statement at-rules are skipped"
+    },
+    {
+      "id": "W-1086/ext-css-string-brace-splits",
+      "requirement": "W-1086",
+      "description": "a brace inside a string is read as structure, so the rule is cut in the string",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, maskCss(css), 0, css.length, wrapper);",
+          "replace": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, css, 0, css.length, wrapper);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*braces and commas inside strings"
     }
   ]
 }
