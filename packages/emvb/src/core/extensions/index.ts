@@ -46,7 +46,12 @@ export {
   extensionAssets,
   extensionStylesheets,
 } from "./registry.ts";
-export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
+export {
+  safeExtensionOutput,
+  extensionClassesOf,
+  extensionVarsOf,
+  withExtensionClasses,
+} from "./safe-nodes.ts";
 export {
   syncSourceValues,
   resolveExtensionSource,

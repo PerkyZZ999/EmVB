@@ -64,7 +64,15 @@ export type ExtensionField = Pick<
  * names from the extension's own `classes.allow` list. Names not on the list are dropped. This is
  * render output only; it is never stored in a layout.
  */
-export type ExtensionOutputNode = LayoutNode & { extClasses?: readonly string[] };
+export type ExtensionOutputNode = LayoutNode & {
+  extClasses?: readonly string[];
+  /**
+   * extensionApi 1.5: CSS custom properties for this node, `{ "--daisy-value": "70" }`. Names start
+   * with `--` and the extension's class prefix, or are listed in `classes.vars`. Values are checked
+   * like style values. Written into the node's own rule, never into a `style` attribute.
+   */
+  extVars?: Readonly<Record<string, string>>;
+};
 
 /**
  * W-1086: the static class allowlist an extension declares. Every name starts with `prefix`
@@ -74,6 +82,11 @@ export type ExtensionOutputNode = LayoutNode & { extClasses?: readonly string[] 
 export type ExtensionClasses = {
   prefix: string;
   allow: readonly string[];
+  /**
+   * extensionApi 1.5: custom property names `extVars` may set besides `--<prefix>…`. Only for a kit
+   * whose CSS reads fixed names; a name that starts with `--` and the prefix needs no entry here.
+   */
+  vars?: readonly string[];
 };
 
 /** Context passed to an element render function (read-only source values). */

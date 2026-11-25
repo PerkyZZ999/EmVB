@@ -123,6 +123,36 @@ servers through the plugin options. The module must sit in a package whose `pack
 - `extClasses` is render output, not stored data: it never enters a layout, and the layout
   schema is unchanged. Class names never come from props or editors.
 
+### `extVars` (extensionApi 1.5)
+
+A node returned by `render()` may carry `extVars`, CSS custom properties for that node:
+
+```ts
+render: (props) => ({
+  type: "heading",
+  props: { text: `${props.percent}%`, level: 2 },
+  extClasses: ["daisy-radial-progress"],
+  extVars: { "--daisy-value": String(props.percent) },
+});
+```
+
+- A name must start with `--` and the extension's class `prefix` (`--daisy-value` for the prefix
+  `daisy-`), with something after it. A kit whose CSS reads fixed names lists them in
+  `classes.vars` (`vars: ["--tw-ring-color"]`, up to 64 names). Any other name is dropped, so an
+  extension cannot set a site variable such as `--color-primary`. Names that start with `--emvb`
+  are never allowed.
+- A value must pass the same check as a style value: a string of at most 200 characters, with no
+  `{ } ; < > \ " '`, no backtick, no `url(`, no comments, no newlines. A value that fails is
+  dropped, the rest stay. At most 16 variables stay on one node.
+- They are written into the node's own rule, `.emvb-e-<id>{--daisy-value:70}`, never into a
+  `style` attribute, so the public page, the editor canvas and the HTML export carry them the same
+  way. The value is read when the page is rendered on the server.
+- To change a value in the browser, the extension's own `runtime` calls
+  `el.style.setProperty("--daisy-value", n)`. The class allowlist limits only what the server
+  writes, not what a script does on the page.
+- An extension with no `classes` declares no prefix, so it can set no variables.
+- Like `extClasses`, `extVars` is render output, not stored data.
+
 ### `css` and `runtime`
 
 - Paths are relative to `module` (`./file`, `../dir/file`), must stay inside the extension's

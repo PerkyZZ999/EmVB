@@ -10,20 +10,31 @@ import { KNOWN_ELEMENT_TYPES } from "../schema/layout.ts";
 import { validateLayout } from "../validate.ts";
 import { newNodeId } from "../tree-ops.ts";
 import { isExtensionType } from "./namespace.ts";
-import { filterExtensionClasses } from "./classes.ts";
+import { filterExtensionClasses, filterExtensionVars, type ExtensionVarRule } from "./classes.ts";
 
 /**
  * W-1086: the extension classes each validated output node keeps. Render output only: they ride
  * beside the node, never in it, so the stored layout schema and its validation are unchanged.
  */
 const EXT_CLASSES = new WeakMap<object, readonly string[]>();
+/** extensionApi 1.5: the same for `extVars`, the custom properties an output node keeps. */
+const EXT_VARS = new WeakMap<object, Readonly<Record<string, string>>>();
 
 /** The allowlisted extension classes of an output node (none for every other node). */
 export function extensionClassesOf(node: object): readonly string[] | undefined {
   return EXT_CLASSES.get(node);
 }
 
-type Coerced = { node: Record<string, unknown>; classes: string[]; children?: Coerced[] };
+/** The custom properties an output node kept (none for every other node). */
+export function extensionVarsOf(node: object): Readonly<Record<string, string>> | undefined {
+  return EXT_VARS.get(node);
+}
+type Coerced = {
+  node: Record<string, unknown>;
+  classes: string[];
+  vars: Record<string, string>;
+  children?: Coerced[];
+};
 
 const KNOWN = new Set<string>(KNOWN_ELEMENT_TYPES);
 const MAX_NODES = 32;
@@ -35,6 +46,7 @@ function coerce(
   budget: { left: number },
   random: () => number,
   allow: ReadonlySet<string> | undefined,
+  varRule: ExtensionVarRule | undefined,
 ): Coerced | undefined {
   if (budget.left <= 0 || depth > MAX_DEPTH) return undefined;
   if (typeof value === "string") return undefined; // raw HTML / text — refused
@@ -58,7 +70,7 @@ function coerce(
   if (Array.isArray(node.children)) {
     children = [];
     for (const child of node.children) {
-      const ok = coerce(child, depth + 1, budget, random, allow);
+      const ok = coerce(child, depth + 1, budget, random, allow, varRule);
       if (ok) children.push(ok);
     }
   }
@@ -72,6 +84,7 @@ function coerce(
       ...(children ? { children: children.map((c) => c.node) } : {}),
     },
     classes: filterExtensionClasses(node.extClasses, allow),
+    vars: filterExtensionVars(node.extVars, varRule),
     ...(children ? { children } : {}),
   };
 }
@@ -79,6 +92,7 @@ function coerce(
 /** Pair each validated node with the classes its coerced twin kept (same tree shape). */
 function attachClasses(validated: LayoutNode, coerced: Coerced): void {
   if (coerced.classes.length > 0) EXT_CLASSES.set(validated, coerced.classes);
+  if (Object.keys(coerced.vars).length > 0) EXT_VARS.set(validated, coerced.vars);
   const kids = (validated as { children?: LayoutNode[] }).children;
   if (!Array.isArray(kids) || !coerced.children || kids.length !== coerced.children.length) return;
   kids.forEach((kid, i) => {
@@ -94,11 +108,13 @@ function attachClasses(validated: LayoutNode, coerced: Coerced): void {
 export function withExtensionClasses(nodes: readonly LayoutNode[]): unknown[] {
   const copy = (node: LayoutNode): Record<string, unknown> => {
     const classes = EXT_CLASSES.get(node);
+    const vars = EXT_VARS.get(node);
     const kids = (node as { children?: LayoutNode[] }).children;
     return {
       ...node,
       ...(Array.isArray(kids) ? { children: kids.map(copy) } : {}),
       ...(classes ? { extClasses: [...classes] } : {}),
+      ...(vars ? { extVars: { ...vars } } : {}),
     };
   };
   return nodes.map(copy);
@@ -113,16 +129,18 @@ export function safeExtensionOutput(
   random: () => number = Math.random,
   /** W-1086: the extension's class allowlist; without one every `extClasses` entry drops. */
   allow?: ReadonlySet<string>,
+  /** extensionApi 1.5: what `extVars` may set; without one every `extVars` entry drops. */
+  varRule?: ExtensionVarRule,
 ): LayoutNode[] {
   const budget = { left: MAX_NODES };
   const coerced: Coerced[] = [];
   if (Array.isArray(raw)) {
     for (const item of raw) {
-      const node = coerce(item, 0, budget, random, allow);
+      const node = coerce(item, 0, budget, random, allow, varRule);
       if (node) coerced.push(node);
     }
   } else {
-    const one = coerce(raw, 0, budget, random, allow);
+    const one = coerce(raw, 0, budget, random, allow, varRule);
     if (one) coerced.push(one);
   }
   if (coerced.length === 0) return [];

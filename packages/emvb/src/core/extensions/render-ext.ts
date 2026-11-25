@@ -5,7 +5,12 @@
 
 import type { LayoutNode } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
-import { extensionClassAllowlist, liveElement, liveExtension } from "./registry.ts";
+import {
+  extensionClassAllowlist,
+  extensionVarRule,
+  liveElement,
+  liveExtension,
+} from "./registry.ts";
 import { validateExtensionProps } from "./schema.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { extensionPlaceholderVNode } from "./placeholder.ts";
@@ -146,7 +151,12 @@ export function liveExtensionOutput(node: {
   } catch {
     return undefined;
   }
-  const safe = safeExtensionOutput(raw, Math.random, extensionClassAllowlist(parsed.pkg));
+  const safe = safeExtensionOutput(
+    raw,
+    Math.random,
+    extensionClassAllowlist(parsed.pkg),
+    extensionVarRule(parsed.pkg),
+  );
   return safe.length > 0 ? safe : undefined;
 }
 
@@ -177,6 +187,7 @@ export function renderExtensionNode(
       outputs.get(extensionOutputKey(node)),
       Math.random,
       extensionClassAllowlist(parsed.pkg),
+      extensionVarRule(parsed.pkg),
     );
   }
   if (!safe || safe.length === 0) {

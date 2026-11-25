@@ -7,7 +7,7 @@
  * and the renderer look them up by id.
  */
 
-import { cleanExtensionAssets, normalizeClasses } from "./classes.ts";
+import { cleanExtensionAssets, normalizeClasses, type ExtensionVarRule } from "./classes.ts";
 import { normalizeExtension } from "./normalize.ts";
 import type { EmVBExtension, ExtensionAssets, ExtensionManifest } from "./types.ts";
 
@@ -20,6 +20,8 @@ type Store = {
   assets?: Map<string, ExtensionAssets>;
   /** W-1086: each extension's class allowlist as a set, by extension id. */
   allow?: Map<string, ReadonlySet<string>>;
+  /** extensionApi 1.5: what each extension's `extVars` may set, by extension id. */
+  varRules?: Map<string, ExtensionVarRule>;
 };
 
 function store(): Store {
@@ -40,12 +42,26 @@ function allowMap(): Map<string, ReadonlySet<string>> {
   return s.allow;
 }
 
+function varRuleMap(): Map<string, ExtensionVarRule> {
+  const s = store();
+  s.varRules ??= new Map();
+  return s.varRules;
+}
+/** Keep (or clear) the class allowlist and the `extVars` rule of extension `id`. */
+function rememberClasses(id: string, classes: ExtensionManifest["classes"]): void {
+  if (classes) {
+    allowMap().set(id, new Set(classes.allow));
+    varRuleMap().set(id, { prefix: classes.prefix, vars: new Set(classes.vars ?? []) });
+  } else {
+    allowMap().delete(id);
+    varRuleMap().delete(id);
+  }
+}
 function rememberManifest(manifest: ExtensionManifest): void {
   const s = store();
   s.manifests = s.manifests.filter((m) => m.id !== manifest.id);
   s.manifests.push(manifest);
-  if (manifest.classes) allowMap().set(manifest.id, new Set(manifest.classes.allow));
-  else allowMap().delete(manifest.id);
+  rememberClasses(manifest.id, manifest.classes);
 }
 
 /** Register live extensions from `emvb({ extensions })`. Returns serializable manifests. */
@@ -120,6 +136,10 @@ export function extensionStylesheets(ids: Iterable<string>): string {
 export function extensionClassAllowlist(id: string): ReadonlySet<string> | undefined {
   return store().allow?.get(id);
 }
+/** extensionApi 1.5: what extension `id`'s `extVars` may set (none without a class prefix). */
+export function extensionVarRule(id: string): ExtensionVarRule | undefined {
+  return store().varRules?.get(id);
+}
 
 /**
  * W-1086: the admin has manifests (from editor/config) but no live extension code. Remembering
@@ -177,6 +197,7 @@ export function clearExtensions(): void {
   s.manifests = [];
   s.assets?.clear();
   s.allow?.clear();
+  s.varRules?.clear();
 }
 
 /** Rebuild manifests from options.extensions after createPlugin (ids only or full manifests). */
@@ -209,7 +230,7 @@ export function manifestsFromOptions(input: unknown): ExtensionManifest[] {
     const { assets: _assets, ...rest } = m;
     const classes = normalizeClasses(m.classes);
     const manifest = { ...rest, ...(classes ? { classes } : {}) };
-    if (classes) allowMap().set(m.id, new Set(classes.allow));
+    if (classes) rememberClasses(m.id, classes);
     const assets = extensionAssets(m.id);
     out.push(assets ? { ...manifest, assets } : manifest);
   }

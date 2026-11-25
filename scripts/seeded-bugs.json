@@ -56975,6 +56975,62 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
+    },
+    {
+      "id": "W-1086/ext-vars-foreign-name",
+      "requirement": "W-1086",
+      "description": "extVars may set a variable outside the extension's prefix, so it can overwrite a site variable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    if (!isVarName(name) || !(own || rule.vars.has(name))) continue;",
+          "replace": "    if (!isVarName(name)) continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*a name outside the prefix and the list is dropped"
+    },
+    {
+      "id": "W-1086/ext-vars-unsafe-value",
+      "requirement": "W-1086",
+      "description": "extVars skips the style value check, so braces and url() reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    if (typeof value !== \"string\" || !isSafeCssValue(value)) continue;",
+          "replace": "    if (typeof value !== \"string\") continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*values are checked like style values"
+    },
+    {
+      "id": "W-1086/ext-vars-not-written",
+      "requirement": "W-1086",
+      "description": "extVars are checked but never written into the node's rule",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      declarations.push({ property, value });",
+          "replace": "      void property;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*they go into the node's own rule"
+    },
+    {
+      "id": "W-1086/ext-vars-rule-survives-clear",
+      "requirement": "W-1086",
+      "description": "clearing the extensions leaves their extVars rule, so a removed extension still sets variables",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/registry.ts",
+          "search": "  s.varRules?.clear();",
+          "replace": "  void s.varRules;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*clearing the extensions clears the rule"
     }
   ]
 }
