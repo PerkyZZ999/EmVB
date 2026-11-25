@@ -94,3 +94,105 @@ function scopeWith(css: string, prefix: string): string {
   }
   return out;
 }
+
+/**
+ * Extension stylesheets (extensionApi 1.5). An extension's CSS is scoped to its own wrapper, so a
+ * kit's base rules (`h1`, `button`, `*`, `html`) cannot restyle the page around the element.
+ *
+ * Per selector: a selector with a class is left alone (the allowlist already limits which classes
+ * reach the page); `html` and `body` become the wrapper itself; a selector with no class becomes
+ * `:where(<wrapper>) <selector>`, which adds no specificity, so the kit's class rules still win.
+ * `:root` and `[data-theme]` stay global, because theme variables are declared there. At-rules
+ * other than the grouping ones (`@keyframes`, `@font-face`, `@import`) are copied as they are.
+ * A rule that changes nothing is copied byte for byte, so an extension that styles only its own
+ * classes gets exactly the CSS it wrote.
+ */
+export const EXTENSION_WRAPPER_CLASS = (token: string): string => `emvb-ext--${token}`;
+
+const GLOBAL_SELECTOR = /:root|\[data-theme/;
+const HAS_CLASS = /\.[A-Za-z_-]/;
+
+function extensionSelector(selector: string, wrapper: string): string {
+  if (GLOBAL_SELECTOR.test(selector) || HAS_CLASS.test(selector)) return selector;
+  if (selector === "html" || selector === "body") return wrapper;
+  return `${wrapper} ${selector}`;
+}
+
+/**
+ * The part of a rule's text before its `{`, split into the comments that lead it (kept as they
+ * are) and the prelude itself.
+ */
+function splitPrelude(raw: string): { lead: string; prelude: string } {
+  const cut = raw.lastIndexOf("*/");
+  if (cut === -1) return { lead: "", prelude: raw.trim() };
+  const after = raw.slice(cut + 2);
+  const gap = after.length - after.trimStart().length;
+  return { lead: raw.slice(0, cut + 2 + gap), prelude: after.trim() };
+}
+
+function rewriteExtensionRules(css: string, wrapper: string): string {
+  let out = "";
+  let i = 0;
+  while (i < css.length) {
+    const open = css.indexOf("{", i);
+    if (open === -1) {
+      out += css.slice(i);
+      break;
+    }
+    const { lead, prelude } = splitPrelude(css.slice(i, open));
+    const end = blockEnd(css, open);
+    const whole = css.slice(i, end);
+    const body = css.slice(open + 1, end - 1);
+    if (GROUPING_AT_RULE.test(prelude)) {
+      const inner = rewriteExtensionRules(body, wrapper);
+      out += inner === body ? whole : `${lead}${prelude}{${inner}}`;
+    } else if (prelude[0] === "@") {
+      out += whole;
+    } else {
+      const selectors = splitSelectors(prelude);
+      const mapped = selectors.map((s) => extensionSelector(s, wrapper));
+      const changed = mapped.some((m, n) => m !== selectors[n]);
+      out += changed ? `${lead}${mapped.join(",")}{${body}}` : whole;
+    }
+    i = end;
+  }
+  return out;
+}
+
+/** The extension's stylesheet, scoped to the wrapper of render token `token` (see above). */
+export function scopeExtensionCss(css: string, token: string): string {
+  return rewriteExtensionRules(css, `:where(.${EXTENSION_WRAPPER_CLASS(token)})`);
+}
+
+/**
+ * Global variables an extension declares outside its own wrapper: `--name` in a `:root` or
+ * `[data-theme]` rule that does not start with the extension's prefix. They would overwrite the
+ * site's own variables of the same name, so the build warns about each one.
+ */
+export function unprefixedGlobalVariables(css: string, prefix: string | undefined): string[] {
+  const found: string[] = [];
+  const visit = (text: string): void => {
+    let i = 0;
+    while (i < text.length) {
+      const open = text.indexOf("{", i);
+      if (open === -1) break;
+      const { prelude } = splitPrelude(text.slice(i, open));
+      const end = blockEnd(text, open);
+      const body = text.slice(open + 1, end - 1);
+      if (GROUPING_AT_RULE.test(prelude)) visit(body);
+      else if (
+        !prelude.startsWith("@") &&
+        splitSelectors(prelude).some((s) => GLOBAL_SELECTOR.test(s))
+      ) {
+        for (const match of body.matchAll(/(--[A-Za-z0-9_-]+)\s*:/g)) {
+          const name = match[1] ?? "";
+          const prefixed = prefix !== undefined && name.startsWith(`--${prefix}`);
+          if (!prefixed && !found.includes(name)) found.push(name);
+        }
+      }
+      i = end;
+    }
+  };
+  visit(css);
+  return found;
+}

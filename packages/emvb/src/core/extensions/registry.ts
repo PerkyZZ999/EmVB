@@ -8,6 +8,7 @@
  */
 
 import { cleanExtensionAssets, normalizeClasses } from "./classes.ts";
+import { cssScopeToken, scopeExtensionCss } from "../css/scope.ts";
 import { normalizeExtension } from "./normalize.ts";
 import type { EmVBExtension, ExtensionAssets, ExtensionManifest } from "./types.ts";
 
@@ -111,7 +112,9 @@ export function extensionStylesheets(ids: Iterable<string>): string {
     .toSorted()
     .flatMap((id) => {
       const css = extensionAssets(id)?.css;
-      return css ? [`/* ${id} */\n${css}\n`] : [];
+      const token = cssScopeToken(id);
+      // extensionApi 1.5: scoped to the extension's own wrapper, so its base rules stay in it.
+      return css && token ? [`/* ${id} */\n${scopeExtensionCss(css, token)}\n`] : [];
     })
     .join("");
 }

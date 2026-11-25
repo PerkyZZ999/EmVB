@@ -56975,6 +56975,62 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
+    },
+    {
+      "id": "W-1086/ext-css-bare-not-scoped",
+      "requirement": "W-1086",
+      "description": "a bare element selector in an extension stylesheet is not scoped, so it restyles the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "return `${wrapper} ${selector}`;",
+          "replace": "return selector;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a bare element selector is scoped to the wrapper"
+    },
+    {
+      "id": "W-1086/ext-css-class-scoped",
+      "requirement": "W-1086",
+      "description": "a class selector in an extension stylesheet is scoped too, which changes the kit's own classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "if (GLOBAL_SELECTOR.test(selector) || HAS_CLASS.test(selector)) return selector;",
+          "replace": "if (GLOBAL_SELECTOR.test(selector)) return selector;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a selector with a class is left alone"
+    },
+    {
+      "id": "W-1086/ext-css-root-scoped",
+      "requirement": "W-1086",
+      "description": "theme variables on :root are scoped, so they no longer reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const GLOBAL_SELECTOR = /:root|\\[data-theme/;",
+          "replace": "const GLOBAL_SELECTOR = /\\[data-theme/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*:root and \\[data-theme\\] stay global"
+    },
+    {
+      "id": "W-1086/ext-css-unprefixed-not-reported",
+      "requirement": "W-1086",
+      "description": "an unprefixed variable on :root is not reported at build",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "if (!prefixed && !found.includes(name)) found.push(name);",
+          "replace": "if (false) found.push(name);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a variable on :root or \\[data-theme\\] without the prefix is reported"
     }
   ]
 }

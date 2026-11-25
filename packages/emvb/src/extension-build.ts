@@ -26,6 +26,7 @@ import {
   type ExtensionManifest,
 } from "./core/extensions/index.ts";
 import { MAX_EXTENSION_CSS_BYTES, MAX_EXTENSION_RUNTIME_BYTES } from "./core/extensions/classes.ts";
+import { unprefixedGlobalVariables } from "./core/css/scope.ts";
 import { PACKAGE_NAME } from "./constants.ts";
 
 type NodeApis = { fs: typeof Fs; path: typeof Path; url: typeof Url; vm?: typeof Vm };
@@ -209,6 +210,12 @@ export function prepareExtensionBuild(
         const issue = extensionCssIssue(css);
         if (issue) say(`css refused: ${issue}`);
         else assets.css = css;
+        // extensionApi 1.5: a global variable without the prefix would overwrite the site's own.
+        for (const name of unprefixedGlobalVariables(css, manifest.classes?.prefix)) {
+          say(
+            `css declares ${name} on :root or [data-theme] without the prefix; name it --${manifest.classes?.prefix ?? "<prefix>"}…`,
+          );
+        }
       }
     }
     if (ext.runtime !== undefined) {
