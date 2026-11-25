@@ -56979,16 +56979,16 @@
     {
       "id": "W-1086/class-brackets-allowed",
       "requirement": "W-1086",
-      "description": "the class rule lets square brackets through, so arbitrary values reach the page",
+      "description": "the class rule admits square brackets and keeps every other valid name, so arbitrary values reach the page",
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/classes.ts",
           "search": "const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._-]*$/;",
-          "replace": "const CLASS_NAME = /^[a-z0-9\\\\[][a-z0-9:/!._\\\\[\\\\]=-]*$/;"
+          "replace": "const CLASS_NAME = /^[a-z0-9[][a-z0-9:/!._[\\]=-]*$/;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
-      "expect": "\\(fail\\).*exact names with the compiled-kit characters are kept"
+      "expect": "\\(fail\\).*a square-bracket name is refused while its valid neighbours stay"
     },
     {
       "id": "W-1086/class-colon-dropped",
@@ -57003,6 +57003,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
       "expect": "\\(fail\\).*names are not parsed"
+    },
+    {
+      "id": "W-1086/class-prefix-not-required",
+      "requirement": "W-1086",
+      "description": "the class rule no longer requires the prefix, so Tailwind's variant-first spelling (sm:daisy-card-side) is admitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    name.startsWith(prefix) &&",
+          "replace": "    true &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a responsive class is spelled prefix-first"
     }
   ]
 }

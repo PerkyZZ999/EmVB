@@ -4,6 +4,10 @@ import { renderPage } from "../render/index.ts";
 import { emptyDesign } from "../schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../schema/layout.ts";
 import {
+  RAW_CARD_SIDE_CSS,
+  SHIPPED_CARD_SIDE_CSS,
+} from "../../../test/fixtures/daisyui-card-side.ts";
+import {
   cleanExtensionAssets,
   classPrefixIssue,
   extensionCssIssue,
@@ -133,6 +137,35 @@ describe("class allowlist at registration (W-1086)", () => {
       "daisy-w-auto!",
       "daisy-sm:card-side",
     ]);
+  });
+  test("a square-bracket name is refused while its valid neighbours stay", () => {
+    const allow = ["daisy-btn", "daisy-size-24!", "daisy-[--value:70]", "daisy-sm:card-side"];
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual([
+      "daisy-btn",
+      "daisy-size-24!",
+      "daisy-sm:card-side",
+    ]);
+  });
+  test("a responsive class is spelled prefix-first in the CSS a kit ships, and that spelling is kept", () => {
+    // Real daisyUI 5.8.2 / Tailwind 4.3.5 output: Tailwind builds `sm:daisy-card-side`, and the kit
+    // renames the selector to `daisy-sm:card-side` so every class name starts with the prefix.
+    const classesIn = (css: string): string[] => [
+      ...new Set(
+        [...css.matchAll(/\.((?:[\w-]|\\.)+)/g)]
+          .map((match) => (match[1] ?? "").replace(/\\(.)/g, "$1"))
+          .filter((name) => name.includes("card-side")),
+      ),
+    ];
+    expect(classesIn(RAW_CARD_SIDE_CSS)).toEqual(["sm:daisy-card-side"]);
+    expect(classesIn(SHIPPED_CARD_SIDE_CSS)).toEqual(["daisy-sm:card-side"]);
+    // The shipped spelling starts with the prefix and is kept exactly; the raw one does not and is dropped.
+    expect(
+      normalizeClasses({ prefix: "daisy-", allow: classesIn(SHIPPED_CARD_SIDE_CSS) })?.allow,
+    ).toEqual(["daisy-sm:card-side"]);
+    expect(
+      normalizeClasses({ prefix: "daisy-", allow: [...classesIn(RAW_CARD_SIDE_CSS), "daisy-card"] })
+        ?.allow,
+    ).toEqual(["daisy-card"]);
   });
   test("names are not parsed: any name with the allowed characters and the prefix is kept", () => {
     const allow = [

@@ -117,6 +117,10 @@ servers through the plugin options. The module must sit in a package whose `pack
   A name uses only lowercase letters, digits, `-`, and `: / ! . _`. Square brackets, spaces,
   quotes and markup are not allowed. Names are matched exactly and never parsed: whatever a name
   means comes from the kit's CSS. Other names are dropped one by one.
+- Every name starts with the prefix, including a responsive one. Tailwind builds a prefixed
+  variant class variant-first (`sm:daisy-card-side`), so a kit that ships `daisy-sm:card-side`
+  asks Tailwind for the variant-first name and renames the selector in the built CSS. The
+  allowlist and the CSS must use the same, prefix-first, spelling.
 - A node returned by `render()` may carry `extClasses: string[]`. EmVB keeps only exact names
   from this extension's allowlist, at most 16 per node, without duplicates; anything else (free
   text, names with spaces, quotes or `<`, `emvb-*` names, unlisted names) is dropped. They are
