@@ -67,6 +67,7 @@ import { serialize, type VNode } from "./vnode.ts";
 import {
   extensionAssets,
   extensionClassesOf,
+  extensionVarsOf,
   extensionStylesheets,
   isExtensionType,
   renderExtensionNode,
@@ -461,6 +462,8 @@ export function renderPage(
     nodeId: string,
     ruleId: string | undefined,
     parent?: LayoutNode,
+    /** extensionApi 1.5: the custom properties an extension's output node set. */
+    extVars?: Readonly<Record<string, string>>,
   ): Record<string, string> => {
     const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${cssTypeName(node.type)}`];
     for (const classId of node.classes ?? []) {
@@ -496,6 +499,11 @@ export function renderPage(
       ? (withInheritedLayers(node.style, classLayers) as typeof node.style)
       : undefined;
     const { declarations, rejected } = styleDeclarations(own);
+    // extensionApi 1.5: written into this node's own rule, so the public page, the editor canvas
+    // and the HTML export all carry them the same way (never a `style` attribute).
+    for (const [property, value] of Object.entries(extVars ?? {})) {
+      declarations.push({ property, value });
+    }
     // W-1070: hiding set on a narrower device only is off on Desktop (and the element doesn't
     // take the value of a hiding box around it).
     if (hidesOnScroll(node) && !declarations.some((d) => d.property === "--emvb-sticky-hide")) {
@@ -788,7 +796,15 @@ export function renderPage(
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     // W-1062: a Spacer's size follows its parent's direction.
     for (const child of nodeChildren(node)) parentOf.set(child, node);
-    const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId, parentOf.get(stored));
+    const attrs = nodeAttrs(
+      node,
+      isRoot,
+      id,
+      nodeId,
+      ruleId,
+      parentOf.get(stored),
+      extensionVarsOf(stored),
+    );
     // W-1086: allowlisted classes an extension's render() put on its output node.
     const extClasses = extensionClassesOf(stored);
     if (extClasses) attrs.class = [attrs.class, ...extClasses].filter(Boolean).join(" ");

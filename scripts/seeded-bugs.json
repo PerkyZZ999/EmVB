@@ -53247,6 +53247,90 @@
       }
     },
     {
+      "id": "W-1086/ext-vars-foreign-name",
+      "requirement": "W-1086",
+      "description": "extVars may set a variable outside the extension's prefix, so it can overwrite a site variable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    if (!isVarName(name) || !(own || rule.vars.has(name))) continue;",
+          "replace": "    if (!isVarName(name)) continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*a name outside the prefix and the list is dropped"
+    },
+    {
+      "id": "W-1086/ext-vars-not-written",
+      "requirement": "W-1086",
+      "description": "extVars are checked but never written into the node's rule",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      declarations.push({ property, value });",
+          "replace": "      void property;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*they go into the node's own rule"
+    },
+    {
+      "id": "W-1086/ext-vars-rule-survives-clear",
+      "requirement": "W-1086",
+      "description": "clearing the extensions leaves their extVars rule, so a removed extension still sets variables",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/registry.ts",
+          "search": "  s.varRules?.clear();",
+          "replace": "  void s.varRules;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*clearing the extensions clears the rule"
+    },
+    {
+      "id": "W-1086/ext-vars-value-form-unchecked",
+      "requirement": "W-1086",
+      "description": "an extVars value only has to be safe, so a token sequence like 70px 2 or a keyword like red reaches the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    VALUE_FORMS.some((form) => form.test(value))",
+          "replace": "    true"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*a plain token sequence is dropped"
+    },
+    {
+      "id": "W-1086/ext-vars-safe-check-skipped",
+      "requirement": "W-1086",
+      "description": "an extVars value is matched on its form alone, so the check that keeps braces and url() out is gone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    isSafeCssValue(value) &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*too long or ends in a newline"
+    },
+    {
+      "id": "W-1086/ext-vars-only-extension-lost",
+      "requirement": "W-1086",
+      "description": "an extension with a valid prefix and allow: [] loses its variable rule even with vars declared",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "  if (kept.size === 0 && listed.length === 0) return undefined;",
+          "replace": "  if (kept.size === 0) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/ext-vars.test.ts"],
+      "expect": "\\(fail\\).*an extension with no class but a vars list keeps its allowlist and its rule"
+    },
+    {
       "id": "W-1080/zones",
       "requirement": "W-1080",
       "description": "A container row drops before/after anywhere, never inside.",
