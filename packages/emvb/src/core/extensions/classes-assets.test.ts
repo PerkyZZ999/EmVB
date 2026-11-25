@@ -436,3 +436,35 @@ describe("HTML export of a missing extension (W-1088, #37)", () => {
     expect(typeof html === "string" && html.includes("not installed")).toBe(false);
   });
 });
+describe("extension stylesheets are scoped to the extension's wrapper (extensionApi 1.5)", () => {
+  const KIT_CSS = "h1{margin:0}body{margin:0}:root{--kit-x:1}.kit-btn{border:2px solid red}";
+  const WRAPPER = ":where(.emvb-ext--emvb-ext-kit)";
+  const SCOPED = `${WRAPPER} h1{margin:0}${WRAPPER}{margin:0}:root{--kit-x:1}.kit-btn{border:2px solid red}`;
+  test("the page's stylesheet is scoped, and the element's wrapper carries the scope class", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });
+    const out = renderPage(page(heading, button), emptyDesign());
+    expect(out.css).toContain(`/* emvb-ext-kit */\n${SCOPED}`);
+    expect(out.css).not.toContain(KIT_CSS);
+    expect(out.html).toContain('class="emvb-ext emvb-ext--emvb-ext-kit"');
+    // The page's own heading is outside the wrapper, so the kit's `h1` rule cannot reach it.
+    expect(out.html).toMatch(/<h1[^>]*class="emvb-heading/);
+  });
+  test("a class-only stylesheet is written exactly as it was", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS });
+    expect(renderPage(page(button), emptyDesign()).css).toContain(`/* emvb-ext-kit */\n${CSS}\n`);
+  });
+  test("the HTML export scopes it the same way", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });
+    const out = buildSiteExport({
+      design: emptyDesign(),
+      parts: [],
+      pages: [{ id: "p1", title: "Shop", slug: "shop", layout: page(heading, button) }],
+    });
+    const files = new Map(out.files.map((f) => [f.path, typeof f.data === "string" ? f.data : ""]));
+    expect(files.get("shop/style.css")).toContain(SCOPED);
+    expect(files.get("shop/index.html")).toContain("emvb-ext--emvb-ext-kit");
+  });
+});
