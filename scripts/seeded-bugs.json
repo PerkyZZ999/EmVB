@@ -52474,6 +52474,146 @@
       "expect": "\\(fail\\).*keeps the @font\\-face rule unprefixed"
     },
     {
+      "id": "W-1086/ext-css-bare-not-scoped",
+      "requirement": "W-1086",
+      "description": "a bare element selector in an extension stylesheet is not scoped, so it restyles the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "  return at === 0 ? `${wrapper} ${orig}` : `${wrapper}${combinator}${orig.slice(at)}`;",
+          "replace": "  return at === 0 ? orig : `${wrapper}${combinator}${orig.slice(at)}`;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a bare element selector is scoped to the wrapper"
+    },
+    {
+      "id": "W-1086/ext-css-class-scoped",
+      "requirement": "W-1086",
+      "description": "a class selector in an extension stylesheet is scoped too, which changes the kit's own classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "  if (hasClass(lastCompound(masked))) return orig;",
+          "replace": "  if (hasClass(lastCompound(masked)) && false) return orig;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a selector with a class is left alone"
+    },
+    {
+      "id": "W-1086/ext-css-root-scoped",
+      "requirement": "W-1086",
+      "description": "theme variables on :root are scoped, so they no longer reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const THEME_HEAD = /^(?::root|\\[data-theme)/;",
+          "replace": "const THEME_HEAD = /^(?:\\[data-theme)/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*:root and \\[data-theme\\] stay global"
+    },
+    {
+      "id": "W-1086/ext-css-unprefixed-not-reported",
+      "requirement": "W-1086",
+      "description": "an unprefixed variable on :root is not reported at build",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "if (!prefixed && !found.includes(name)) found.push(name);",
+          "replace": "if (false) found.push(name);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a variable on :root or \\[data-theme\\] without the prefix is reported"
+    },
+    {
+      "id": "W-1086/ext-css-statement-at-rule-hides-rule",
+      "requirement": "W-1086",
+      "description": "a statement at-rule (@layer a,b;) swallows the next rule, so it is not scoped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "    if (masked[p] === \"@\" && semi !== -1 && semi < to && (open === -1 || semi < open)) {\n      yield { start: i, end: semi + 1, p, preludeEnd: semi, open: -1 };",
+          "replace": "    if (false) {\n      yield { start: i, end: semi + 1, p, preludeEnd: semi, open: -1 };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*statement at-rules are skipped"
+    },
+    {
+      "id": "W-1086/ext-css-string-brace-splits",
+      "requirement": "W-1086",
+      "description": "a brace inside a string is read as structure, so the rule is cut in the string",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, maskCss(css), 0, css.length, wrapper);",
+          "replace": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, css, 0, css.length, wrapper);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*braces and commas inside strings"
+    },
+    {
+      "id": "W-1086/ext-css-root-not-mapped",
+      "requirement": "W-1086",
+      "description": "a leading body is kept as a descendant of the wrapper, so body button can never match inside the kit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const root = /^(?:html|body)(?=[\\s>]|$)/.exec(masked.slice(at));",
+          "replace": "const root = /^(?:zzzz)/.exec(masked.slice(at));"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a leading html or body is the wrapper itself"
+    },
+    {
+      "id": "W-1086/ext-css-foreign-class-unreported",
+      "requirement": "W-1086",
+      "description": "a class in the stylesheet that does not start with the prefix is not reported, so it silently styles page content",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "        if (!name.startsWith(prefix) && !found.includes(name)) found.push(name);",
+          "replace": "        if (false) found.push(name);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
+      "expect": "\\(fail\\).*a class selector without the prefix is reported once"
+    },
+    {
+      "id": "W-1086/ext-css-scope-not-cached",
+      "requirement": "W-1086",
+      "description": "the scoped stylesheet is rewritten on every render instead of once per text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/registry.ts",
+          "search": "  if (hit !== undefined) return hit;",
+          "replace": "  if (false) return hit ?? \"\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*the rewrite does not repeat on each canvas render"
+    },
+    {
+      "id": "W-1086/ext-css-cache-survives-new-assets",
+      "requirement": "W-1086",
+      "description": "setting an extension's stylesheet again leaves the old scoped one in the cache, so the old css is served",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/registry.ts",
+          "search": "  store().scoped?.delete(id);",
+          "replace": "  void id;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a changed stylesheet is scoped again"
+    },
+    {
       "id": "W-1072/family-quote-unescaped",
       "requirement": "W-1072",
       "description": "A double quote in a family name is written as is.",
@@ -56975,90 +57115,6 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
-    },
-    {
-      "id": "W-1086/ext-css-bare-not-scoped",
-      "requirement": "W-1086",
-      "description": "a bare element selector in an extension stylesheet is not scoped, so it restyles the page",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "  return `${wrapper} ${orig}`;",
-          "replace": "  return orig;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*a bare element selector is scoped to the wrapper"
-    },
-    {
-      "id": "W-1086/ext-css-class-scoped",
-      "requirement": "W-1086",
-      "description": "a class selector in an extension stylesheet is scoped too, which changes the kit's own classes",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "  if (hasClass(lastCompound(masked))) return orig;",
-          "replace": "  if (hasClass(lastCompound(masked)) && false) return orig;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*a selector with a class is left alone"
-    },
-    {
-      "id": "W-1086/ext-css-root-scoped",
-      "requirement": "W-1086",
-      "description": "theme variables on :root are scoped, so they no longer reach the page",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const THEME_HEAD = /^(?::root|\\[data-theme)/;",
-          "replace": "const THEME_HEAD = /^(?:\\[data-theme)/;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*:root and \\[data-theme\\] stay global"
-    },
-    {
-      "id": "W-1086/ext-css-unprefixed-not-reported",
-      "requirement": "W-1086",
-      "description": "an unprefixed variable on :root is not reported at build",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "if (!prefixed && !found.includes(name)) found.push(name);",
-          "replace": "if (false) found.push(name);"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*a variable on :root or \\[data-theme\\] without the prefix is reported"
-    },
-    {
-      "id": "W-1086/ext-css-statement-at-rule-hides-rule",
-      "requirement": "W-1086",
-      "description": "a statement at-rule (@layer a,b;) swallows the next rule, so it is not scoped",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "if (masked[p] === \"@\" && semi !== -1 && semi < to && (open === -1 || semi < open)) {\n      out += css.slice(i, semi + 1);",
-          "replace": "if (false) {\n      out += css.slice(i, semi + 1);"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*statement at-rules are skipped"
-    },
-    {
-      "id": "W-1086/ext-css-string-brace-splits",
-      "requirement": "W-1086",
-      "description": "a brace inside a string is read as structure, so the rule is cut in the string",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, maskCss(css), 0, css.length, wrapper);",
-          "replace": "const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;\n  return rewriteExtensionRange(css, css, 0, css.length, wrapper);"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*braces and commas inside strings"
     }
   ]
 }

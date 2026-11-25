@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { EXTENSION_WRAPPER_CLASS, scopeExtensionCss, unprefixedGlobalVariables } from "./scope.ts";
+import {
+  EXTENSION_WRAPPER_CLASS,
+  foreignClassSelectors,
+  scopeExtensionCss,
+  unprefixedGlobalVariables,
+} from "./scope.ts";
 
 const W = ":where(.emvb-ext--kit)";
 
@@ -143,6 +148,52 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
     ).toBe(`@layer theme,base;@layer base{${W} *,${W} ::before{margin:0}${W},${W} :host{x:1}}`);
   });
 
+  test("a leading html or body is the wrapper itself, so body button can match inside it", () => {
+    expect(scopeExtensionCss("body button{x:1}", "kit")).toBe(`${W} button{x:1}`);
+    expect(scopeExtensionCss("html body button{x:1}", "kit")).toBe(`${W} button{x:1}`);
+    expect(scopeExtensionCss("html > body > main{x:1}", "kit")).toBe(`${W} > main{x:1}`);
+    expect(scopeExtensionCss("body  >  p{x:1}", "kit")).toBe(`${W} > p{x:1}`);
+    expect(scopeExtensionCss("html body{x:1}", "kit")).toBe(`${W}{x:1}`);
+    expect(scopeExtensionCss("body\n  button{x:1}", "kit")).toBe(`${W} button{x:1}`);
+  });
+
+  test("a document root maps to the wrapper inside @media, @supports, @container and @layer", () => {
+    expect(
+      scopeExtensionCss(
+        "@media (x){body button{x:1}}@supports (a:b){html body p{x:1}}" +
+          "@container (min-width:1px){body a{x:1}}@layer base{body h1{x:1}}",
+        "kit",
+      ),
+    ).toBe(
+      `@media (x){${W} button{x:1}}@supports (a:b){${W} p{x:1}}` +
+        `@container (min-width:1px){${W} a{x:1}}@layer base{${W} h1{x:1}}`,
+    );
+  });
+
+  test("a document root in a list maps in each selector, and the others in the list are scoped", () => {
+    expect(scopeExtensionCss("html,body{x:1}", "kit")).toBe(`${W},${W}{x:1}`);
+    expect(scopeExtensionCss("body a:hover,h2{x:1}", "kit")).toBe(`${W} a:hover,${W} h2{x:1}`);
+  });
+
+  test("after a theme head the root is the wrapper too", () => {
+    expect(scopeExtensionCss("[data-theme=dark] body button{x:1}", "kit")).toBe(
+      `[data-theme=dark] ${W} button{x:1}`,
+    );
+    expect(scopeExtensionCss(":root body h1{x:1}", "kit")).toBe(`:root ${W} h1{x:1}`);
+  });
+
+  test("a name that only starts like a root, a sibling combinator and a qualified root are not mapped", () => {
+    expect(scopeExtensionCss("bodyx button{x:1}", "kit")).toBe(`${W} bodyx button{x:1}`);
+    expect(scopeExtensionCss("body-x{x:1}", "kit")).toBe(`${W} body-x{x:1}`);
+    expect(scopeExtensionCss("body + p{x:1}", "kit")).toBe(`${W} body + p{x:1}`);
+    expect(scopeExtensionCss("html.dark body button{x:1}", "kit")).toBe(
+      `${W} html.dark body button{x:1}`,
+    );
+    expect(scopeExtensionCss("body:not(.x) button{x:1}", "kit")).toBe(
+      `${W} body:not(.x) button{x:1}`,
+    );
+  });
+
   test("the wrapper class is the one the render writes on the element", () => {
     expect(EXTENSION_WRAPPER_CLASS("kit")).toBe("emvb-ext--kit");
   });
@@ -182,5 +233,49 @@ describe("unprefixed global variables are reported (extensionApi 1.5)", () => {
 
   test("with no prefix declared, every global variable is reported", () => {
     expect(unprefixedGlobalVariables(":root{--anything:1}", undefined)).toEqual(["--anything"]);
+  });
+});
+
+describe("classes that do not belong to the extension are reported (extensionApi 1.5)", () => {
+  test("a class selector without the prefix is reported once, with its escapes undone", () => {
+    expect(
+      foreignClassSelectors(
+        ".kit-a{x:1}.page-heading{x:2}.page-heading:hover{x:3}.sm\\:flex{x:4}",
+        "kit-",
+      ),
+    ).toEqual(["page-heading", "sm:flex"]);
+  });
+
+  test("every class in a compound or descendant selector is checked", () => {
+    expect(foreignClassSelectors(".kit-a .sidebar, .kit-b.dark{x:1}", "kit-")).toEqual([
+      "sidebar",
+      "dark",
+    ]);
+  });
+
+  test("classes inside :not(), :is() and nested at-rules are checked too", () => {
+    expect(
+      foreignClassSelectors(
+        "a:not(.hidden){x:1}@media (x){@supports (a:b){:is(.kit-a,.other){y:2}}}",
+        "kit-",
+      ),
+    ).toEqual(["hidden", "other"]);
+  });
+
+  test("a stylesheet of the extension's own classes reports nothing", () => {
+    expect(foreignClassSelectors(HELLO_CSS.replaceAll("hello-", "kit-"), "kit-")).toEqual([]);
+  });
+
+  test("a dot in a string, a comment, a url, a number or a keyframe step is not a class", () => {
+    const css =
+      'a[href$=".pdf"]{x:1}/* .note */h1{background:url(a.b.png)}td:nth-child(2n+1.5){x:2}' +
+      '@keyframes k{0.5%{x:3}100%{x:4}}h1::after{content:".x"}';
+    expect(foreignClassSelectors(css, "kit-")).toEqual([]);
+  });
+
+  test("a class in a declaration value is not a selector", () => {
+    expect(
+      foreignClassSelectors(".kit-a{font-family:a.b;margin:.5rem;width:1.5em}", "kit-"),
+    ).toEqual([]);
   });
 });
