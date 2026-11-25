@@ -13,6 +13,10 @@
  * - An id that is not a plain id, that starts with `emvb`, or that would replace a browser global
  *   (`isShadowingId`, S-12) is dropped, like a reference to it.
  * - The first element to use an id owns it; a later one with the same id loses its `id` attribute.
+ * - An id that ends the way `uniqueId` ends a repeat (`-r2`) is dropped: `a-r2` in one copy and `a`
+ *   in a second would both come out as `ext-a-r2`. (A theme part's `-t<hash>` ending cannot be
+ *   told from a word such as `-title`, so it is not refused; it needs an author id that equals
+ *   another id plus a 32-bit hash.)
  *
  * Pure: it returns a new tree and leaves the input alone.
  */
@@ -33,10 +37,21 @@ const ID_LIST_ATTRS: ReadonlySet<string> = new Set([
   "aria-owns",
   "aria-details",
   "aria-errormessage",
+  "aria-flowto",
 ]);
+/** `aria-activedescendant` takes one id, so it is handled with the single-id attributes. */
+const ID_ATTRS_ARIA = "aria-activedescendant";
+/** SVG paint attributes that point at an id as `url(#id)`: gradients, patterns, clip paths, masks. */
+const URL_REF_ATTRS: ReadonlySet<string> = new Set(["fill", "stroke", "clip-path", "mask"]);
+const URL_REF = /url\(\s*#([^)\s]+)\s*\)/g;
+/** The ending `uniqueId` adds to the second copy of an id. */
+const GENERATED_ENDING = /-r\d+$/;
 
 const usableId = (value: string): boolean =>
-  ID_RULE.test(value) && !isShadowingId(value) && !value.startsWith("emvb");
+  ID_RULE.test(value) &&
+  !isShadowingId(value) &&
+  !value.startsWith("emvb") &&
+  !GENERATED_ENDING.test(value);
 
 /** Every id the tree owns, in document order, mapped to its page-unique id. */
 function ownedIds(root: VNode, uniqueId: (base: string) => string): Map<string, string> {
@@ -52,6 +67,20 @@ function ownedIds(root: VNode, uniqueId: (base: string) => string): Map<string, 
   return owned;
 }
 
+/**
+ * A paint value with every `url(#id)` renamed, or `undefined` when one of them points at an id the
+ * element does not own (the attribute is then dropped, like any other reference to a foreign id).
+ */
+function scopeUrlRefs(value: string, owned: ReadonlyMap<string, string>): string | undefined {
+  let foreign = false;
+  const out = value.replace(URL_REF, (_all, id: string) => {
+    const mapped = owned.get(id);
+    if (mapped === undefined) foreign = true;
+    return `url(#${mapped ?? id})`;
+  });
+  return foreign ? undefined : out;
+}
+
 function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<string>): VNode {
   const attrs: Record<string, string> = {};
   for (const [name, value] of Object.entries(node.attrs)) {
@@ -62,7 +91,7 @@ function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<stri
         seen.add(mapped);
         attrs.id = mapped;
       }
-    } else if (ID_ATTRS.has(name)) {
+    } else if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) {
       const mapped = owned.get(value);
       if (mapped !== undefined) attrs[name] = mapped;
     } else if (ID_LIST_ATTRS.has(name)) {
@@ -71,6 +100,9 @@ function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<stri
         .map((id) => owned.get(id))
         .filter((id): id is string => id !== undefined);
       if (mapped.length > 0) attrs[name] = mapped.join(" ");
+    } else if (URL_REF_ATTRS.has(name) && value.includes("url(")) {
+      const scoped = scopeUrlRefs(value, owned);
+      if (scoped !== undefined) attrs[name] = scoped;
     } else if ((name === "href" || name === "xlink:href") && value.startsWith("#")) {
       const mapped = owned.get(value.slice(1));
       if (mapped !== undefined) attrs[name] = `#${mapped}`;

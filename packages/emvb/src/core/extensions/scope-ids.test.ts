@@ -108,6 +108,41 @@ describe("scopeIds", () => {
     kids.forEach((kid) => expect(kid.attrs).toEqual({}));
   });
 
+  test("SVG paint references (url(#id)) follow the renamed id, and a foreign one is dropped", () => {
+    const svg = el(
+      "svg",
+      {},
+      el("defs", {}, el("linearGradient", { id: "grad" }), el("clipPath", { id: "clip" })),
+      el("rect", { fill: "url(#grad)", "clip-path": "url(#clip)", stroke: "url(#outside)" }),
+      el("rect", { fill: "red", mask: "url( #clip )" }),
+    );
+    const out = scopeIds(svg, uniqueIds());
+    const [, rect, plain] = out.children as VNode[];
+    expect(rect?.attrs).toEqual({ fill: "url(#ext-grad)", "clip-path": "url(#ext-clip)" });
+    expect(plain?.attrs).toEqual({ fill: "red", mask: "url(#ext-clip)" });
+  });
+
+  test("aria-activedescendant and aria-flowto are references too", () => {
+    const out = scopeIds(
+      el(
+        "div",
+        { "aria-activedescendant": "opt", "aria-flowto": "opt other" },
+        el("li", { id: "opt" }),
+      ),
+      uniqueIds(),
+    );
+    expect(out.attrs).toEqual({ "aria-activedescendant": "ext-opt", "aria-flowto": "ext-opt" });
+  });
+
+  test("an id that ends like a generated repeat (-r2) is dropped, so two copies never collide", () => {
+    const copy = () => el("div", {}, el("p", { id: "a" }), el("p", { id: "a-r2" }));
+    const uniqueId = uniqueIds();
+    const ids = [copy(), copy()].flatMap((root) =>
+      (scopeIds(root, uniqueId).children as VNode[]).map((c) => c.attrs.id),
+    );
+    expect(ids).toEqual(["ext-a", undefined, "ext-a-r2", undefined]);
+  });
+
   test("a repeated id inside one element is kept once", () => {
     const out = scopeIds(el("div", {}, el("p", { id: "a" }), el("p", { id: "a" })), uniqueIds());
     expect((out.children[0] as VNode).attrs.id).toBe("ext-a");
