@@ -1,10 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  EXTENSION_WRAPPER_CLASS,
-  foreignClassSelectors,
-  scopeExtensionCss,
-  unprefixedGlobalVariables,
-} from "./scope.ts";
+import { EXTENSION_WRAPPER_CLASS, foreignClassSelectors, scopeExtensionCss } from "./scope.ts";
 
 const W = ":where(.emvb-ext--kit)";
 
@@ -58,12 +53,14 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
     expect(scopeExtensionCss("h2,.btn{x:1}", "kit")).toBe(`${W} h2,.btn{x:1}`);
   });
 
-  test(":root and [data-theme] stay global, as theme variables are declared there", () => {
-    expect(scopeExtensionCss(":root{--kit-x:1}", "kit")).toBe(":root{--kit-x:1}");
-    expect(scopeExtensionCss("[data-theme=dark]{--kit-x:1}", "kit")).toBe(
-      "[data-theme=dark]{--kit-x:1}",
+  test("the document root's variables are declared on the wrapper, so they can't overwrite the host's", () => {
+    expect(scopeExtensionCss(":root{--kit-x:1}", "kit")).toBe(`:where(:root) ${W}{--kit-x:1}`);
+    expect(scopeExtensionCss(":root,:host{--kit-x:1}", "kit")).toBe(
+      `:where(:root) ${W},:where(:host) ${W}{--kit-x:1}`,
     );
-    expect(scopeExtensionCss(":root,:host{--kit-x:1}", "kit")).toBe(`:root,${W} :host{--kit-x:1}`);
+    expect(scopeExtensionCss(":where(:root){--color-primary:red}", "kit")).toBe(
+      `:where(:where(:root)) ${W}{--color-primary:red}`,
+    );
   });
 
   test("grouping at-rules are scoped inside, and keyframes and font-face are copied as they are", () => {
@@ -117,11 +114,8 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
     expect(scopeExtensionCss(".sm\\:flex{x:1}", "kit")).toBe(".sm\\:flex{x:1}");
   });
 
-  test("a rule under :root or [data-theme] with a bare descendant is scoped after the head", () => {
-    expect(scopeExtensionCss(":root h1{x:1}", "kit")).toBe(`:root ${W} h1{x:1}`);
-    expect(scopeExtensionCss("[data-theme=dark] h1{x:1}", "kit")).toBe(
-      `[data-theme=dark] ${W} h1{x:1}`,
-    );
+  test("a rule under the root or a theme attribute with a bare descendant is scoped after the head", () => {
+    expect(scopeExtensionCss(":root h1{x:1}", "kit")).toBe(`:where(:root) ${W} h1{x:1}`);
     expect(scopeExtensionCss("[data-theme=dark] .btn{x:1}", "kit")).toBe(
       "[data-theme=dark] .btn{x:1}",
     );
@@ -145,16 +139,18 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
         "@layer theme,base;@layer base{*,::before{margin:0}html,:host{x:1}}",
         "kit",
       ),
-    ).toBe(`@layer theme,base;@layer base{${W} *,${W} ::before{margin:0}${W},${W} :host{x:1}}`);
+    ).toBe(
+      `@layer theme,base;@layer base{${W} *,${W} ::before{margin:0}${W},:where(:host) ${W}{x:1}}`,
+    );
   });
 
   test("a leading html or body is the wrapper itself, so body button can match inside it", () => {
     expect(scopeExtensionCss("body button{x:1}", "kit")).toBe(`${W} button{x:1}`);
     expect(scopeExtensionCss("html body button{x:1}", "kit")).toBe(`${W} button{x:1}`);
     expect(scopeExtensionCss("html > body > main{x:1}", "kit")).toBe(`${W} > main{x:1}`);
-    expect(scopeExtensionCss("body  >  p{x:1}", "kit")).toBe(`${W} > p{x:1}`);
+    expect(scopeExtensionCss("body  >  p{x:1}", "kit")).toBe(`${W}  >  p{x:1}`);
     expect(scopeExtensionCss("html body{x:1}", "kit")).toBe(`${W}{x:1}`);
-    expect(scopeExtensionCss("body\n  button{x:1}", "kit")).toBe(`${W} button{x:1}`);
+    expect(scopeExtensionCss("body\n  button{x:1}", "kit")).toBe(`${W}\n  button{x:1}`);
   });
 
   test("a document root maps to the wrapper inside @media, @supports, @container and @layer", () => {
@@ -177,62 +173,45 @@ describe("extension stylesheets are scoped to their wrapper (extensionApi 1.5)",
 
   test("after a theme head the root is the wrapper too", () => {
     expect(scopeExtensionCss("[data-theme=dark] body button{x:1}", "kit")).toBe(
-      `[data-theme=dark] ${W} button{x:1}`,
+      `[data-theme=dark] ${W} button,[data-emvb-theme=dark] ${W} button,${W}[data-theme=dark] button,${W} [data-theme=dark] button{x:1}`,
     );
-    expect(scopeExtensionCss(":root body h1{x:1}", "kit")).toBe(`:root ${W} h1{x:1}`);
+    expect(scopeExtensionCss(":root body h1{x:1}", "kit")).toBe(`:where(:root) ${W} h1{x:1}`);
   });
 
-  test("a name that only starts like a root, a sibling combinator and a qualified root are not mapped", () => {
+  test("a name that only starts like a root, and a sibling combinator, are not mapped", () => {
     expect(scopeExtensionCss("bodyx button{x:1}", "kit")).toBe(`${W} bodyx button{x:1}`);
     expect(scopeExtensionCss("body-x{x:1}", "kit")).toBe(`${W} body-x{x:1}`);
     expect(scopeExtensionCss("body + p{x:1}", "kit")).toBe(`${W} body + p{x:1}`);
-    expect(scopeExtensionCss("html.dark body button{x:1}", "kit")).toBe(
-      `${W} html.dark body button{x:1}`,
+  });
+  test("a qualified root moves its qualifiers onto the wrapper, so the kit's own class or attribute decides", () => {
+    expect(scopeExtensionCss("body.dark button{x:1}", "kit")).toBe(`${W}.dark button{x:1}`);
+    expect(scopeExtensionCss("html.dark body button{x:1}", "kit")).toBe(`${W}.dark button{x:1}`);
+    expect(scopeExtensionCss("body:not(.x) button{x:1}", "kit")).toBe(`${W}:not(.x) button{x:1}`);
+    expect(scopeExtensionCss('html[lang="ar"] .card{x:1}', "kit")).toBe(
+      `${W}[lang="ar"] .card{x:1}`,
     );
-    expect(scopeExtensionCss("body:not(.x) button{x:1}", "kit")).toBe(
-      `${W} body:not(.x) button{x:1}`,
+    expect(scopeExtensionCss("html.dark > body > main{x:1}", "kit")).toBe(`${W}.dark > main{x:1}`);
+  });
+  test("a root with a class still maps when the target has a class, so the rule stays inside the kit", () => {
+    expect(scopeExtensionCss("body .btn{x:1}", "kit")).toBe(`${W} .btn{x:1}`);
+    expect(scopeExtensionCss("body.dark .btn{x:1}", "kit")).toBe(`${W}.dark .btn{x:1}`);
+  });
+  test("theme attributes select the kit by the host's root, by its emvb theme, or by its own element", () => {
+    expect(scopeExtensionCss("[data-theme=dark]{--a:2}", "kit")).toBe(
+      `[data-theme=dark] ${W},[data-emvb-theme=dark] ${W},${W}[data-theme=dark],${W} [data-theme=dark]{--a:2}`,
+    );
+    expect(scopeExtensionCss("html[data-theme=dark] button{x:1}", "kit")).toBe(
+      `html[data-theme=dark] ${W} button,html[data-emvb-theme=dark] ${W} button,${W}[data-theme=dark] button,${W} [data-theme=dark] button{x:1}`,
+    );
+  });
+  test("the OS default does not apply when the host chose a theme through data-emvb-theme", () => {
+    expect(scopeExtensionCss(":root:not([data-theme]){--a:1}", "kit")).toBe(
+      `:where(:root:not([data-theme]):not([data-emvb-theme])) ${W}{--a:1}`,
     );
   });
 
   test("the wrapper class is the one the render writes on the element", () => {
     expect(EXTENSION_WRAPPER_CLASS("kit")).toBe("emvb-ext--kit");
-  });
-});
-
-describe("unprefixed global variables are reported (extensionApi 1.5)", () => {
-  test("a variable on :root or [data-theme] without the prefix is reported once", () => {
-    const css =
-      ":root{--color-primary:red;--daisy-value:1}[data-theme=dark]{--color-primary:blue;--color-primary:blue}";
-    expect(unprefixedGlobalVariables(css, "daisy-")).toEqual(["--color-primary"]);
-  });
-
-  test("a prefixed variable and a variable inside a component are not reported", () => {
-    expect(
-      unprefixedGlobalVariables(":root{--daisy-x:1}.card{--color-primary:red}", "daisy-"),
-    ).toEqual([]);
-  });
-
-  test("inside @media and @layer, global variables are still checked", () => {
-    expect(unprefixedGlobalVariables("@layer base{@media (x){:root{--bad:1}}}", "kit-")).toEqual([
-      "--bad",
-    ]);
-  });
-
-  test("a variable in a rule with a class, or in a string or comment, is not a global declaration", () => {
-    expect(
-      unprefixedGlobalVariables(
-        '.a{--x:1}/* :root{--y:1} */h1::after{content:":root{--z:1}"}',
-        "k-",
-      ),
-    ).toEqual([]);
-  });
-
-  test("a statement at-rule before the rules does not hide them", () => {
-    expect(unprefixedGlobalVariables("@layer a,b;:root{--bad:1}", "k-")).toEqual(["--bad"]);
-  });
-
-  test("with no prefix declared, every global variable is reported", () => {
-    expect(unprefixedGlobalVariables(":root{--anything:1}", undefined)).toEqual(["--anything"]);
   });
 });
 

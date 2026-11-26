@@ -26,7 +26,7 @@ import {
   type ExtensionManifest,
 } from "./core/extensions/index.ts";
 import { MAX_EXTENSION_CSS_BYTES, MAX_EXTENSION_RUNTIME_BYTES } from "./core/extensions/classes.ts";
-import { foreignClassSelectors, unprefixedGlobalVariables } from "./core/css/scope.ts";
+import { foreignClassSelectors } from "./core/css/scope.ts";
 import { PACKAGE_NAME } from "./constants.ts";
 
 type NodeApis = { fs: typeof Fs; path: typeof Path; url: typeof Url; vm?: typeof Vm };
@@ -219,12 +219,6 @@ export function prepareExtensionBuild(
               `css names the class .${name}, which does not start with ${prefix}; a class selector is left as written, so it would style content outside the extension`,
             );
           }
-        }
-        // extensionApi 1.5: a global variable without the prefix would overwrite the site's own.
-        for (const name of unprefixedGlobalVariables(css, manifest.classes?.prefix)) {
-          say(
-            `css declares ${name} on :root or [data-theme] without the prefix; name it --${manifest.classes?.prefix ?? "<prefix>"}…`,
-          );
         }
       }
     }

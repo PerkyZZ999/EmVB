@@ -440,7 +440,7 @@ describe("HTML export of a missing extension (W-1088, #37)", () => {
 describe("extension stylesheets are scoped to the extension's wrapper (extensionApi 1.5)", () => {
   const KIT_CSS = "h1{margin:0}body{margin:0}:root{--kit-x:1}.kit-btn{border:2px solid red}";
   const WRAPPER = ":where(.emvb-ext--emvb-ext-kit)";
-  const SCOPED = `${WRAPPER} h1{margin:0}${WRAPPER}{margin:0}:root{--kit-x:1}.kit-btn{border:2px solid red}`;
+  const SCOPED = `${WRAPPER} h1{margin:0}${WRAPPER}{margin:0}:where(:root) ${WRAPPER}{--kit-x:1}.kit-btn{border:2px solid red}`;
   test("the page's stylesheet is scoped, and the element's wrapper carries the scope class", () => {
     rememberExtensions([kit()]);
     rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });

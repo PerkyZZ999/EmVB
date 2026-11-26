@@ -187,7 +187,6 @@ function scopeWith(css: string, prefix: string): string {
 export const EXTENSION_WRAPPER_CLASS = (token: string): string => `emvb-ext--${token}`;
 
 const EXTENSION_GROUPING = /^@(media|supports|container|layer|starting-style)\b/;
-const THEME_HEAD = /^(?::root|\[data-theme)/;
 const COMBINATOR = /[\s>+~]/;
 // A class name starts with a letter, `_`, `-`, an escape or a non-ASCII character, never a digit, so
 // the `.5` in `:nth-child(2n+1.5)` or `0.5%` is not one.
@@ -211,13 +210,6 @@ function topLevel(text: string): string {
   return out;
 }
 
-/** Index just past the end of the first compound selector (the first top-level combinator). */
-function firstCompoundEnd(selector: string): number {
-  const top = topLevel(selector);
-  for (let k = 0; k < top.length; k++) if (COMBINATOR.test(top[k] ?? "")) return k;
-  return top.length;
-}
-
 /** The last compound selector: the element the selector styles. */
 function lastCompound(selector: string): string {
   const top = topLevel(selector);
@@ -228,43 +220,140 @@ function lastCompound(selector: string): string {
 
 const hasClass = (compound: string): boolean => CLASS_START.test(topLevel(compound));
 
-/** The selector `orig` (whose masked form is `masked`), scoped to `wrapper`. */
-function scopeExtensionSelector(orig: string, masked: string, wrapper: string): string {
-  if (THEME_HEAD.test(masked)) {
-    const headEnd = firstCompoundEnd(masked);
-    // Only the head (`:root`, `[data-theme=dark]`): theme variables, global.
-    if (headEnd >= masked.length || hasClass(lastCompound(masked))) return orig;
-    let k = headEnd;
-    while (k < masked.length && COMBINATOR.test(masked[k] ?? "")) k += 1;
-    return `${orig.slice(0, k)}${fromWrapper(orig.slice(k), masked.slice(k), wrapper)}`;
+/** A leading `html` or `body` root (qualifiers allowed), not `html-x` or `bodies`. */
+const ROOT_TAG = /^(?:html|body)(?![\w-])/;
+/** The document's own root: `:root`, `:where(:root)` or the shadow host. Its variables are the kit's. */
+const DOC_ROOT = /^(?::root|:where\(:root\)|:host)(?![\w-])/;
+/** A theme attribute at the head of a selector: `[data-theme=dark]`, `[data-emvb-theme="light"]`. */
+const THEME_LEAD = /^\[data-(?:emvb-)?theme(?![\w-])/;
+const THEME_ATTR = /\[data-(?:emvb-)?theme(?![\w-])/;
+
+/** One compound selector or one run of combinators, with its text as written and as masked. */
+type Token = { text: string; masked: string; combinator: boolean };
+
+/** The top-level tokens of a selector: compounds alternating with the combinators between them. */
+function tokenize(orig: string, masked: string): Token[] {
+  const tokens: Token[] = [];
+  let depth = 0;
+  let start = 0;
+  const flush = (end: number): void => {
+    if (end > start)
+      tokens.push({
+        text: orig.slice(start, end),
+        masked: masked.slice(start, end),
+        combinator: false,
+      });
+  };
+  let i = 0;
+  while (i < masked.length) {
+    const ch = masked[i] ?? "";
+    if (ch === "(" || ch === "[") depth += 1;
+    else if (ch === ")" || ch === "]") depth -= 1;
+    else if (depth === 0 && /[\s>+~]/.test(ch)) {
+      flush(i);
+      let j = i;
+      while (j < masked.length && /[\s>+~]/.test(masked[j] ?? "")) j += 1;
+      tokens.push({ text: orig.slice(i, j), masked: masked.slice(i, j), combinator: true });
+      start = j;
+      i = j;
+      continue;
+    }
+    i += 1;
   }
-  if (hasClass(lastCompound(masked))) return orig;
-  return fromWrapper(orig, masked, wrapper);
+  flush(masked.length);
+  return tokens;
+}
+
+/** `:not([data-theme])` also says "no emvb theme", so the host's own choice wins over the OS. */
+function guardEmvbTheme(head: string): string {
+  return head.replace(/:not\(\[data-theme(?:[^\]]*)?\]\)/g, (m) => `${m}:not([data-emvb-theme])`);
 }
 
 /**
- * `orig` scoped to `wrapper`, where a leading plain `html` or `body` (or a run of them, `html >
- * body`) is the wrapper itself, because the wrapper stands for the document root of its kit.
- * `body button` becomes `wrapper button`, not `wrapper body button`, which could never match.
- * A root with a qualifier (`html.dark`, `body:not(.x)`) is not a plain root and is left in place.
+ * A selector headed by a theme attribute. It applies when the host root carries the theme (as an
+ * ancestor, with `data-theme` or the EmVB `data-emvb-theme`), and when the kit's wrapper or an
+ * element inside it carries it itself, so an extension can choose its own theme.
  */
-function fromWrapper(orig: string, masked: string, wrapper: string): string {
-  let at = 0;
-  let combinator = " ";
-  while (true) {
-    const root = /^(?:html|body)(?=[\s>]|$)/.exec(masked.slice(at));
-    if (!root) break;
-    let next = at + root[0].length;
-    while (/\s/.test(masked[next] ?? "")) next += 1;
-    // A sibling combinator after the root (`body + p`) has nothing to map to; leave it.
-    if (masked[next] === "+" || masked[next] === "~") break;
-    combinator = masked[next] === ">" ? " > " : " ";
-    if (masked[next] === ">") next += 1;
-    while (/\s/.test(masked[next] ?? "")) next += 1;
-    at = next;
-    if (next >= masked.length) return wrapper;
+function themeAlternatives(head: string, rest: string, wrapper: string): string {
+  const bare = head.replace(/^(?:html|body)/, "");
+  const emvb = head.replace(/data-theme/g, "data-emvb-theme");
+  const forms = [`${head} ${wrapper}${rest}`];
+  if (emvb !== head) forms.push(`${emvb} ${wrapper}${rest}`);
+  forms.push(`${wrapper}${bare}${rest}`, `${wrapper} ${bare}${rest}`);
+  return forms.join(",");
+}
+
+/**
+ * The leading `html` and `body` roots of a token run (qualified and chained), removed. Their
+ * qualifiers come back apart, and `rest` keeps the combinator that followed the last root:
+ * `html.dark > body > main` gives qualifiers `.dark` and rest ` > main`. `undefined` for a sibling
+ * combinator (`body + p`), which has no wrapper to map to.
+ */
+function mapRoots(tokens: Token[]): { qualifiers: string; rest: string } | undefined {
+  let qualifiers = "";
+  let i = 0;
+  let joiner = " ";
+  if (tokens[0]?.combinator) {
+    if (/[+~]/.test(tokens[0].masked)) return undefined;
+    joiner = tokens[0].text;
+    i = 1;
   }
-  return at === 0 ? `${wrapper} ${orig}` : `${wrapper}${combinator}${orig.slice(at)}`;
+  while (i < tokens.length && !tokens[i]?.combinator && ROOT_TAG.test(tokens[i]?.masked ?? "")) {
+    const tag = ROOT_TAG.exec(tokens[i]?.masked ?? "")?.[0].length ?? 0;
+    qualifiers += (tokens[i]?.text ?? "").slice(tag);
+    i += 1;
+    const link = tokens[i];
+    if (link?.combinator) {
+      if (/[+~]/.test(link.masked)) return undefined;
+      joiner = link.text;
+      i += 1;
+    } else joiner = "";
+  }
+  const tail = tokens
+    .slice(i)
+    .map((t) => t.text)
+    .join("");
+  return { qualifiers, rest: tail === "" ? "" : joiner + tail };
+}
+
+/**
+ * Leading `html` and `body` roots become the wrapper, and their qualifiers move onto it:
+ * `body.dark button` is `:where(W).dark button`, `html.dark body button` is `:where(W).dark button`,
+ * and `html > body > main` is `:where(W) > main`. The kit's runtime puts such a class on its
+ * wrapper; a page's own `dark` class does not reach it.
+ */
+function mapLeadingRoots(tokens: Token[], wrapper: string): string | undefined {
+  const mapped = mapRoots(tokens);
+  return mapped && `${wrapper}${mapped.qualifiers}${mapped.rest}`;
+}
+
+/** The selector `orig` (whose masked form is `masked`), scoped to `wrapper`. */
+function scopeExtensionSelector(orig: string, masked: string, wrapper: string): string {
+  const tokens = tokenize(orig, masked);
+  const first = tokens[0];
+  if (!first || first.combinator) return orig;
+  // The document's root: its variables are declared on the kit's wrapper instead, so they can't
+  // overwrite the host's. A root headed by `:root` with a class further along is left as written.
+  if (DOC_ROOT.test(first.masked)) {
+    if (hasClass(lastCompound(masked))) return orig;
+    const head = guardEmvbTheme(first.text);
+    const after = mapRoots(tokens.slice(1));
+    if (!after) return `${wrapper} ${orig}`;
+    return `:where(${head}) ${wrapper}${after.qualifiers}${after.rest}`;
+  }
+  if (
+    THEME_LEAD.test(first.masked) ||
+    (ROOT_TAG.test(first.masked) && THEME_ATTR.test(first.masked))
+  ) {
+    if (hasClass(lastCompound(masked))) return orig;
+    // Roots after the theme head (`[data-theme=dark] body button`) map to the wrapper as well.
+    const rest = mapRoots(tokens.slice(1));
+    if (!rest) return `${wrapper} ${orig}`;
+    return themeAlternatives(first.text, `${rest.qualifiers}${rest.rest}`, wrapper);
+  }
+  if (ROOT_TAG.test(first.masked)) return mapLeadingRoots(tokens, wrapper) ?? `${wrapper} ${orig}`;
+  if (hasClass(lastCompound(masked))) return orig;
+  return `${wrapper} ${orig}`;
 }
 
 /** Calls `visit` for every style rule, inside the grouping at-rules `grouping` matches. */
@@ -321,28 +410,6 @@ function rewriteExtensionRange(
 export function scopeExtensionCss(css: string, token: string): string {
   const wrapper = `:where(.${EXTENSION_WRAPPER_CLASS(token)})`;
   return rewriteExtensionRange(css, maskCss(css), 0, css.length, wrapper);
-}
-/**
- * Global variables an extension declares outside its own wrapper: `--name` in a rule that is only
- * `:root` or `[data-theme]`, when it does not start with the extension's prefix. They would
- * overwrite the site's own variables of the same name, so the build warns about them.
- */
-export function unprefixedGlobalVariables(css: string, prefix: string | undefined): string[] {
-  const masked = maskCss(css);
-  const found: string[] = [];
-  eachStyleRule(masked, 0, css.length, EXTENSION_GROUPING, (spans, from, to) => {
-    const global = spans.some(
-      ([a, b]) =>
-        THEME_HEAD.test(masked.slice(a, b)) && firstCompoundEnd(masked.slice(a, b)) >= b - a,
-    );
-    if (!global) return;
-    for (const match of masked.slice(from, to).matchAll(/(--[A-Za-z0-9_-]+)\s*:/g)) {
-      const name = match[1] ?? "";
-      const prefixed = prefix !== undefined && name.startsWith(`--${prefix}`);
-      if (!prefixed && !found.includes(name)) found.push(name);
-    }
-  });
-  return found;
 }
 /**
  * Classes an extension's stylesheet names that do not start with its class prefix. A class selector

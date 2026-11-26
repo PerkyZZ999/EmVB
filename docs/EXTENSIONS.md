@@ -143,18 +143,26 @@ servers through the plugin options. The module must sit in a package whose `pack
   inline page styles.
 - **Scoping (extensionApi 1.5):** the stylesheet is scoped to the extension's own wrapper,
   `.emvb-ext--<id>`, so it cannot restyle the page around its elements.
-  - A selector with no class (`h1`, `button`, `*`) becomes `:where(.emvb-ext--<id>) h1`, which adds no
-    specificity. A leading `html` or `body` is the wrapper itself, so `body button` becomes
-    `:where(.emvb-ext--<id>) button`.
-  - `:root` and `[data-theme]` stay global, because theme variables are declared there. Declare
-    only variables that start with the extension's prefix there; the build warns about any other,
-    because it would overwrite the site's own variable of that name.
-  - **A class selector is left as written.** This assumes every class in the stylesheet is the
-    extension's own, so every class the stylesheet names must start with the extension's `prefix`.
-    That includes a class that only the extension's `runtime` adds: it has to be named in the CSS to
-    do anything, so it needs the prefix too. A class such as `.page-heading` would style content
-    outside the extension, so the build warns about each class that does not start with the prefix.
-    It is a warning, not a refusal.
+  - A selector with no class (`h1`, `button`, `*`) becomes `:where(.emvb-ext--<id>) h1`, which adds
+    no specificity.
+  - A leading `html` or `body` is the wrapper itself, and its qualifiers move onto it:
+    `body button` is `:where(.emvb-ext--<id>) button`, `body.dark button` is
+    `:where(.emvb-ext--<id>).dark button`, and `html.dark body button` is the same. The qualifier is
+    a class or attribute on the wrapper, so the extension's runtime sets it (`dark` on its wrapper
+    when the host is dark). A page's own `dark` class on `<html>` does not reach the kit.
+  - The document's variables (`:root`, `:host`, unprefixed daisyUI palette included) are declared on
+    the wrapper, not the page root, so a kit's `--color-primary` can't overwrite the host's. The kit's
+    elements read them as usual.
+  - **Theme.** A kit rule keyed on `[data-theme=X]` applies when the host root carries it, when the
+    host root carries EmVB's `data-emvb-theme=X` (the Theme toggle and the pre-paint choice), when the
+    wrapper carries `data-theme=X` (the extension's own theme), or when an element inside it does.
+    A kit's default rule (`:root:not([data-theme])`) does not apply when `data-emvb-theme` is set,
+    so the host's choice beats the operating system's.
+  - **A class selector is left as written**, except for its leading root, which is still mapped. This
+    assumes every class in the stylesheet is the extension's own, so every class it names must start
+    with the extension's `prefix`, including a class that only the runtime adds. The build warns about
+    each class that does not (`.page-heading` would style content outside the extension); it is a
+    warning, not a refusal.
   - A rule that changes nothing keeps its exact bytes, so a stylesheet of the extension's own
     classes is emitted exactly as written.
 - **Emitted only where used:** a public page gets the stylesheet and the runtime only when it, or

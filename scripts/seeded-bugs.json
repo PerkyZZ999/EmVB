@@ -52480,8 +52480,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "  return at === 0 ? `${wrapper} ${orig}` : `${wrapper}${combinator}${orig.slice(at)}`;",
-          "replace": "  return at === 0 ? orig : `${wrapper}${combinator}${orig.slice(at)}`;"
+          "search": "  if (hasClass(lastCompound(masked))) return orig;\n  return `${wrapper} ${orig}`;\n}",
+          "replace": "  if (hasClass(lastCompound(masked))) return orig;\n  return orig;\n}"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
@@ -52494,8 +52494,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "  if (hasClass(lastCompound(masked))) return orig;",
-          "replace": "  if (hasClass(lastCompound(masked)) && false) return orig;"
+          "search": "  if (hasClass(lastCompound(masked))) return orig;\n  return `${wrapper} ${orig}`;\n}",
+          "replace": "  return `${wrapper} ${orig}`;\n}"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
@@ -52508,26 +52508,12 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const THEME_HEAD = /^(?::root|\\[data-theme)/;",
-          "replace": "const THEME_HEAD = /^(?:\\[data-theme)/;"
+          "search": "const DOC_ROOT = /^(?::root|:where\\(:root\\)|:host)(?![\\w-])/;",
+          "replace": "const DOC_ROOT = /^(?:zzzz)/;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*:root and \\[data-theme\\] stay global"
-    },
-    {
-      "id": "W-1086/ext-css-unprefixed-not-reported",
-      "requirement": "W-1086",
-      "description": "an unprefixed variable on :root is not reported at build",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "if (!prefixed && !found.includes(name)) found.push(name);",
-          "replace": "if (false) found.push(name);"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
-      "expect": "\\(fail\\).*a variable on :root or \\[data-theme\\] without the prefix is reported"
+      "expect": "\\(fail\\).*the document root's variables are declared on the wrapper"
     },
     {
       "id": "W-1086/ext-css-statement-at-rule-hides-rule",
@@ -52564,8 +52550,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const root = /^(?:html|body)(?=[\\s>]|$)/.exec(masked.slice(at));",
-          "replace": "const root = /^(?:zzzz)/.exec(masked.slice(at));"
+          "search": "const ROOT_TAG = /^(?:html|body)(?![\\w-])/;",
+          "replace": "const ROOT_TAG = /^(?:zzzz)/;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/css/scope-extension.test.ts"],
