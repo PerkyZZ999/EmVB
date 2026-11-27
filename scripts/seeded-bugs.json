@@ -1776,8 +1776,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
-          "search": "  \"tspan\",\n]);",
-          "replace": "  \"tspan\",\n  \"script\",\n]);"
+          "search": "  \"kbd\",\n]);",
+          "replace": "  \"kbd\",\n  \"script\",\n]);"
         },
         {
           "file": "packages/emvb/src/core/elements/index.ts",
@@ -41670,8 +41670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n",
-          "replace": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n"
+          "search": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n",
+          "replace": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -47266,8 +47266,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/scope-ids.ts",
-          "search": "if (mapped !== undefined) attrs[name] = mapped;",
-          "replace": "attrs[name] = mapped ?? value;"
+          "search": "if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value);",
+          "replace": "if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value) ?? value;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
@@ -47294,8 +47294,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/scope-ids.ts",
-          "search": "} else if (URL_REF_ATTRS.has(name) && value.includes(\"url(\")) {",
-          "replace": "} else if (false && URL_REF_ATTRS.has(name) && value.includes(\"url(\")) {"
+          "search": "if (URL_REF_ATTRS.has(name) && value.includes(\"url(\")) return scopeUrlRefs(value, owned);",
+          "replace": "if (false && URL_REF_ATTRS.has(name) && value.includes(\"url(\")) return scopeUrlRefs(value, owned);"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],

@@ -84,7 +84,8 @@ function coerce(
       // A markup node validates as a plain container; its spec rides beside it (see markup.ts).
       type: isMarkup ? "container" : node.type,
       props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },
-      ...(children ? { children: children.map((c) => c.node) } : {}),
+      // A container needs its children array, even an empty one (the layout schema requires it).
+      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),
     },
     classes: filterExtensionClasses(node.extClasses, allow),
     ...(markup ? { markup } : {}),
