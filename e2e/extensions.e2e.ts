@@ -112,8 +112,9 @@ test("the editor canvas follows the admin's light or dark mode, and a kit's them
     ]),
     `ext-${unique()}`,
   );
-  await emulateAdminColorScheme(page, "light");
+  // The admin must be loaded before its colour scheme can be read, so set the scheme after the editor opens.
   await openEditor(page, id, "Extension theme");
+  await emulateAdminColorScheme(page, "light");
   const root = canvas(page).locator("html");
   await expect(root).toHaveAttribute("data-emvb-theme", "light");
   // A stylesheet written the way a kit's is after scoping: a default, and a rule for the dark root.
