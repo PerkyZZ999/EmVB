@@ -110,20 +110,32 @@ function scopedValue(
   owned: ReadonlyMap<string, string>,
   seen: Set<string>,
 ): string | undefined {
-  if (name === "id") {
-    const mapped = targetOf(owned, value);
-    if (mapped === undefined || seen.has(mapped)) return undefined;
-    seen.add(mapped);
-    return mapped;
-  }
+  if (name === "id") return scopedOwnId(value, owned, seen);
   if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value);
   if (ID_LIST_ATTRS.has(name)) return scopedIdList(value, owned);
   if (URL_REF_ATTRS.has(name) && value.includes("url(")) return scopeUrlRefs(value, owned);
   if ((name === "href" || name === "xlink:href") && value.startsWith("#")) {
-    const mapped = targetOf(owned, value.slice(1));
-    return mapped === undefined ? undefined : `#${mapped}`;
+    return scopedFragment(value, owned);
   }
   return value;
+}
+
+/** An element's own id: its renamed id, the first time only (a duplicate id is invalid HTML). */
+function scopedOwnId(
+  value: string,
+  owned: ReadonlyMap<string, string>,
+  seen: Set<string>,
+): string | undefined {
+  const mapped = targetOf(owned, value);
+  if (mapped === undefined || seen.has(mapped)) return undefined;
+  seen.add(mapped);
+  return mapped;
+}
+
+/** An in-page link (`#id`), pointing at the renamed id, or undefined when the target is foreign. */
+function scopedFragment(value: string, owned: ReadonlyMap<string, string>): string | undefined {
+  const mapped = targetOf(owned, value.slice(1));
+  return mapped === undefined ? undefined : `#${mapped}`;
 }
 
 function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<string>): VNode {
