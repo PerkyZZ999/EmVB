@@ -74,8 +74,8 @@ function normalizeElement(
     ];
   });
   const parts = (element.parts ?? []).slice(0, MAX_PARTS).flatMap((name) => {
-    const type = typeof name === "string" ? storedChildType(pkg, name) : undefined;
-    return type && !isBuiltinType(type) ? [type] : [];
+    const partType = typeof name === "string" ? storedChildType(pkg, name) : undefined;
+    return partType && !isBuiltinType(partType) ? [partType] : [];
   });
   return {
     type,

@@ -56975,6 +56975,48 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
+    },
+    {
+      "id": "ext15-slots/undeclared-slot-renders",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "A slot marker whose name the element does not declare still renders the stored children.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "if (found && declared?.name !== name) return [];",
+          "replace": "if (found && false) return [];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*renders nothing"
+    },
+    {
+      "id": "ext15-slots/part-outside-parent",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "A part is accepted in a container that does not list it as its own part.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/slot-rules.ts",
+          "search": "if (rule === undefined) return !PARTS.has(child);",
+          "replace": "if (rule === undefined) return true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*a part lives only inside"
+    },
+    {
+      "id": "ext15-slots/marker-name-unchecked",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "A slot marker with a name that is not a slot name is kept instead of refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "if (typeof node.name !== \"string\" || !SLOT_NAME_RULE.test(node.name)) return undefined;",
+          "replace": "if (typeof node.name !== \"string\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*not a slot name is refused"
     }
   ]
 }
