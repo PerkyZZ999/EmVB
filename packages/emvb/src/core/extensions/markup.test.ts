@@ -7,6 +7,23 @@ import { defineExtension } from "./define.ts";
 import { markupOf, markupSpec } from "./markup.ts";
 import { clearExtensions, rememberExtensions } from "./registry.ts";
 import { safeExtensionOutput, withExtensionClasses } from "./safe-nodes.ts";
+import type { ExtensionOutputNode } from "./types.ts";
+import { validateLayout } from "../validate.ts";
+
+// TEMP DIAGNOSTIC (remove before PR): why does a bare container child fail validation?
+test("diagnostic: validateLayout issues for a markup-shaped container", () => {
+  const r = validateLayout({
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [{ id: "mark0001", type: "container", props: {} }],
+    },
+  });
+  expect(r.ok ? [] : r.issues).toEqual([]);
+  expect(markupSpec({ tag: "pre", text: "code" })).toEqual({ tag: "pre", attrs: {}, text: "code" });
+});
 
 /** The ten tags extensionApi 1.5 adds to the serializer's list (no `tfoot`). */
 const NEW_TAGS = ["dialog", "table", "caption", "thead", "tbody", "tr", "th", "td", "pre", "kbd"];
@@ -91,7 +108,7 @@ const kit = () =>
         schema: { type: "object", properties: {} },
         fields: [],
         defaults: () => ({}),
-        render: () => [
+        render: (): ExtensionOutputNode[] => [
           {
             type: "markup",
             props: { tag: "table", attrs: {} },
@@ -110,7 +127,7 @@ const kit = () =>
         schema: { type: "object", properties: {} },
         fields: [],
         defaults: () => ({}),
-        render: () => [
+        render: (): ExtensionOutputNode[] => [
           { type: "markup", props: { tag: "p", attrs: { id: "title" }, text: "Copy" } },
           { type: "markup", props: { tag: "a", attrs: { href: "#title" }, text: "Jump" } },
           { type: "markup", props: { tag: "a", attrs: { href: "#nowhere" }, text: "Lost" } },
