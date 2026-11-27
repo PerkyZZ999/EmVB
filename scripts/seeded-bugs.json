@@ -41670,8 +41670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n",
-          "replace": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n"
+          "search": "      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n",
+          "replace": "      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
