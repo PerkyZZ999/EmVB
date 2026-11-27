@@ -94,18 +94,34 @@ describe("scopeIds", () => {
       el(
         "div",
         {},
-        el("p", { id: "emvb-root" }),
         el("p", { id: "location" }),
         el("p", { id: "name" }),
         el("p", { id: "1bad" }),
         el("p", { id: 'a"b' }),
         el("label", { for: "location" }),
-        el("a", { href: "#emvb-root" }),
+        el("a", { href: "#name" }),
       ),
       uniqueIds(),
     );
     const kids = out.children as VNode[];
     kids.forEach((kid) => expect(kid.attrs).toEqual({}));
+  });
+
+  test("an emvb- id EmVB generated (a form control) keeps its id and its references", () => {
+    const out = scopeIds(
+      el(
+        "div",
+        {},
+        el("label", { for: "emvb-field-n1" }),
+        el("input", { id: "emvb-field-n1" }),
+        el("a", { href: "#emvb-field-n1" }),
+      ),
+      uniqueIds(),
+    );
+    const [label, input, link] = out.children as VNode[];
+    expect(label?.attrs).toEqual({ for: "emvb-field-n1" });
+    expect(input?.attrs).toEqual({ id: "emvb-field-n1" });
+    expect(link?.attrs).toEqual({ href: "#emvb-field-n1" });
   });
 
   test("SVG paint references (url(#id)) follow the renamed id, and a foreign one is dropped", () => {

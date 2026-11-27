@@ -10,8 +10,10 @@
  *
  * - An id the element does not own is not a target. A reference to it is dropped, so output cannot
  *   point at the host page's own ids or at another element's.
- * - An id that is not a plain id, that starts with `emvb`, or that would replace a browser global
- *   (`isShadowingId`, S-12) is dropped, like a reference to it.
+ * - An author id that is not a plain id, or that would replace a browser global (`isShadowingId`,
+ *   S-12), is dropped, like a reference to it. An author `emvb` id is refused before this (markup.ts).
+ * - An `emvb-` id EmVB generated (a form control or its label) is kept as it is, with its references,
+ *   since it is unique on the page already.
  * - The first element to use an id owns it; a later one with the same id loses its `id` attribute.
  * - An id that ends the way `uniqueId` ends a repeat (`-r2`) is dropped: `a-r2` in one copy and `a`
  *   in a second would both come out as `ext-a-r2`. (A theme part's `-t<hash>` ending cannot be
@@ -68,13 +70,21 @@ function ownedIds(root: VNode, uniqueId: (base: string) => string): Map<string, 
 }
 
 /**
+ * Where a reference to `id` points after scoping: the element's own renamed id, EmVB's own
+ * generated `emvb-` id (a form's control or label; unique on the page already, so it stays), or
+ * nothing (a foreign id, which is dropped).
+ */
+const targetOf = (owned: ReadonlyMap<string, string>, id: string): string | undefined =>
+  owned.get(id) ?? (id.startsWith("emvb") ? id : undefined);
+
+/**
  * A paint value with every `url(#id)` renamed, or `undefined` when one of them points at an id the
  * element does not own (the attribute is then dropped, like any other reference to a foreign id).
  */
 function scopeUrlRefs(value: string, owned: ReadonlyMap<string, string>): string | undefined {
   let foreign = false;
   const out = value.replace(URL_REF, (_all, id: string) => {
-    const mapped = owned.get(id);
+    const mapped = targetOf(owned, id);
     if (mapped === undefined) foreign = true;
     return `url(#${mapped ?? id})`;
   });
@@ -85,26 +95,26 @@ function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<stri
   const attrs: Record<string, string> = {};
   for (const [name, value] of Object.entries(node.attrs)) {
     if (name === "id") {
-      const mapped = owned.get(value);
+      const mapped = targetOf(owned, value);
       // Only the first element with an id keeps it; a duplicate id is invalid HTML.
       if (mapped !== undefined && !seen.has(mapped)) {
         seen.add(mapped);
         attrs.id = mapped;
       }
     } else if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) {
-      const mapped = owned.get(value);
+      const mapped = targetOf(owned, value);
       if (mapped !== undefined) attrs[name] = mapped;
     } else if (ID_LIST_ATTRS.has(name)) {
       const mapped = value
         .split(/\s+/)
-        .map((id) => owned.get(id))
+        .map((id) => targetOf(owned, id))
         .filter((id): id is string => id !== undefined);
       if (mapped.length > 0) attrs[name] = mapped.join(" ");
     } else if (URL_REF_ATTRS.has(name) && value.includes("url(")) {
       const scoped = scopeUrlRefs(value, owned);
       if (scoped !== undefined) attrs[name] = scoped;
     } else if ((name === "href" || name === "xlink:href") && value.startsWith("#")) {
-      const mapped = owned.get(value.slice(1));
+      const mapped = targetOf(owned, value.slice(1));
       if (mapped !== undefined) attrs[name] = `#${mapped}`;
     } else {
       attrs[name] = value;
