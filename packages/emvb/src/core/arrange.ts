@@ -22,6 +22,7 @@ import {
   type Layout,
   type LayoutNode,
 } from "./schema/layout.ts";
+import { canHoldChild, holdsChildren } from "./extensions/slot-rules.ts";
 import {
   findNode,
   insertNode,
@@ -56,6 +57,7 @@ type Located = {
 export const REASONS = {
   intoItself: "A container can't go inside itself.",
   notContainer: "Only layout containers, forms, and loops can hold other elements.",
+  slotRefused: "That element can't go here.",
   rootFixed: "The page's outer container can't be moved.",
   rootCopy: "The page's outer container can't be duplicated.",
   missing: "That element is no longer on the page.",
@@ -301,7 +303,11 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
   if (!into) return refuse(REASONS.missing);
   const moving = dragged(layout, source, parentId);
   if (!moving.ok) return moving;
-  if (!isParentNode(into.node)) return refuse(REASONS.notContainer);
+  // extensionApi 1.5: an extension element that declares a slot holds children, by its rules.
+  if (!isParentNode(into.node) && !holdsChildren(into.node.type)) {
+    return refuse(REASONS.notContainer);
+  }
+  if (!canHoldChild(into.node.type, moving.node.type)) return refuse(REASONS.slotRefused);
   const inForm = underForm(layout, into.node.id);
   const placed = parentChildRefusal(into.node, moving.node, inForm);
   if (placed) return refuse(placed);

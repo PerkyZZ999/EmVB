@@ -68,6 +68,8 @@ import {
   extensionAssets,
   extensionClassesOf,
   extensionStylesheets,
+  markSlot,
+  slotNameOf,
   isExtensionType,
   renderExtensionNode,
   isExtensionPlaceholder,
@@ -778,6 +780,13 @@ export function renderPage(
         attrs: { class: "emvb-unknown", ...(id ? { "data-emvb-id": id } : {}) },
         children: [`Unknown element "${type}"`],
       };
+    }
+    // extensionApi 1.5: an output's slot marker is a placeholder; renderExtensionNode fills it.
+    const slot = slotNameOf(stored);
+    if (slot !== undefined) {
+      const placeholder: VNode = { tag: "div", attrs: {}, children: [] };
+      markSlot(placeholder, slot);
+      return placeholder;
     }
     usedTypes.add(type);
     if (isFormNode(node) && node.props.formId.trim()) rendered.form = true;

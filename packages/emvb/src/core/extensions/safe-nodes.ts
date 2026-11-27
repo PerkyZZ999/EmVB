@@ -11,6 +11,7 @@ import { validateLayout } from "../validate.ts";
 import { newNodeId } from "../tree-ops.ts";
 import { isExtensionType } from "./namespace.ts";
 import { filterExtensionClasses } from "./classes.ts";
+import { markSlot, SLOT_NAME_RULE, SLOT_TYPE, slotNameOf } from "./slots.ts";
 
 /**
  * W-1086: the extension classes each validated output node keeps. Render output only: they ride
@@ -23,7 +24,13 @@ export function extensionClassesOf(node: object): readonly string[] | undefined 
   return EXT_CLASSES.get(node);
 }
 
-type Coerced = { node: Record<string, unknown>; classes: string[]; children?: Coerced[] };
+type Coerced = {
+  node: Record<string, unknown>;
+  classes: string[];
+  children?: Coerced[];
+  /** The name of a slot marker; its `node` is a plain empty container (extensionApi 1.5). */
+  slot?: string;
+};
 
 const KNOWN = new Set<string>(KNOWN_ELEMENT_TYPES);
 const MAX_NODES = 32;
@@ -40,6 +47,7 @@ function coerce(
   if (typeof value === "string") return undefined; // raw HTML / text — refused
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const node = value as Record<string, unknown>;
+  if (node.type === SLOT_TYPE) return coerceSlot(node, budget, random);
   if (typeof node.type !== "string" || !KNOWN.has(node.type) || isExtensionType(node.type)) {
     return undefined;
   }
@@ -76,9 +84,33 @@ function coerce(
   };
 }
 
-/** Pair each validated node with the classes its coerced twin kept (same tree shape). */
+/**
+ * extensionApi 1.5: a slot marker, kept as an empty container with its name beside it. The
+ * container always carries its children array, as the layout schema requires.
+ */
+function coerceSlot(
+  node: Record<string, unknown>,
+  budget: { left: number },
+  random: () => number,
+): Coerced | undefined {
+  if (typeof node.name !== "string" || !SLOT_NAME_RULE.test(node.name)) return undefined;
+  budget.left -= 1;
+  const id =
+    typeof node.id === "string" && /^[A-Za-z0-9_-]{4,24}$/.test(node.id)
+      ? node.id
+      : newNodeId(random);
+  return {
+    node: { id, type: "container", props: {}, children: [] },
+    classes: [],
+    children: [],
+    slot: node.name,
+  };
+}
+
+/** Pair each validated node with the classes and slot its coerced twin kept (same tree shape). */
 function attachClasses(validated: LayoutNode, coerced: Coerced): void {
   if (coerced.classes.length > 0) EXT_CLASSES.set(validated, coerced.classes);
+  if (coerced.slot !== undefined) markSlot(validated, coerced.slot);
   const kids = (validated as { children?: LayoutNode[] }).children;
   if (!Array.isArray(kids) || !coerced.children || kids.length !== coerced.children.length) return;
   kids.forEach((kid, i) => {
@@ -93,6 +125,8 @@ function attachClasses(validated: LayoutNode, coerced: Coerced): void {
  */
 export function withExtensionClasses(nodes: readonly LayoutNode[]): unknown[] {
   const copy = (node: LayoutNode): Record<string, unknown> => {
+    const slot = slotNameOf(node);
+    if (slot !== undefined) return { type: SLOT_TYPE, name: slot };
     const classes = EXT_CLASSES.get(node);
     const kids = (node as { children?: LayoutNode[] }).children;
     return {

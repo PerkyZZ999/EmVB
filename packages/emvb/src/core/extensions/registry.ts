@@ -7,6 +7,7 @@
  * and the renderer look them up by id.
  */
 
+import { clearSlotRules, setSlotRules } from "./slot-rules.ts";
 import { cleanExtensionAssets, normalizeClasses } from "./classes.ts";
 import { normalizeExtension } from "./normalize.ts";
 import type { EmVBExtension, ExtensionAssets, ExtensionManifest } from "./types.ts";
@@ -44,6 +45,7 @@ function rememberManifest(manifest: ExtensionManifest): void {
   const s = store();
   s.manifests = s.manifests.filter((m) => m.id !== manifest.id);
   s.manifests.push(manifest);
+  setSlotRules(s.manifests.flatMap((m) => m.elements));
   if (manifest.classes) allowMap().set(manifest.id, new Set(manifest.classes.allow));
   else allowMap().delete(manifest.id);
 }
@@ -175,6 +177,7 @@ export function clearExtensions(): void {
   const s = store();
   s.byId.clear();
   s.manifests = [];
+  clearSlotRules();
   s.assets?.clear();
   s.allow?.clear();
 }

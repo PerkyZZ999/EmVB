@@ -1,10 +1,12 @@
-import type { ExtensionManifest } from "../../core/index.ts";
+import { setSlotRules, type ExtensionManifest } from "../../core/index.ts";
 
 /** Admin-side cache of manifests from editor/config (no render functions). */
 let cache: readonly ExtensionManifest[] = [];
 
 export function setAdminExtensionManifests(manifests: readonly ExtensionManifest[]): void {
   cache = manifests;
+  // extensionApi 1.5: the drop rules for slots and parts come from the same manifests.
+  setSlotRules(manifests.flatMap((m) => m.elements));
 }
 
 export function adminExtensionDefaults(type: string): Record<string, unknown> | undefined {

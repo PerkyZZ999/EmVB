@@ -673,6 +673,7 @@ export {
   normalizeExtension,
   extensionOutputKey,
   rememberExtensionManifests,
+  setSlotRules,
   type EmVBExtension,
   type ExtensionManifest,
   type ExtensionElement,

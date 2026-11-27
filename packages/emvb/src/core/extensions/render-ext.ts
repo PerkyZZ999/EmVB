@@ -9,7 +9,8 @@ import { extensionClassAllowlist, liveElement, liveExtension } from "./registry.
 import { validateExtensionProps } from "./schema.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { extensionPlaceholderVNode } from "./placeholder.ts";
-import type { ExtensionRenderContext } from "./types.ts";
+import { fillSlots } from "./slots.ts";
+import type { ExtensionElementManifest, ExtensionRenderContext } from "./types.ts";
 import { parseExtensionType } from "./namespace.ts";
 import { cleanBoundText } from "../data/bindings.ts";
 
@@ -99,6 +100,26 @@ export async function resolveExtensionSource(
 
 export type VisitChildren = (nodes: LayoutNode[]) => VNode[];
 
+/** A stored extension element's children; an extension element may hold children in its slot. */
+function storedChildrenOf(node: LayoutNode): LayoutNode[] {
+  const children = (node as { children?: unknown }).children;
+  return Array.isArray(children) ? (children as LayoutNode[]) : [];
+}
+
+/**
+ * extensionApi 1.5: the stored children a slot takes. With `accepts`, a child must be on that list,
+ * or be one of the element's `parts` (which only live here). Without `accepts`, any child.
+ */
+function slotChildren(
+  stored: LayoutNode[],
+  manifest: ExtensionElementManifest | undefined,
+): LayoutNode[] {
+  const accepts = manifest?.slots?.[0]?.accepts;
+  if (!accepts) return stored;
+  const parts = manifest?.parts ?? [];
+  return stored.filter((child) => accepts.includes(child.type) || parts.includes(child.type));
+}
+
 const propsOf = (node: { props?: unknown }): Record<string, unknown> =>
   node.props && typeof node.props === "object" && !Array.isArray(node.props)
     ? (node.props as Record<string, unknown>)
@@ -184,7 +205,16 @@ export function renderExtensionNode(
   }
   rendered?.(parsed.pkg);
 
-  const children = visitChildren(safe);
+  // extensionApi 1.5: the element's stored children render in its slot, and nowhere else. A marker
+  // the manifest does not declare renders nothing. Without a live element (the admin canvas) the
+  // slot takes every stored child; the editor's drop rules keep those valid.
+  const found = liveElement(type);
+  const declared = found?.manifest.slots?.[0];
+  const fill = (name: string): VNode[] => {
+    if (found && declared?.name !== name) return [];
+    return visitChildren(slotChildren(storedChildrenOf(node), found?.manifest));
+  };
+  const children = visitChildren(safe).map((child) => fillSlots(child, fill));
   return {
     tag: "div",
     attrs: {

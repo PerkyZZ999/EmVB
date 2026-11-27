@@ -13,6 +13,16 @@ import type {
   ExtensionSource,
 } from "./types.ts";
 import { EXTENSION_API_VERSION } from "./types.ts";
+import { KNOWN_ELEMENT_TYPES } from "../schema/layout.ts";
+
+/** A slot name: a lowercase word, as an output node's `name` (see slots.ts). */
+const SLOT_NAME = /^[a-z][a-z0-9-]{0,31}$/;
+/** Longest `accepts` list and `parts` list per element. */
+const MAX_ACCEPTS = 32;
+const MAX_PARTS = 16;
+
+const isBuiltinType = (type: string): boolean =>
+  (KNOWN_ELEMENT_TYPES as readonly string[]).includes(type);
 
 export type NormalizedExtension = {
   live: EmVBExtension;
@@ -47,6 +57,26 @@ function normalizeElement(
     ...schemaDefaults(element.schema),
     ...(typeof element.defaults === "function" ? element.defaults() : {}),
   };
+  // extensionApi 1.5: one slot per element; the shape allows more later without a breaking change.
+  if ((element.slots?.length ?? 0) > 1) return undefined;
+  const slots = (element.slots ?? []).flatMap((slot) => {
+    if (!SLOT_NAME.test(slot.name) || typeof slot.label !== "string") return [];
+    const accepts = slot.accepts?.slice(0, MAX_ACCEPTS).flatMap((name) => {
+      const stored = storedChildType(pkg, name);
+      return stored ? [stored] : [];
+    });
+    return [
+      {
+        name: slot.name,
+        label: slot.label.trim().slice(0, 80) || slot.name,
+        ...(accepts ? { accepts } : {}),
+      },
+    ];
+  });
+  const parts = (element.parts ?? []).slice(0, MAX_PARTS).flatMap((name) => {
+    const type = typeof name === "string" ? storedChildType(pkg, name) : undefined;
+    return type && !isBuiltinType(type) ? [type] : [];
+  });
   return {
     type,
     name: element.name,
@@ -55,7 +85,19 @@ function normalizeElement(
     schema: element.schema,
     fields,
     defaults,
+    ...(slots.length > 0 ? { slots } : {}),
+    ...(parts.length > 0 ? { parts } : {}),
   };
+}
+
+/**
+ * extensionApi 1.5: the stored type of a child an `accepts` list names: a built-in type as it is,
+ * or one of this extension's elements.
+ */
+function storedChildType(pkg: string, name: unknown): string | undefined {
+  if (typeof name !== "string") return undefined;
+  if ((KNOWN_ELEMENT_TYPES as readonly string[]).includes(name)) return name;
+  return extensionNameIssue(name) ? undefined : extensionType(pkg, name);
 }
 
 function normalizePanel(

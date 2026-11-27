@@ -47,6 +47,8 @@ export {
   extensionStylesheets,
 } from "./registry.ts";
 export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
+export { markSlot, slotNameOf } from "./slots.ts";
+export { setSlotRules } from "./slot-rules.ts";
 export {
   syncSourceValues,
   resolveExtensionSource,
