@@ -53046,6 +53046,90 @@
       "expect": "\\(fail\\).*names with spaces, quotes, markup"
     },
     {
+      "id": "W-1086/class-brackets-allowed",
+      "requirement": "W-1086",
+      "description": "the class rule admits square brackets and keeps every other valid name, so arbitrary values reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._@-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9[][A-Za-z0-9:/!._@[\\]=-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a square-bracket name is refused while its valid neighbours stay"
+    },
+    {
+      "id": "W-1086/class-colon-dropped",
+      "requirement": "W-1086",
+      "description": "the class rule drops names with a colon, so responsive classes lose their layout",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._@-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9/!._@-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*names are not parsed"
+    },
+    {
+      "id": "W-1086/class-prefix-not-required",
+      "requirement": "W-1086",
+      "description": "the class rule no longer requires the prefix, so Tailwind's variant-first spelling (sm:daisy-card-side) is admitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "    name.startsWith(prefix) &&",
+          "replace": "    true &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a responsive class is spelled prefix-first"
+    },
+    {
+      "id": "W-1086/class-uppercase-dropped",
+      "requirement": "W-1086",
+      "description": "the class rule drops names with an uppercase letter, so Spectrum's spectrum-Button is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._@-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._@-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a name with an uppercase letter is kept when listed"
+    },
+    {
+      "id": "W-1086/class-at-dropped",
+      "requirement": "W-1086",
+      "description": "the class rule drops names with @, so UIkit's uk-width-1-2@m is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._@-]*$/;",
+          "replace": "const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._-]*$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a name with @ is kept when listed"
+    },
+    {
+      "id": "W-1086/class-exact-match-lost",
+      "requirement": "W-1086",
+      "description": "a name that is not on the extension's own list passes, so another spelling reaches the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "if (typeof name === \"string\" && allow.has(name) && !out.includes(name)) out.push(name);",
+          "replace": "if (typeof name === \"string\" && allow.size > 0 && !out.includes(name)) out.push(name);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/classes-assets.test.ts"],
+      "expect": "\\(fail\\).*a name that is not on the extension's own list is refused"
+    },
+    {
       "id": "W-1086/classes-not-rendered",
       "requirement": "W-1086",
       "description": "Extension classes never reach the rendered element.",

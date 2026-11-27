@@ -4,6 +4,10 @@ import { renderPage } from "../render/index.ts";
 import { emptyDesign } from "../schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../schema/layout.ts";
 import {
+  RAW_CARD_SIDE_CSS,
+  SHIPPED_CARD_SIDE_CSS,
+} from "../../../test/fixtures/daisyui-card-side.ts";
+import {
   cleanExtensionAssets,
   classPrefixIssue,
   extensionCssIssue,
@@ -102,7 +106,6 @@ describe("class allowlist at registration (W-1086)", () => {
       "d-btn d-evil",
       'd-x"onmouseover="y',
       "d-<script>",
-      "d-UPPER",
       "x-other",
       "emvb-root",
       "d-",
@@ -115,6 +118,104 @@ describe("class allowlist at registration (W-1086)", () => {
     expect(normalizeClasses({ prefix: "d-", allow: "d-btn" })).toBeUndefined();
   });
 
+  test("exact names with the compiled-kit characters are kept; brackets, spaces and quotes are dropped", () => {
+    const allow = [
+      "daisy-size-24!",
+      "daisy-w-1/2",
+      "daisy-w-auto!",
+      "daisy-sm:card-side",
+      "daisy-[--value:70]",
+      "daisy-[url(x)]",
+      "daisy-btn d-evil",
+      'daisy-x"onmouseover="y',
+      "daisy-[--value:a b]",
+    ];
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual([
+      "daisy-size-24!",
+      "daisy-w-1/2",
+      "daisy-w-auto!",
+      "daisy-sm:card-side",
+    ]);
+  });
+  test("a square-bracket name is refused while its valid neighbours stay", () => {
+    const allow = ["daisy-btn", "daisy-size-24!", "daisy-[--value:70]", "daisy-sm:card-side"];
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual([
+      "daisy-btn",
+      "daisy-size-24!",
+      "daisy-sm:card-side",
+    ]);
+  });
+  test("a responsive class is spelled prefix-first in the CSS a kit ships, and that spelling is kept", () => {
+    // Real daisyUI 5.8.2 / Tailwind 4.3.5 output: Tailwind builds `sm:daisy-card-side`, and the kit
+    // renames the selector to `daisy-sm:card-side` so every class name starts with the prefix.
+    const classesIn = (css: string): string[] => [
+      ...new Set(
+        [...css.matchAll(/\.((?:[\w-]|\\.)+)/g)]
+          .map((match) => (match[1] ?? "").replace(/\\(.)/g, "$1"))
+          .filter((name) => name.includes("card-side")),
+      ),
+    ];
+    expect(classesIn(RAW_CARD_SIDE_CSS)).toEqual(["sm:daisy-card-side"]);
+    expect(classesIn(SHIPPED_CARD_SIDE_CSS)).toEqual(["daisy-sm:card-side"]);
+    // The shipped spelling starts with the prefix and is kept exactly; the raw one does not and is dropped.
+    expect(
+      normalizeClasses({ prefix: "daisy-", allow: classesIn(SHIPPED_CARD_SIDE_CSS) })?.allow,
+    ).toEqual(["daisy-sm:card-side"]);
+    expect(
+      normalizeClasses({ prefix: "daisy-", allow: [...classesIn(RAW_CARD_SIDE_CSS), "daisy-card"] })
+        ?.allow,
+    ).toEqual(["daisy-card"]);
+  });
+  test("a name with an uppercase letter is kept when listed, as Spectrum names its classes", () => {
+    expect(
+      normalizeClasses({ prefix: "spectrum-", allow: ["spectrum-Button", "spectrum-Button--cta"] })
+        ?.allow,
+    ).toEqual(["spectrum-Button", "spectrum-Button--cta"]);
+    // The prefix is matched exactly, so a name with the prefix in another case is not the prefix.
+    expect(normalizeClasses({ prefix: "spectrum-", allow: ["Spectrum-Button"] })).toBeUndefined();
+  });
+  test("a name with @ is kept when listed, as UIkit names its responsive widths", () => {
+    expect(
+      normalizeClasses({
+        prefix: "uk-",
+        allow: ["uk-width-1-2@m", "uk-child-width-1-3@s", "uk-hidden@l"],
+      })?.allow,
+    ).toEqual(["uk-width-1-2@m", "uk-child-width-1-3@s", "uk-hidden@l"]);
+  });
+  test("a name that is not on the extension's own list is refused, uppercase or @ or not", () => {
+    const spectrum = new Set(["spectrum-Button"]);
+    expect(
+      filterExtensionClasses(
+        ["spectrum-Button", "spectrum-button", "spectrum-BUTTON", "spectrum-Button@m"],
+        spectrum,
+      ),
+    ).toEqual(["spectrum-Button"]);
+    const uikit = new Set(["uk-width-1-2@m"]);
+    expect(
+      filterExtensionClasses(
+        ["uk-width-1-2@m", "uk-width-1-2@l", "uk-width-1-2", "uk-width-1-2@M"],
+        uikit,
+      ),
+    ).toEqual(["uk-width-1-2@m"]);
+  });
+  test("brackets, spaces and quotes stay refused beside the new characters", () => {
+    const allow = ["uk-width-1-2@m", "uk-width-[1/2]@m", "uk-a b@m", 'uk-"x"@m', "spectrum-Button"];
+    expect(normalizeClasses({ prefix: "uk-", allow })?.allow).toEqual(["uk-width-1-2@m"]);
+    expect(normalizeClasses({ prefix: "spectrum-", allow })?.allow).toEqual(["spectrum-Button"]);
+  });
+  test("names are not parsed: any name with the allowed characters and the prefix is kept", () => {
+    const allow = [
+      "daisy-sm:hidden",
+      "daisy-lg:flex",
+      "daisy-max-sm:timeline-vertical",
+      "daisy-xx:hidden",
+      "daisy-!",
+      "daisy-.x",
+      "daisy-_y",
+    ];
+    // Nothing is parsed: a name is kept when it has the prefix and only the allowed characters.
+    expect(normalizeClasses({ prefix: "daisy-", allow })?.allow).toEqual(allow);
+  });
   test("the extension's manifest carries the checked allowlist; a bad one is left out", () => {
     const ok = normalizeExtension(kit());
     expect(ok?.manifest.classes?.allow).toEqual(["kit-btn", "kit-btn-primary", "kit-card"]);
@@ -194,6 +295,32 @@ describe("classes on extension output (W-1086)", () => {
     expect(html).not.toContain("x y");
   });
 
+  test("a mixed-case name and a name with @ reach the page as written, and an unlisted spelling does not", () => {
+    rememberExtensions([
+      defineExtension({
+        id: "emvb-ext-kit",
+        classes: { prefix: "kit-", allow: ["kit-Button", "kit-width-1-2@m"] },
+        elements: [
+          {
+            name: "promo-tile",
+            label: "Tile",
+            schema: { type: "object", properties: {} },
+            fields: [],
+            render: () => ({
+              id: "btn00001",
+              type: "heading",
+              props: { text: "Go", level: 2 },
+              extClasses: ["kit-Button", "kit-width-1-2@m", "kit-button", "kit-width-1-2@l"],
+            }),
+          },
+        ],
+      }),
+    ]);
+    const { html } = renderPage(page(button), emptyDesign());
+    expect(html).toContain("kit-Button kit-width-1-2@m");
+    expect(html).not.toContain("kit-button");
+    expect(html).not.toContain("kit-width-1-2@l");
+  });
   test("an extension without an allowlist gets no classes", () => {
     rememberExtensions([{ ...kit(), classes: undefined }]);
     const { html } = renderPage(page(button), emptyDesign());

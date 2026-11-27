@@ -113,8 +113,15 @@ servers through the plugin options. The module must sit in a package whose `pack
 - `prefix`: 2–16 characters, lowercase letters, digits and single hyphens, ending in `-`
   (`d-`, `acme-ui-`). It may not start with `emvb`. A refused prefix drops the whole allowlist
   (the extension still registers, without classes).
-- `allow`: up to 512 names, each `^[a-z][a-z0-9-]*$`, at most 64 characters, starting with the
-  prefix and longer than it. Other names are dropped one by one.
+- `allow`: up to 512 names, at most 64 characters, starting with the prefix and longer than it.
+  A name starts with the prefix, then uses letters of either case (`spectrum-Button`), digits, `-`,
+  and `: / ! . _ @` (`uk-width-1-2@m`). Square brackets, spaces,
+  quotes and markup are not allowed. Names are matched exactly and never parsed: whatever a name
+  means comes from the kit's CSS. Other names are dropped one by one.
+- Every name starts with the prefix, including a responsive one. Tailwind builds a prefixed
+  variant class variant-first (`sm:daisy-card-side`), so a kit that ships `daisy-sm:card-side`
+  asks Tailwind for the variant-first name and renames the selector in the built CSS. The
+  allowlist and the CSS must use the same, prefix-first, spelling.
 - A node returned by `render()` may carry `extClasses: string[]`. EmVB keeps only exact names
   from this extension's allowlist, at most 16 per node, without duplicates; anything else (free
   text, names with spaces, quotes or `<`, `emvb-*` names, unlisted names) is dropped. They are
