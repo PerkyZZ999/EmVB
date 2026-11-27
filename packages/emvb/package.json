@@ -60,7 +60,7 @@
     "@phosphor-icons/react": "2.1.10",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "astro": "7.4.12",
+    "astro": "7.4.13",
     "emdash": "1.6.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
