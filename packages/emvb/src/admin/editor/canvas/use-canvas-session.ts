@@ -10,6 +10,7 @@ import {
 import type { PasteRefusal, ClipboardActions } from "../useClipboardActions.ts";
 import { canvasScale, type CanvasZoom } from "./canvas-scale.ts";
 import type { Box, InvalidDrop } from "./SelectionOverlay.tsx";
+import { followAdminTheme } from "./canvas-theme.ts";
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
 import { revealInAccordions, revealInMenus, revealInTabs } from "./tab-reveal.ts";
 import { vnodeToReact } from "./vnode-react.tsx";
@@ -118,6 +119,8 @@ export function useCanvasSession({
     const loaded = frame.current?.contentDocument;
     if (loaded?.body) setDoc(loaded);
   }, []);
+  // The canvas root carries the admin's light or dark mode, so a kit's dark rules show (and follow a switch).
+  React.useEffect(() => (doc ? followAdminTheme(doc) : undefined), [doc]);
 
   const [refused, setRefused] = React.useState<InvalidDrop | null>(null);
   React.useEffect(() => {

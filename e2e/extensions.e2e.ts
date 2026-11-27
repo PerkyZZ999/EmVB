@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, openEditor, overlay, unique } from "./support/helpers.ts";
+import { canvas, emulateAdminColorScheme, openEditor, overlay, unique } from "./support/helpers.ts";
 
 // W-1086: the sample extension emvb-ext-hello (registered in both demos) puts allowlisted
 // classes on its output and ships a stylesheet and a runtime. Both load only on pages that
@@ -96,6 +96,48 @@ test("the editor canvas shows the extension's output with its classes and styles
   ).toBe(false);
 });
 
+// extensionApi 1.5: the canvas root carries the admin's own light or dark mode, as a public page
+// carries a visitor's choice, so a kit's dark rules show while editing and follow a switch. A kit's
+// rule is keyed on `[data-emvb-theme=dark]` on the root (see scopeExtensionCss).
+test("the editor canvas follows the admin's light or dark mode, and a kit's themed style follows it (extensionApi 1.5)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(
+    request,
+    "Extension theme",
+    layoutWith([
+      { id: "head0001", type: "heading", props: { text: "Extension theme", level: 1 } },
+      { id: "greet001", type: GREETING, props: { text: "Hello in a theme" } },
+    ]),
+    `ext-${unique()}`,
+  );
+  // The admin must be loaded before its colour scheme can be read, so set the scheme after the editor opens.
+  await openEditor(page, id, "Extension theme");
+  await emulateAdminColorScheme(page, "light");
+  const root = canvas(page).locator("html");
+  await expect(root).toHaveAttribute("data-emvb-theme", "light");
+  // A stylesheet written the way a kit's is after scoping: a default, and a rule for the dark root.
+  const card = canvas(page).locator('[data-emvb-id="greet001"] > .hello-card');
+  await expect(card).toHaveCount(1);
+  await card.evaluate((el) => {
+    const style = el.ownerDocument.createElement("style");
+    style.textContent =
+      ".hello-card{background-color:rgb(255,255,255)}" +
+      '[data-emvb-theme="dark"] .hello-card{background-color:rgb(1,2,3)}';
+    el.ownerDocument.head.append(style);
+  });
+  const background = () => card.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await expect.poll(background).toBe("rgb(255, 255, 255)");
+  // The admin switches to dark: the canvas root follows, and the themed rule now applies.
+  await emulateAdminColorScheme(page, "dark");
+  await expect(root).toHaveAttribute("data-emvb-theme", "dark");
+  await expect.poll(background).toBe("rgb(1, 2, 3)");
+  // And back.
+  await emulateAdminColorScheme(page, "light");
+  await expect(root).toHaveAttribute("data-emvb-theme", "light");
+  await expect.poll(background).toBe("rgb(255, 255, 255)");
+});
 // W-1088 (#37): an element whose extension isn't installed (removed from astro.config) keeps its
 // data. Visitors see nothing in its place; the editor canvas and the field Preview keep the note.
 const GONE = "ext:emvb-ext-gone/notice";

@@ -12,6 +12,7 @@ import { extensionPlaceholderVNode } from "./placeholder.ts";
 import type { ExtensionRenderContext } from "./types.ts";
 import { parseExtensionType } from "./namespace.ts";
 import { cleanBoundText } from "../data/bindings.ts";
+import { cssScopeToken, EXTENSION_WRAPPER_CLASS } from "../css/scope.ts";
 
 export type ExtensionRenderMode = "public" | "editor";
 
@@ -185,10 +186,12 @@ export function renderExtensionNode(
   rendered?.(parsed.pkg);
 
   const children = visitChildren(safe);
+  // extensionApi 1.5: the wrapper carries the scope class its stylesheet is written against.
+  const token = cssScopeToken(parsed.pkg);
   return {
     tag: "div",
     attrs: {
-      class: "emvb-ext",
+      class: token ? `emvb-ext ${EXTENSION_WRAPPER_CLASS(token)}` : "emvb-ext",
       "data-emvb-ext": type,
       ...(id && mode === "editor" ? { "data-emvb-id": id } : {}),
     },

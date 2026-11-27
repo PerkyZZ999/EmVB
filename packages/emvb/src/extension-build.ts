@@ -26,6 +26,7 @@ import {
   type ExtensionManifest,
 } from "./core/extensions/index.ts";
 import { MAX_EXTENSION_CSS_BYTES, MAX_EXTENSION_RUNTIME_BYTES } from "./core/extensions/classes.ts";
+import { foreignClassSelectors } from "./core/css/scope.ts";
 import { PACKAGE_NAME } from "./constants.ts";
 
 type NodeApis = { fs: typeof Fs; path: typeof Path; url: typeof Url; vm?: typeof Vm };
@@ -209,6 +210,16 @@ export function prepareExtensionBuild(
         const issue = extensionCssIssue(css);
         if (issue) say(`css refused: ${issue}`);
         else assets.css = css;
+        // extensionApi 1.5: a class selector is left as written when the stylesheet is scoped, on the
+        // assumption that every class in it is the extension's own, so it must carry the prefix.
+        const prefix = manifest.classes?.prefix;
+        if (prefix !== undefined) {
+          for (const name of foreignClassSelectors(css, prefix)) {
+            say(
+              `css names the class .${name}, which does not start with ${prefix}; a class selector is left as written, so it would style content outside the extension`,
+            );
+          }
+        }
       }
     }
     if (ext.runtime !== undefined) {

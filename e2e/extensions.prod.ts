@@ -87,7 +87,7 @@ test("the built server renders the extension's element, classes, stylesheet and 
   const html = await response.text();
   // The element rendered (no placeholder), with its allowlisted classes, in all three places.
   expect(html).not.toMatch(/class="[^"]*emvb-ext-missing/);
-  expect(count(html, 'class="emvb-ext"')).toBe(3);
+  expect(count(html, 'class="emvb-ext emvb-ext--emvb-ext-hello"')).toBe(3);
   expect(html).toMatch(/class="emvb-div-block( \S+)* hello-card"/);
   expect(html).toMatch(/class="emvb-heading( \S+)* hello-title hello-wave"/);
   for (const text of ["Hello from the header", "Hello from the body", "Hello from the footer"])

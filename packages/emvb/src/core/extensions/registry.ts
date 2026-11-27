@@ -10,6 +10,7 @@
 import { cleanExtensionAssets, normalizeClasses } from "./classes.ts";
 import { normalizeExtension } from "./normalize.ts";
 import type { EmVBExtension, ExtensionAssets, ExtensionManifest } from "./types.ts";
+import { cssScopeToken, scopeExtensionCss } from "../css/scope.ts";
 
 const KEY = Symbol.for("emvb.extensions.v1");
 
@@ -18,6 +19,12 @@ type Store = {
   manifests: ExtensionManifest[];
   /** W-1086: stylesheet and runtime text read at build time, by extension id. */
   assets?: Map<string, ExtensionAssets>;
+  /**
+   * extensionApi 1.5: each extension's scoped stylesheet, by extension id. The rewrite is stable, so
+   * a page render, a canvas render and the HTML export reuse it. It is dropped whenever the
+   * extension's assets are set again or the extensions are cleared.
+   */
+  scoped?: Map<string, string>;
   /** W-1086: each extension's class allowlist as a set, by extension id. */
   allow?: Map<string, ReadonlySet<string>>;
 };
@@ -94,6 +101,7 @@ export function rememberExtensionAssets(id: string, assets: unknown): void {
   const clean = cleanExtensionAssets(assets);
   if (clean) assetsMap().set(id, clean);
   else assetsMap().delete(id);
+  store().scoped?.delete(id);
 }
 
 /** W-1086: the build-time stylesheet and runtime text of extension `id`, if any. */
@@ -111,9 +119,19 @@ export function extensionStylesheets(ids: Iterable<string>): string {
     .toSorted()
     .flatMap((id) => {
       const css = extensionAssets(id)?.css;
-      return css ? [`/* ${id} */\n${css}\n`] : [];
+      const token = cssScopeToken(id);
+      return css && token ? [`/* ${id} */\n${scopedStylesheet(id, css, token)}\n`] : [];
     })
     .join("");
+}
+/** extensionApi 1.5: the stylesheet scoped to the extension's wrapper, rewritten once per text. */
+function scopedStylesheet(id: string, css: string, token: string): string {
+  const cache = (store().scoped ??= new Map());
+  const hit = cache.get(id);
+  if (hit !== undefined) return hit;
+  const scoped = scopeExtensionCss(css, token);
+  cache.set(id, scoped);
+  return scoped;
 }
 
 /** W-1086: the class allowlist of extension `id` (empty when it declares none). */
@@ -175,6 +193,7 @@ export function clearExtensions(): void {
   const s = store();
   s.byId.clear();
   s.manifests = [];
+  s.scoped?.clear();
   s.assets?.clear();
   s.allow?.clear();
 }

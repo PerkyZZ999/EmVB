@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { buildSiteExport } from "../export/site.ts";
+import * as scope from "../css/scope.ts";
 import { renderPage } from "../render/index.ts";
 import { emptyDesign } from "../schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../schema/layout.ts";
@@ -434,5 +435,93 @@ describe("HTML export of a missing extension (W-1088, #37)", () => {
     expect(typeof html === "string" && html.includes("emvb-heading")).toBe(true);
     expect(typeof html === "string" && html.includes("emvb-ext")).toBe(false);
     expect(typeof html === "string" && html.includes("not installed")).toBe(false);
+  });
+});
+describe("extension stylesheets are scoped to the extension's wrapper (extensionApi 1.5)", () => {
+  const KIT_CSS = "h1{margin:0}body{margin:0}:root{--kit-x:1}.kit-btn{border:2px solid red}";
+  const WRAPPER = ":where(.emvb-ext--emvb-ext-kit)";
+  const SCOPED = `${WRAPPER} h1{margin:0}${WRAPPER}{margin:0}:where(:root) ${WRAPPER}{--kit-x:1}.kit-btn{border:2px solid red}`;
+  test("the page's stylesheet is scoped, and the element's wrapper carries the scope class", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });
+    const out = renderPage(page(heading, button), emptyDesign());
+    expect(out.css).toContain(`/* emvb-ext-kit */\n${SCOPED}`);
+    expect(out.css).not.toContain(KIT_CSS);
+    expect(out.html).toContain('class="emvb-ext emvb-ext--emvb-ext-kit"');
+    // The page's own heading is outside the wrapper, so the kit's `h1` rule cannot reach it.
+    expect(out.html).toMatch(/<h1[^>]*class="emvb-heading/);
+  });
+  test("a class-only stylesheet is written exactly as it was", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS });
+    expect(renderPage(page(button), emptyDesign()).css).toContain(`/* emvb-ext-kit */\n${CSS}\n`);
+  });
+  test("the HTML export scopes it the same way", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: KIT_CSS });
+    const out = buildSiteExport({
+      design: emptyDesign(),
+      parts: [],
+      pages: [{ id: "p1", title: "Shop", slug: "shop", layout: page(heading, button) }],
+    });
+    const files = new Map(out.files.map((f) => [f.path, typeof f.data === "string" ? f.data : ""]));
+    expect(files.get("shop/style.css")).toContain(SCOPED);
+    expect(files.get("shop/index.html")).toContain("emvb-ext--emvb-ext-kit");
+  });
+});
+describe("the scoped stylesheet is built once per text (extensionApi 1.5)", () => {
+  const CSS_A = "h1{margin:0}.kit-btn{x:1}";
+  test("renders and the export reuse it, so the rewrite does not repeat on each canvas render", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS_A });
+    const spy = spyOn(scope, "scopeExtensionCss");
+    try {
+      const first = renderPage(page(heading, button), emptyDesign()).css;
+      for (let i = 0; i < 5; i++) renderPage(page(heading, button), emptyDesign());
+      buildSiteExport({
+        design: emptyDesign(),
+        parts: [],
+        pages: [{ id: "p1", title: "Shop", slug: "shop", layout: page(button) }],
+      });
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(renderPage(page(heading, button), emptyDesign()).css).toBe(first);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+  test("a changed stylesheet is scoped again, and the old one is not served", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS_A });
+    expect(extensionStylesheets(["emvb-ext-kit"])).toContain("h1{margin:0}");
+    rememberExtensionAssets("emvb-ext-kit", { css: "h2{margin:1px}.kit-btn{x:2}" });
+    const next = extensionStylesheets(["emvb-ext-kit"]);
+    expect(next).toContain(":where(.emvb-ext--emvb-ext-kit) h2{margin:1px}");
+    expect(next).not.toContain("h1{margin:0}");
+  });
+  test("the same text set again still gives the right sheet, and removing the css gives none", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS_A });
+    const once = extensionStylesheets(["emvb-ext-kit"]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS_A });
+    expect(extensionStylesheets(["emvb-ext-kit"])).toBe(once);
+    rememberExtensionAssets("emvb-ext-kit", {});
+    expect(extensionStylesheets(["emvb-ext-kit"])).toBe("");
+  });
+  test("clearing the extensions serves nothing, and a new stylesheet is scoped fresh", () => {
+    rememberExtensions([kit()]);
+    rememberExtensionAssets("emvb-ext-kit", { css: CSS_A });
+    expect(extensionStylesheets(["emvb-ext-kit"])).not.toBe("");
+    clearExtensions();
+    expect(extensionStylesheets(["emvb-ext-kit"])).toBe("");
+    rememberExtensionAssets("emvb-ext-kit", { css: "h3{x:1}" });
+    expect(extensionStylesheets(["emvb-ext-kit"])).toContain("h3{x:1}");
+    expect(extensionStylesheets(["emvb-ext-kit"])).not.toContain("h1{margin:0}");
+  });
+  test("two extensions with the same text keep their own wrapper class", () => {
+    rememberExtensionAssets("emvb-ext-one", { css: "h1{x:1}" });
+    rememberExtensionAssets("emvb-ext-two", { css: "h1{x:1}" });
+    const both = extensionStylesheets(["emvb-ext-one", "emvb-ext-two"]);
+    expect(both).toContain(":where(.emvb-ext--emvb-ext-one) h1{x:1}");
+    expect(both).toContain(":where(.emvb-ext--emvb-ext-two) h1{x:1}");
   });
 });

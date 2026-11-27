@@ -121,6 +121,46 @@ describe("prepareExtensionBuild (W-1086)", () => {
     expect(extensionAssets("emvb-ext-kit")).toBeUndefined();
   });
 
+  test("warns about a class in the stylesheet that does not start with the prefix", () => {
+    const { module, site } = pkg("emvb-ext-kit", {
+      "src/kit.css":
+        ":root{--kit-gap:1;--color-primary:red}.kit-card{x:1}.page-heading{x:2}@media (x){.kit-a .sidebar{x:3}}",
+    });
+    const build = prepareExtensionBuild(
+      rememberExtensions([
+        ext("emvb-ext-kit", {
+          module,
+          css: "./kit.css",
+          classes: { prefix: "kit-", allow: ["kit-card"] },
+        }),
+      ]),
+      { root: site },
+    );
+    const text = build.warnings.join("\n");
+    expect(text).toContain("names the class .page-heading, which does not start with kit-");
+    expect(text).toContain("names the class .sidebar, which does not start with kit-");
+    expect(text).not.toContain(".kit-card");
+    // Root variables are scoped to the wrapper now, so they need no warning.
+    expect(text).not.toContain("declares");
+    // A warning only: the stylesheet is still kept.
+    expect(extensionAssets("emvb-ext-kit")?.css).toContain(".page-heading");
+  });
+  test("an extension that names only its own classes gets no class warning", () => {
+    const { module, site } = pkg("emvb-ext-kit", {
+      "src/kit.css": ".kit-card{x:1}.kit-card:hover .kit-title{y:2}@media (x){.kit-a{z:3}}",
+    });
+    const build = prepareExtensionBuild(
+      rememberExtensions([
+        ext("emvb-ext-kit", {
+          module,
+          css: "./kit.css",
+          classes: { prefix: "kit-", allow: ["kit-card"] },
+        }),
+      ]),
+      { root: site },
+    );
+    expect(build.warnings.join()).not.toContain("names the class");
+  });
   test("an extension without module keeps the old entry and gets a warning for its files", () => {
     const build = prepareExtensionBuild(
       rememberExtensions([ext("emvb-ext-kit", { css: "./kit.css" })]),
