@@ -91,34 +91,46 @@ function scopeUrlRefs(value: string, owned: ReadonlyMap<string, string>): string
   return foreign ? undefined : out;
 }
 
+/** One id-list attribute (`aria-labelledby`): its ids that the element owns, or undefined if none. */
+function scopedIdList(value: string, owned: ReadonlyMap<string, string>): string | undefined {
+  const mapped = value
+    .split(/\s+/)
+    .map((id) => targetOf(owned, id))
+    .filter((id): id is string => id !== undefined);
+  return mapped.length > 0 ? mapped.join(" ") : undefined;
+}
+
+/**
+ * One attribute's value after scoping, or undefined to drop the attribute. `seen` holds the ids
+ * already written, so a repeated id keeps only its first use.
+ */
+function scopedValue(
+  name: string,
+  value: string,
+  owned: ReadonlyMap<string, string>,
+  seen: Set<string>,
+): string | undefined {
+  if (name === "id") {
+    const mapped = targetOf(owned, value);
+    if (mapped === undefined || seen.has(mapped)) return undefined;
+    seen.add(mapped);
+    return mapped;
+  }
+  if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value);
+  if (ID_LIST_ATTRS.has(name)) return scopedIdList(value, owned);
+  if (URL_REF_ATTRS.has(name) && value.includes("url(")) return scopeUrlRefs(value, owned);
+  if ((name === "href" || name === "xlink:href") && value.startsWith("#")) {
+    const mapped = targetOf(owned, value.slice(1));
+    return mapped === undefined ? undefined : `#${mapped}`;
+  }
+  return value;
+}
+
 function rewrite(node: VNode, owned: ReadonlyMap<string, string>, seen: Set<string>): VNode {
   const attrs: Record<string, string> = {};
   for (const [name, value] of Object.entries(node.attrs)) {
-    if (name === "id") {
-      const mapped = targetOf(owned, value);
-      // Only the first element with an id keeps it; a duplicate id is invalid HTML.
-      if (mapped !== undefined && !seen.has(mapped)) {
-        seen.add(mapped);
-        attrs.id = mapped;
-      }
-    } else if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) {
-      const mapped = targetOf(owned, value);
-      if (mapped !== undefined) attrs[name] = mapped;
-    } else if (ID_LIST_ATTRS.has(name)) {
-      const mapped = value
-        .split(/\s+/)
-        .map((id) => targetOf(owned, id))
-        .filter((id): id is string => id !== undefined);
-      if (mapped.length > 0) attrs[name] = mapped.join(" ");
-    } else if (URL_REF_ATTRS.has(name) && value.includes("url(")) {
-      const scoped = scopeUrlRefs(value, owned);
-      if (scoped !== undefined) attrs[name] = scoped;
-    } else if ((name === "href" || name === "xlink:href") && value.startsWith("#")) {
-      const mapped = targetOf(owned, value.slice(1));
-      if (mapped !== undefined) attrs[name] = `#${mapped}`;
-    } else {
-      attrs[name] = value;
-    }
+    const scoped = scopedValue(name, value, owned, seen);
+    if (scoped !== undefined) attrs[name] = scoped;
   }
   return {
     tag: node.tag,

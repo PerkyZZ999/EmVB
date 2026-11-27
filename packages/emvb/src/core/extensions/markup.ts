@@ -48,23 +48,34 @@ export const setMarkup = (node: object, spec: MarkupSpec): void => {
 export function markupSpec(props: Record<string, unknown>): MarkupSpec | undefined {
   const { tag, attrs, text } = props;
   if (typeof tag !== "string" || !isAllowedTag(tag)) return undefined;
-  const out: Record<string, string> = {};
-  if (attrs !== undefined) {
-    if (!attrs || typeof attrs !== "object" || Array.isArray(attrs)) return undefined;
-    for (const [name, value] of Object.entries(attrs)) {
-      if (typeof value !== "string" || value.length > MAX_VALUE) return undefined;
-      if (!isAllowedAttr(name) || name === "class") return undefined;
-      if (name === "id" && value.startsWith("emvb")) return undefined;
-      const cleaned = cleanBoundText(value, MAX_VALUE);
-      const safe = URL_ATTRS.has(name) ? sanitizeHref(cleaned) : cleaned;
-      if (safe === undefined) return undefined;
-      out[name] = safe;
-    }
-  }
+  const kept = checkedAttrs(attrs);
+  if (kept === undefined) return undefined;
   if (text !== undefined && (typeof text !== "string" || text.length > MAX_VALUE)) return undefined;
   return {
     tag,
-    attrs: out,
+    attrs: kept,
     ...(typeof text === "string" ? { text: cleanBoundText(text, MAX_VALUE) } : {}),
   };
+}
+
+/** The attributes kept (`{}` when there are none), or undefined when one is refused. */
+function checkedAttrs(attrs: unknown): Record<string, string> | undefined {
+  if (attrs === undefined) return {};
+  if (!attrs || typeof attrs !== "object" || Array.isArray(attrs)) return undefined;
+  const out: Record<string, string> = {};
+  for (const [name, value] of Object.entries(attrs)) {
+    const kept = checkedValue(name, value);
+    if (kept === undefined) return undefined;
+    out[name] = kept;
+  }
+  return out;
+}
+
+/** One attribute's cleaned value, or undefined when its name, value or URL is refused. */
+function checkedValue(name: string, value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > MAX_VALUE) return undefined;
+  if (!isAllowedAttr(name) || name === "class") return undefined;
+  if (name === "id" && value.startsWith("emvb")) return undefined;
+  const cleaned = cleanBoundText(value, MAX_VALUE);
+  return URL_ATTRS.has(name) ? sanitizeHref(cleaned) : cleaned;
 }

@@ -41670,8 +41670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n",
-          "replace": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n"
+          "search": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n",
+          "replace": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -47206,8 +47206,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)",
-          "replace": "node.htmlId && HTML_ID.test(node.htmlId)"
+          "search": "const htmlId =\n      node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)",
+          "replace": "const htmlId =\n      node.htmlId && HTML_ID.test(node.htmlId)"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
