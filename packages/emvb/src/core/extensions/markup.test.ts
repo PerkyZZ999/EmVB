@@ -76,9 +76,10 @@ describe("markupSpec", () => {
 
 describe("safe output of the markup node", () => {
   test("a valid markup node keeps its spec beside the validated node", () => {
-    const [node] = safeExtensionOutput([{ type: "markup", props: { tag: "pre", text: "code" } }]);
-    expect(node).toBeDefined();
-    expect(markupOf(node!)).toEqual({ tag: "pre", attrs: {}, text: "code" });
+    const node = only(
+      safeExtensionOutput([{ type: "markup", props: { tag: "pre", text: "code" } }]),
+    );
+    expect(markupOf(node)).toEqual({ tag: "pre", attrs: {}, text: "code" });
   });
 
   test("a refused markup node is refused whole, so the element shows its placeholder", () => {
@@ -86,12 +87,13 @@ describe("safe output of the markup node", () => {
   });
 
   test("the spec survives the admin round trip", () => {
-    const [node] = safeExtensionOutput([
-      { type: "markup", props: { tag: "th", attrs: { scope: "row" }, text: "Row" } },
-    ]);
-    const raw = withExtensionClasses([node!]);
-    const [again] = safeExtensionOutput(raw);
-    expect(markupOf(again!)).toEqual({ tag: "th", attrs: { scope: "row" }, text: "Row" });
+    const node = only(
+      safeExtensionOutput([
+        { type: "markup", props: { tag: "th", attrs: { scope: "row" }, text: "Row" } },
+      ]),
+    );
+    const again = only(safeExtensionOutput(withExtensionClasses([node])));
+    expect(markupOf(again)).toEqual({ tag: "th", attrs: { scope: "row" }, text: "Row" });
   });
 });
 
@@ -135,6 +137,13 @@ const kit = () =>
       },
     ],
   });
+
+/** The only item of a one-item list, without a non-null assertion. */
+function only<T>(items: readonly T[]): T {
+  const [item] = items;
+  if (items.length !== 1 || item === undefined) throw new Error("expected exactly one item");
+  return item;
+}
 
 const EXT_TABLE = "ext:emvb-ext-kit/table";
 const EXT_ANCHORED = "ext:emvb-ext-kit/anchored";
