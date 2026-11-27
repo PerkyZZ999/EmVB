@@ -114,7 +114,8 @@ servers through the plugin options. The module must sit in a package whose `pack
   (`d-`, `acme-ui-`). It may not start with `emvb`. A refused prefix drops the whole allowlist
   (the extension still registers, without classes).
 - `allow`: up to 512 names, at most 64 characters, starting with the prefix and longer than it.
-  A name uses only lowercase letters, digits, `-`, and `: / ! . _`. Square brackets, spaces,
+  A name starts with the prefix, then uses letters of either case (`spectrum-Button`), digits, `-`,
+  and `: / ! . _ @` (`uk-width-1-2@m`). Square brackets, spaces,
   quotes and markup are not allowed. Names are matched exactly and never parsed: whatever a name
   means comes from the kit's CSS. Other names are dropped one by one.
 - Every name starts with the prefix, including a responsive one. Tailwind builds a prefixed

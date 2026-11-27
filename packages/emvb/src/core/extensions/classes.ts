@@ -9,11 +9,12 @@ import type { ExtensionAssets, ExtensionClasses } from "./types.ts";
 const PREFIX = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-$/;
 /**
  * A class name (extensionApi 1.5): matched exactly against the static allowlist, nothing parsed. The
- * characters are the ones compiled kits use: lowercase letters, digits, `-`, and `: / ! . _`, starting
- * with a letter or digit. No square brackets, spaces, quotes or markup. Whether a name means anything
- * comes from the kit's own CSS.
+ * characters are the ones compiled kits use: letters of either case (Spectrum's `spectrum-Button`),
+ * digits, `-`, and `: / ! . _ @` (UIkit's `uk-width-1-2@m`). It starts with a lowercase letter or
+ * digit, which the extension's prefix guarantees. No square brackets, spaces, quotes or markup.
+ * Whether a name means anything comes from the kit's own CSS.
  */
-const CLASS_NAME = /^[a-z0-9][a-z0-9:/!._-]*$/;
+const CLASS_NAME = /^[a-z0-9][A-Za-z0-9:/!._@-]*$/;
 
 const MAX_CLASS_PREFIX_LENGTH = 16;
 const MAX_CLASS_NAME_LENGTH = 64;
