@@ -90,11 +90,8 @@ describe("rendering the stored children into the slot", () => {
 
   test("a marker whose name the element does not declare renders nothing", () => {
     rememberExtensions([cards()]);
-    const page = renderPage(
-      pageWithCard(`ext:${PKG}/undeclared`),
-      emptyDesign(),
-      { mode: "public" },
-    );
+    const undeclared = pageWithCard(`ext:${PKG}/undeclared`);
+    const page = renderPage(undeclared, emptyDesign(), { mode: "public" });
     expect(page.html).not.toContain("Kept copy");
   });
 });

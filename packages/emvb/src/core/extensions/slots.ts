@@ -35,7 +35,9 @@ export function slotNameOf(node: object): string | undefined {
  */
 export function fillSlots(root: VNode, fill: (name: string) => VNode[]): VNode {
   const name = slotNameOf(root);
-  if (name !== undefined) return { tag: "div", attrs: { class: "emvb-ext-slot" }, children: fill(name) };
+  if (name !== undefined) {
+    return { tag: "div", attrs: { class: "emvb-ext-slot" }, children: fill(name) };
+  }
   return {
     tag: root.tag,
     attrs: root.attrs,
