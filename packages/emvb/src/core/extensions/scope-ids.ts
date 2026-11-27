@@ -11,9 +11,12 @@
  * - An id the element does not own is not a target. A reference to it is dropped, so output cannot
  *   point at the host page's own ids or at another element's.
  * - An author id that is not a plain id, or that would replace a browser global (`isShadowingId`,
- *   S-12), is dropped, like a reference to it. An author `emvb` id is refused before this (markup.ts).
- * - An `emvb-` id EmVB generated (a form control or its label) is kept as it is, with its references,
- *   since it is unique on the page already.
+ *   S-12), is dropped, like a reference to it. An author id that starts with `emvb` never gets here:
+ *   the markup node refuses it (markup.ts) and a built-in output node carries no author id at all
+ *   (safe-nodes.ts keeps only `id`, `type`, `props` and `children`).
+ * - An `emvb-` id on a node of this output is one EmVB generated for it (a form control or its
+ *   label). It is kept as it is, with the references to it that sit in the same output, since it is
+ *   unique on the page already. A reference to an `emvb-` id that is not in this output is dropped.
  * - The first element to use an id owns it; a later one with the same id loses its `id` attribute.
  * - An id that ends the way `uniqueId` ends a repeat (`-r2`) is dropped: `a-r2` in one copy and `a`
  *   in a second would both come out as `ext-a-r2`. (A theme part's `-t<hash>` ending cannot be
@@ -55,13 +58,20 @@ const usableId = (value: string): boolean =>
   !value.startsWith("emvb") &&
   !GENERATED_ENDING.test(value);
 
-/** Every id the tree owns, in document order, mapped to its page-unique id. */
+/**
+ * Every id the tree owns, in document order, mapped to its page-unique id. An `emvb-` id on a node
+ * of this tree is one EmVB generated for it (a form control and its label): an author id that
+ * starts with `emvb` is refused before it gets here (markup.ts) and never comes from a built-in
+ * node's `htmlId`. It is unique on the page already, so it maps to itself. A reference to an
+ * `emvb-` id that is not on a node of this tree is not in the map, so it is dropped.
+ */
 function ownedIds(root: VNode, uniqueId: (base: string) => string): Map<string, string> {
   const owned = new Map<string, string>();
   const visit = (node: VNode): void => {
     const id = node.attrs.id;
-    if (id !== undefined && usableId(id) && !owned.has(id)) {
-      owned.set(id, uniqueId(`${ID_BASE}${id}`));
+    if (id !== undefined && !owned.has(id)) {
+      if (id.startsWith("emvb")) owned.set(id, id);
+      else if (usableId(id)) owned.set(id, uniqueId(`${ID_BASE}${id}`));
     }
     for (const child of node.children) if (typeof child !== "string") visit(child);
   };
@@ -70,12 +80,11 @@ function ownedIds(root: VNode, uniqueId: (base: string) => string): Map<string, 
 }
 
 /**
- * Where a reference to `id` points after scoping: the element's own renamed id, EmVB's own
- * generated `emvb-` id (a form's control or label; unique on the page already, so it stays), or
- * nothing (a foreign id, which is dropped).
+ * Where a reference to `id` points after scoping: an id this tree owns (renamed, or an `emvb-` id
+ * EmVB generated inside it), or nothing: any other id is foreign and the reference is dropped.
  */
 const targetOf = (owned: ReadonlyMap<string, string>, id: string): string | undefined =>
-  owned.get(id) ?? (id.startsWith("emvb") ? id : undefined);
+  owned.get(id);
 
 /**
  * A paint value with every `url(#id)` renamed, or `undefined` when one of them points at an id the

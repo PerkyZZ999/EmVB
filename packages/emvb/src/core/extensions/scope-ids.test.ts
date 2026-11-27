@@ -107,6 +107,22 @@ describe("scopeIds", () => {
     kids.forEach((kid) => expect(kid.attrs).toEqual({}));
   });
 
+  test("a reference to an emvb- id that is not in the output is dropped", () => {
+    const out = scopeIds(
+      el(
+        "div",
+        {},
+        el("label", { for: "emvb-field-other" }),
+        el("a", { href: "#emvb-field-other" }),
+        el("p", { "aria-controls": "emvb-hp-other", "aria-labelledby": "emvb-field-other" }),
+        el("p", { fill: "url(#emvb-grad-other)" }),
+      ),
+      uniqueIds(),
+    );
+    const kids = out.children as VNode[];
+    kids.forEach((kid) => expect(kid.attrs).toEqual({}));
+  });
+
   test("an emvb- id EmVB generated (a form control) keeps its id and its references", () => {
     const out = scopeIds(
       el(

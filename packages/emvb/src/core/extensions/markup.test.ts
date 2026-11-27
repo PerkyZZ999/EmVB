@@ -119,8 +119,58 @@ const kit = () =>
           { type: "markup", props: { tag: "a", attrs: { href: "#nowhere" }, text: "Lost" } },
         ],
       },
+      {
+        // A form: EmVB generates its control and label ids (`emvb-field-<id>`) inside this output.
+        name: "formed",
+        label: "Formed",
+        schema: { type: "object", properties: {} },
+        fields: [],
+        defaults: () => ({}),
+        render: (): ExtensionOutputNode[] => [
+          asOutput({
+            id: "form0001",
+            type: "form",
+            props: { formId: "newsletter" },
+            children: [
+              { id: "inpt0001", type: "text-input", props: { field: "email", label: "Email" } },
+            ],
+          }),
+        ],
+      },
+      {
+        // References to EmVB ids that this output does not hold: the form's control, and its
+        // honeypot, which sit in another element on the same page.
+        name: "foreign",
+        label: "Foreign",
+        schema: { type: "object", properties: {} },
+        fields: [],
+        defaults: () => ({}),
+        render: (): ExtensionOutputNode[] => [
+          { type: "markup", props: { tag: "label", attrs: { for: "emvb-field-inpt0001" } } },
+          { type: "markup", props: { tag: "a", attrs: { href: "#emvb-field-inpt0001" } } },
+          { type: "markup", props: { tag: "p", attrs: { "aria-controls": "emvb-hp-form0001" } } },
+        ],
+      },
+      {
+        // A built-in node that carries an author id starting with emvb.
+        name: "emvbid",
+        label: "Emvbid",
+        schema: { type: "object", properties: {} },
+        fields: [],
+        defaults: () => ({}),
+        render: (): ExtensionOutputNode[] => [
+          asOutput({
+            id: "head0001",
+            type: "heading",
+            htmlId: "emvb-taken",
+            props: { text: "Built in", level: 2 },
+          }),
+        ],
+      },
     ],
   });
+/** A built-in node as extension output. The cast skips only the type's strict prop shapes. */
+const asOutput = (node: unknown): ExtensionOutputNode => node as ExtensionOutputNode;
 
 /** The only item of a one-item list, without a non-null assertion. */
 function only<T>(items: readonly T[]): T {
@@ -131,6 +181,9 @@ function only<T>(items: readonly T[]): T {
 
 const EXT_TABLE = "ext:emvb-ext-kit/table";
 const EXT_ANCHORED = "ext:emvb-ext-kit/anchored";
+const EXT_FORMED = "ext:emvb-ext-kit/formed";
+const EXT_FOREIGN = "ext:emvb-ext-kit/foreign";
+const EXT_EMVBID = "ext:emvb-ext-kit/emvbid";
 
 /** A page of the given children; a heading with an Advanced id `ext-title` joins them. */
 const pageOf = (children: Layout["root"]["children"]): Layout => ({
@@ -184,5 +237,54 @@ describe("render of the markup node", () => {
       expect(page.html).toContain(`id="ext-title${suffix}"`);
       expect(page.html).toContain(`href="#ext-title${suffix}"`);
     }
+  });
+});
+
+describe("emvb ids in extension output (#52 review)", () => {
+  const publicPage = (children: Layout["root"]["children"]) =>
+    renderPage(pageOf(children), emptyDesign(), { mode: "public" }).html;
+
+  test("an author id in a synced section is reserved too, in either order", () => {
+    const section = {
+      schemaVersion: LAYOUT_SCHEMA_VERSION,
+      root: { id: "root0001", type: "container", props: {}, children: [authorHeading] },
+    };
+    const ref = { id: "sect0001", type: "part-ref", props: { partId: "pa" }, children: [] };
+    for (const children of [
+      [extNode("ext00001", EXT_ANCHORED), ref],
+      [ref, extNode("ext00001", EXT_ANCHORED)],
+    ]) {
+      const html = renderPage(pageOf(children as never), emptyDesign(), {
+        mode: "public",
+        dynamic: { sectionTemplates: { pa: section } } as never,
+      }).html;
+      expect(html.match(/id="ext-title"/g)?.length).toBe(1);
+      expect(html).toContain('id="ext-title-r2"');
+      expect(html).toContain('href="#ext-title-r2"');
+    }
+  });
+
+  test("a form label inside extension output keeps its for, and the control its id", () => {
+    const html = publicPage([extNode("ext00001", EXT_FORMED)]);
+    expect(html).toContain('for="emvb-field-inpt0001"');
+    expect(html).toContain('id="emvb-field-inpt0001"');
+  });
+
+  test("a reference to an emvb id outside the element's own output is dropped", () => {
+    // The form is on the page, so its ids exist, but they are not in the other element's output.
+    const html = publicPage([extNode("ext00001", EXT_FORMED), extNode("ext00002", EXT_FOREIGN)]);
+    expect(html.match(/for="emvb-field-inpt0001"/g)?.length).toBe(1);
+    expect(html).not.toContain('href="#emvb-field-inpt0001"');
+    expect(html).not.toContain('aria-controls="emvb-hp-form0001"');
+  });
+
+  test("an author id that starts with emvb on a built-in output node is not written", () => {
+    const html = publicPage([extNode("ext00001", EXT_EMVBID)]);
+    expect(html).toContain("Built in");
+    expect(html).not.toContain('id="emvb-taken"');
+  });
+
+  test("an author id that starts with emvb on a markup node refuses the element", () => {
+    expect(markupSpec({ tag: "p", attrs: { id: "emvb-taken" } })).toBeUndefined();
   });
 });

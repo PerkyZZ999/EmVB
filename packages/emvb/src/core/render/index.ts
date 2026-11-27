@@ -430,7 +430,16 @@ export function renderPage(
   const domIds = new Map<string, number>();
   // extensionApi 1.5: every author id is reserved before any generated id, so an extension's
   // generated id never takes one, whatever the order they render in.
-  for (const id of authorHtmlIds(layout.root)) domIds.set(id, 1);
+  // Synced sections and loop items render inside the page too, so their author ids are reserved.
+  const parts = opts.dynamic;
+  const reserved = [
+    layout,
+    ...Object.values(parts?.sectionTemplates ?? {}),
+    ...Object.values(parts?.loopTemplates ?? {}),
+  ];
+  for (const source of reserved) {
+    for (const id of authorHtmlIds(source.root)) domIds.set(id, 1);
+  }
   const idSuffix = opts.partIds && opts.scope ? `-t${originHash(opts.scope)}` : "";
   // W-253: runtimes follow what renders, including synced section and loop item contents,
   // which the page's own layout doesn't hold.
