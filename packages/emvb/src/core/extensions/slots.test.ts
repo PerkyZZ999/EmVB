@@ -128,7 +128,10 @@ describe("drop rules (setSlotRules / canHoldChild)", () => {
   });
 
   test("an element with accepts takes only those children; without accepts, any non-part", () => {
-    setSlotRules([{ type: CARD, slots: [{ accepts: ["text"] }] }, { type: TABS, slots: [{}] }]);
+    setSlotRules([
+      { type: CARD, slots: [{ accepts: ["text"] }] },
+      { type: TABS, slots: [{}] },
+    ]);
     expect(canHoldChild(CARD, "text")).toBe(true);
     expect(canHoldChild(CARD, "heading")).toBe(false);
     expect(canHoldChild(TABS, "heading")).toBe(true);
