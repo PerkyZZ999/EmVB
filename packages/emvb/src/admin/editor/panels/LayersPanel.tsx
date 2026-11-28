@@ -1,9 +1,9 @@
 import { CaretDownIcon, CaretRightIcon, DotsThreeIcon, ProhibitIcon } from "@phosphor-icons/react";
 import * as React from "react";
+import { canParent, nodeChildren } from "../../../core/tree-ops.ts";
 import {
   firstChild,
   hasStateStyles,
-  isParentNode,
   nextInOrder,
   parentOf,
   previousInOrder,
@@ -37,8 +37,9 @@ const rows = (
   collapsed: Set<string>,
 ): Array<{ node: LayoutNode; depth: number }> => {
   const self = [{ node, depth }];
-  if (!isParentNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;
-  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));
+  const children = nodeChildren(node);
+  if (!canParent(node) || collapsed.has(node.id) || children.length === 0) return self;
+  return self.concat(children.flatMap((child) => rows(child, depth + 1, collapsed)));
 };
 
 type LayerActions = {
@@ -92,7 +93,7 @@ function menuItems(
     surface: "layers",
     targetId: node.id,
     isRoot,
-    isParent: isParentNode(node),
+    isParent: canParent(node),
     device: "desktop",
     canDuplicate: !isRoot,
     canDelete: !isRoot,
@@ -146,7 +147,7 @@ export function treeKey(
     case "ArrowRight":
       return collapsed.has(id) ? { toggle: true } : { select: firstChild(layout, id) };
     case "ArrowLeft": {
-      const open = !!node && isParentNode(node) && !collapsed.has(id) && node.children.length > 0;
+      const open = !!node && canParent(node) && !collapsed.has(id) && nodeChildren(node).length > 0;
       return open ? { toggle: true } : { select: parentOf(layout, id) };
     }
     case "Enter":
@@ -421,7 +422,7 @@ const LayerRow = React.memo(function LayerRow({
     : preview
       ? `${typeName}: ${preview}`
       : typeName;
-  const hasChildren = isParentNode(node) && node.children.length > 0;
+  const hasChildren = canParent(node) && nodeChildren(node).length > 0;
   const [renaming, setRenaming] = React.useState(false);
   const startRename = () => {
     if (actions.onRename) setRenaming(true);

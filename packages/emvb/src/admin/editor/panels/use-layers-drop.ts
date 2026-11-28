@@ -1,5 +1,6 @@
 import * as React from "react";
-import { findNode, isParentNode, type Layout } from "../../../core/index.ts";
+import { findNode, type Layout } from "../../../core/index.ts";
+import { canParent, nodeChildren } from "../../../core/tree-ops.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
 import { draggedSource } from "../dnd/dragged-source.ts";
 import { EXISTING_ELEMENT_MIME, NEW_ELEMENT_MIME, transferKinds } from "../dnd/drop-target.ts";
@@ -126,8 +127,8 @@ export function useLayersDrop(
     const node = id ? findNode(layout, id) : undefined;
     if (!row || !id || !node) return null;
     const depth = depths.get(id) ?? 0;
-    const holds = isParentNode(node);
-    const open = holds && !collapsed.has(id) && node.children.length > 0;
+    const holds = canParent(node);
+    const open = holds && !collapsed.has(id) && nodeChildren(node).length > 0;
     const rect = row.getBoundingClientRect();
     const onRow = rowOf(event.target) !== null;
     const zone = onRow
@@ -162,7 +163,7 @@ export function useLayersDrop(
   const autoExpand = (id: string) => {
     const { layout, collapsed } = latest.current;
     const node = layout ? findNode(layout, id) : undefined;
-    const closed = !!node && isParentNode(node) && node.children.length > 0 && collapsed.has(id);
+    const closed = !!node && canParent(node) && nodeChildren(node).length > 0 && collapsed.has(id);
     if (expandTimer.current?.id === id && closed) return;
     if (expandTimer.current) clearTimeout(expandTimer.current.timer);
     expandTimer.current = closed

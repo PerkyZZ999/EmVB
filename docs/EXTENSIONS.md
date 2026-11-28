@@ -180,6 +180,35 @@ EmVB's accessibility check can't see inside extension markup or scripts. The pac
 - **Keyboard use:** anything interactive must work with the keyboard and show focus.
 - **ARIA:** roles, names and states for anything the runtime makes interactive.
 
+## Slots and parts (extensionApi 1.5)
+
+An element can hold stored children in a **slot**. Declare it in the element, and mark where
+the children go in the output with `{ type: "ext-slot", name }`:
+
+```ts
+{
+  name: "card",
+  // ...schema, fields, render
+  slots: [{ name: "body", label: "Body", accepts: ["heading", "text"] }],
+  render: () => [{ type: "ext-slot", name: "body" }],
+}
+```
+
+- One slot per element in 1.5. An element declaring two is not registered.
+- `accepts` lists the child types the slot takes: built-in types as they are, or this
+  extension's element names. Without `accepts`, any child.
+- `parts` lists this extension's element names that may only live inside this element
+  (a tab panel inside tabs). A part is refused anywhere else in the editor.
+- A marker whose name the element does not declare renders nothing.
+- Children are ordinary stored nodes, so the layout format is unchanged. The slot marker is
+  output only; it is never stored.
+- If the extension is missing, its children stay saved and visitors see nothing, as for any
+  extension element.
+
+The drop rules apply wherever the editor places an element: drag and drop on the canvas and in
+Layers, the Add panel, paste, and proposals. Saving a page does not re-check them. A child that
+breaks them is kept, and the page draws it only if the slot's `accepts` list allows it.
+
 ## Panels
 
 Panels are **declarative**. EmVB renders them in a Kumo slot with EmVB tokens

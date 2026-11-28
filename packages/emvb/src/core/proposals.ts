@@ -7,14 +7,15 @@ import { MAX_PROPOSAL_BYTES, MAX_PROPOSAL_DEPTH, MAX_PROPOSAL_OPS } from "./limi
 import { nestingIssues } from "./nesting.ts";
 import { isRecord } from "./record.ts";
 import { type DesignSystem } from "./schema/design.ts";
+import { KNOWN_ELEMENT_TYPES, NodeId, type Layout, type LayoutNode } from "./schema/layout.ts";
 import {
-  isParentNode,
-  KNOWN_ELEMENT_TYPES,
-  NodeId,
-  type Layout,
-  type LayoutNode,
-} from "./schema/layout.ts";
-import { findNode, forEachNode, removeNode, updateNode } from "./tree-ops.ts";
+  canParent,
+  findNode,
+  forEachNode,
+  nodeChildren,
+  removeNode,
+  updateNode,
+} from "./tree-ops.ts";
 import { byteLength, summarizeIssues, validateDesign, validateLayout } from "./validate.ts";
 import { proposalSafetyRefusal } from "./proposals-safety.ts";
 
@@ -286,7 +287,7 @@ export function applyProposal(
     let reason: string | undefined;
     if (op.kind === "insert" || op.kind === "move") {
       const parent = findNode(layout, op.parentId);
-      if (!parent || !isParentNode(parent) || op.index > parent.children.length)
+      if (!parent || !canParent(parent) || op.index > nodeChildren(parent).length)
         return refuse("Missing parent or insertion index outside its children.", opIndex);
     }
     switch (op.kind) {

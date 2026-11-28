@@ -21,6 +21,7 @@ import {
 } from "../dnd/drop-target.ts";
 import { draggedSource } from "../dnd/dragged-source.ts";
 import { useCanvasEvents } from "./canvas-events.ts";
+import { canParent, nodeChildren } from "../../../core/tree-ops.ts";
 import { dropLineBox } from "./drop-line.ts";
 import type { Box, DropTarget, InvalidDrop } from "./SelectionOverlay.tsx";
 import { boxOf, type CanvasSelection } from "./use-canvas-session.ts";
@@ -28,7 +29,7 @@ import { boxOf, type CanvasSelection } from "./use-canvas-session.ts";
 const ownDirection = (node: LayoutNode) =>
   (isParentNode(node) ? node.style?.flexDirection : undefined) ?? "column";
 
-const childrenOf = (node: LayoutNode): LayoutNode[] => (isParentNode(node) ? node.children : []);
+const childrenOf = (node: LayoutNode): LayoutNode[] => (canParent(node) ? nodeChildren(node) : []);
 
 /**
  * W-559: the direction the canvas shows for `node`'s children, read from the element that
@@ -105,7 +106,7 @@ export function useCanvasDnD({
       // W-128: the nearest element that takes the dragged one. A refusal the user must see
       // (into itself, too deep, too many) stops the walk so the invalid outline still shows.
       const verdict = (parent: LayoutNode) =>
-        source ? canDrop(current, source, parent.id) : { ok: isParentNode(parent) };
+        source ? canDrop(current, source, parent.id) : { ok: canParent(parent) };
       const accepts = (parent: LayoutNode) => {
         const result = verdict(parent);
         return result.ok || ("reason" in result && STOPS.has(result.reason as string));
