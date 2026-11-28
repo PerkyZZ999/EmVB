@@ -18,17 +18,11 @@ import { sanitizeHref } from "./sanitize/href.ts";
 import { sanitizeMediaUrl } from "./sanitize/media-url.ts";
 import { sanitizeSvgReport } from "./sanitize/svg.ts";
 import type { DesignSystem } from "./schema/design.ts";
-import {
-  isParentNode,
-  LAYOUT_SCHEMA_VERSION,
-  type ContainerNode,
-  type Layout,
-  type LayoutNode,
-} from "./schema/layout.ts";
+import { LAYOUT_SCHEMA_VERSION, type Layout, type LayoutNode } from "./schema/layout.ts";
 import { STYLE_STATES } from "./schema/state-names.ts";
 import type { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./schema/style.ts";
 import { localStyleOf, withLocalStyle } from "./local-style.ts";
-import { findNode, nodeChildren } from "./tree-ops.ts";
+import { canParent, findNode, nodeChildren } from "./tree-ops.ts";
 import { summarizeIssues, validateLayout } from "./validate.ts";
 
 /**
@@ -442,20 +436,20 @@ export function pastePlace(
     if (!allowed.ok) return allowed;
     return {
       ok: true,
-      place: { parentId: target.id, index: (target as ContainerNode).children.length },
+      place: { parentId: target.id, index: nodeChildren(target).length },
     };
   };
   const parentId = parentOf(layout, target.id);
   if (mode === "inside" || !parentId) {
-    return isParentNode(target) ? inside() : refuse(REASONS.notContainer);
+    return canParent(target) ? inside() : refuse(REASONS.notContainer);
   }
   const after = canDrop(layout, source, parentId);
   if (after.ok) {
-    const parent = findNode(layout, parentId) as ContainerNode;
-    const index = parent.children.findIndex((child) => child.id === target.id);
+    const parent = findNode(layout, parentId) as LayoutNode;
+    const index = nodeChildren(parent).findIndex((child) => child.id === target.id);
     return { ok: true, place: { parentId, index: index + 1 } };
   }
-  if (isParentNode(target)) {
+  if (canParent(target)) {
     const into = inside();
     if (into.ok) return into;
   }

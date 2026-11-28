@@ -13,7 +13,6 @@ import {
   isContainerNode,
   isFormFieldType,
   isFormNode,
-  isParentNode,
   isLayoutParentNode,
   LAYOUT_SCHEMA_VERSION,
   type ContainerNode,
@@ -22,8 +21,9 @@ import {
   type Layout,
   type LayoutNode,
 } from "./schema/layout.ts";
-import { canHoldChild, holdsChildren } from "./extensions/slot-rules.ts";
+import { canHoldChild } from "./extensions/slot-rules.ts";
 import {
+  canParent,
   findNode,
   insertNode,
   newNodeId,
@@ -112,8 +112,8 @@ function locate(layout: Layout, id: string): Located | undefined {
     if (node.id === id) return { node, parent, index, depth };
     // Containers and forms are drop/arrange parents. Still descend into unknown
     // children so nested ids can be found (they are not rearrangeable).
-    if (isParentNode(node)) {
-      for (const [i, child] of node.children.entries()) {
+    if (canParent(node)) {
+      for (const [i, child] of nodeChildren(node).entries()) {
         const found = walk(child, node as ArrangeParent, i, depth + 1);
         if (found) return found;
       }
@@ -304,9 +304,7 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
   const moving = dragged(layout, source, parentId);
   if (!moving.ok) return moving;
   // extensionApi 1.5: an extension element that declares a slot holds children, by its rules.
-  if (!isParentNode(into.node) && !holdsChildren(into.node.type)) {
-    return refuse(REASONS.notContainer);
-  }
+  if (!canParent(into.node)) return refuse(REASONS.notContainer);
   if (!canHoldChild(into.node.type, moving.node.type)) return refuse(REASONS.slotRefused);
   const inForm = underForm(layout, into.node.id);
   const placed = parentChildRefusal(into.node, moving.node, inForm);
@@ -500,8 +498,9 @@ function wrapWith(layout: Layout, id: string, shell: LayoutNode): Arranged {
 /** Where click-to-add puts a new element: into a selected container, after a selected element, or at the end. */
 export function insertionPoint(layout: Layout, selectedId: string | null): Place {
   const found = selectedId ? locate(layout, selectedId) : undefined;
-  if (found && isParentNode(found.node))
-    return { parentId: found.node.id, index: found.node.children.length };
+  if (found && canParent(found.node)) {
+    return { parentId: found.node.id, index: nodeChildren(found.node).length };
+  }
   if (found?.parent) return { parentId: found.parent.id, index: found.index + 1 };
   return { parentId: layout.root.id, index: layout.root.children.length };
 }

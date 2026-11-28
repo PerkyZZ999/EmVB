@@ -1,3 +1,4 @@
+import { holdsChildren } from "./extensions/slot-rules.ts";
 import {
   isContainerNode,
   isParentNode,
@@ -14,6 +15,12 @@ export const nodeChildren = (node: LayoutNode): LayoutNode[] => {
   return [];
 };
 
+/**
+ * Whether the editor treats `node` as a parent: a built-in container, or (extensionApi 1.5) an
+ * extension element that declares a slot. Drops, moves and the Layers tree all ask this.
+ */
+export const canParent = (node: LayoutNode): boolean =>
+  isParentNode(node) || holdsChildren(node.type);
 /** Children of a known parent only. Unknown nodes are not descended into (W-353). */
 export const knownChildren = (node: LayoutNode): readonly LayoutNode[] =>
   isParentNode(node) ? node.children : [];
@@ -62,7 +69,7 @@ export function indexLayout(layout: Layout): LayoutIndex {
       byId.set(node.id, node);
       if (parentId) parents.set(node.id, parentId);
     }
-    const nextParent = isParentNode(node) ? node.id : undefined;
+    const nextParent = canParent(node) ? node.id : undefined;
     for (const child of nodeChildren(node)) walk(child, nextParent);
   };
   walk(layout.root, undefined);
@@ -117,11 +124,12 @@ export function removeNode(layout: Layout, id: string): { layout: Layout; remove
   if (layout.root.id === id) return { layout };
   let removed: Removed | undefined;
   const root = mapTree(layout.root, (node) => {
-    if (!isParentNode(node)) return node;
-    const index = node.children.findIndex((child) => child.id === id);
+    if (!canParent(node)) return node;
+    const children = nodeChildren(node);
+    const index = children.findIndex((child) => child.id === id);
     if (index === -1) return node;
-    removed = { node: node.children[index] as LayoutNode, parentId: node.id, index };
-    return { ...node, children: node.children.filter((child) => child.id !== id) };
+    removed = { node: children[index] as LayoutNode, parentId: node.id, index };
+    return { ...node, children: children.filter((child) => child.id !== id) } as LayoutNode;
   });
   return removed ? { layout: { ...layout, root: root as ContainerNode }, removed } : { layout };
 }
@@ -134,12 +142,13 @@ export function insertNode(
   node: LayoutNode,
 ): Layout {
   return updateNode(layout, parentId, (parent) => {
-    if (!isParentNode(parent)) return parent;
-    const at = Math.max(0, Math.min(index, parent.children.length));
+    if (!canParent(parent)) return parent;
+    const children = nodeChildren(parent);
+    const at = Math.max(0, Math.min(index, children.length));
     return {
       ...parent,
-      children: [...parent.children.slice(0, at), node, ...parent.children.slice(at)],
-    };
+      children: [...children.slice(0, at), node, ...children.slice(at)],
+    } as LayoutNode;
   });
 }
 

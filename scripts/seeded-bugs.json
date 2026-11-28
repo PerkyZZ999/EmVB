@@ -56983,8 +56983,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/render-ext.ts",
-          "search": "if (found && declared?.name !== name) return [];",
-          "replace": "if (found && false) return [];"
+          "search": "if (manifest && declared?.name !== name) return [];",
+          "replace": "if (manifest && false) return [];"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
@@ -57017,6 +57017,62 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
       "expect": "\\(fail\\).*not a slot name is refused"
+    },
+    {
+      "id": "ext15-slots/holder-not-a-parent",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "The editor does not treat an extension element with a slot as a parent, so a drop is allowed and then does nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/tree-ops.ts",
+          "search": "  isParentNode(node) || holdsChildren(node.type);",
+          "replace": "  isParentNode(node);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*added inside the holder"
+    },
+    {
+      "id": "ext15-slots/accepts-ignored",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "A slot takes any child, whatever its accepts list says.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/slot-rules.ts",
+          "search": "  return rule.accepts === undefined || rule.accepts.includes(child);",
+          "replace": "  return true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*takes only those children"
+    },
+    {
+      "id": "ext15-slots/render-ignores-accepts",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "The public page renders children the slot's accepts list does not allow.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "  return stored.filter((child) => accepts.includes(child.type) || parts.includes(child.type));",
+          "replace": "  return stored;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*not on the slot's accepts list does not render"
+    },
+    {
+      "id": "ext15-slots/remove-skips-holder",
+      "requirement": "extensionApi 1.5 slots (#43)",
+      "description": "A child cannot be removed from a slot holder, so a move out of it leaves a copy behind.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/tree-ops.ts",
+          "search": "    if (!canParent(node)) return node;\n    const children = nodeChildren(node);",
+          "replace": "    if (!isParentNode(node)) return node;\n    const children = nodeChildren(node);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/slots.test.ts"],
+      "expect": "\\(fail\\).*moves out of the holder"
     }
   ]
 }

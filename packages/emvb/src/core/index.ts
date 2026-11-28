@@ -311,6 +311,7 @@ export {
   insertNode,
   nodeIdAtPath,
   newNodeId,
+  canParent,
   starterLayout,
   pageSlug,
   slugify,

@@ -205,8 +205,9 @@ the children go in the output with `{ type: "ext-slot", name }`:
 - If the extension is missing, its children stay saved and visitors see nothing, as for any
   extension element.
 
-Known limits in 1.5: the editor's Layers tree doesn't show a holder's children yet, and the
-server's own writes (MCP) don't apply the drop rules. The canvas draws the children.
+The drop rules apply wherever the editor places an element: drag and drop on the canvas and in
+Layers, the Add panel, paste, and proposals. Saving a page does not re-check them. A child that
+breaks them is kept, and the page draws it only if the slot's `accepts` list allows it.
 
 ## Panels
 

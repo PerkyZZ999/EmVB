@@ -7,6 +7,8 @@ import { clearExtensions, liveElement, rememberExtensions } from "./registry.ts"
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { slotNameOf } from "./slots.ts";
 import { validateLayout } from "../validate.ts";
+import { addNode, canDrop, moveNode, REASONS } from "../arrange.ts";
+import { findNode, nodeChildren, removeNode } from "../tree-ops.ts";
 import { canHoldChild, clearSlotRules, holdsChildren, setSlotRules } from "./slot-rules.ts";
 import type { ExtensionOutputNode } from "./types.ts";
 
@@ -35,6 +37,8 @@ const cards = () =>
       element("card", [{ name: "body", accepts: ["text"] }], "body"),
       element("two", [{ name: "a" }, { name: "b" }], "a"),
       element("undeclared", [{ name: "body" }], "other"),
+      { ...element("tabs", [{ name: "body" }], "body"), parts: ["panel"] },
+      element("panel", [{ name: "body" }], "body"),
       {
         // A marker nested in a container. Its type allows a marker at the top level only, so the
         // nested form needs a cast; at runtime it works at any depth.
@@ -161,5 +165,53 @@ describe("drop rules (setSlotRules / canHoldChild)", () => {
     expect(canHoldChild(CARD, "text")).toBe(true);
     expect(canHoldChild(CARD, "heading")).toBe(false);
     expect(canHoldChild(TABS, "heading")).toBe(true);
+  });
+});
+
+describe("the editor treats a slot holder as a parent", () => {
+  const text = { id: "text0002", type: "text", props: { text: "New" } } as const;
+  const heading = { id: "head0002", type: "heading", props: { text: "H", level: 2 } } as const;
+  const holder = (): Layout => pageWithCard(CARD);
+  const childIds = (layout: Layout, id: string) =>
+    nodeChildren(findNode(layout, id) as never).map((child) => child.id);
+
+  test("a child the slot accepts is added inside the holder", () => {
+    rememberExtensions([cards()]);
+    const added = addNode(holder(), text as never, { parentId: "card0001", index: 0 });
+    if (!added.ok) throw new Error(added.reason);
+    expect(childIds(added.layout, "card0001")[0]).toBe("text0002");
+  });
+
+  test("a child the slot does not accept is refused", () => {
+    rememberExtensions([cards()]);
+    expect(canDrop(holder(), { kind: "new", node: heading as never }, "card0001")).toEqual({
+      ok: false,
+      reason: REASONS.slotRefused,
+    });
+  });
+
+  test("a child moves out of the holder and can be removed from it", () => {
+    rememberExtensions([cards()]);
+    const moved = moveNode(holder(), "text0001", "root0001", 0);
+    if (!moved.ok) throw new Error(moved.reason);
+    expect(childIds(moved.layout, "card0001")).not.toContain("text0001");
+    expect(childIds(moved.layout, "root0001")).toContain("text0001");
+    const removed = removeNode(holder(), "text0001");
+    expect(removed.removed?.parentId).toBe("card0001");
+  });
+
+  test("a part goes into its own element, and nowhere else", () => {
+    rememberExtensions([cards()]);
+    const panel = { id: "pane0001", type: PANEL, props: {} };
+    const layout = holder();
+    const tabs = { id: "tabs0001", type: TABS, props: {}, children: [] };
+    layout.root.children.push(tabs as never);
+    expect(canDrop(layout, { kind: "new", node: panel as never }, "tabs0001")).toEqual({
+      ok: true,
+    });
+    expect(canDrop(layout, { kind: "new", node: panel as never }, "root0001")).toEqual({
+      ok: false,
+      reason: REASONS.slotRefused,
+    });
   });
 });

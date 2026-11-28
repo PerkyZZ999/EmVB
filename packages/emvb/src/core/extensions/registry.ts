@@ -172,6 +172,17 @@ export function liveElement(type: string):
   return undefined;
 }
 
+/**
+ * The manifest of a stored element type, from the manifests remembered here. The admin has these
+ * (from editor/config) without any live extension code, so slot rules read this, not `liveElement`.
+ */
+export function elementManifest(type: string): ExtensionManifest["elements"][number] | undefined {
+  for (const manifest of store().manifests) {
+    const found = manifest.elements.find((e) => e.type === type);
+    if (found) return found;
+  }
+  return undefined;
+}
 /** Test helper: drop every registered extension. */
 export function clearExtensions(): void {
   const s = store();

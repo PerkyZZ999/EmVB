@@ -5,7 +5,12 @@
 
 import type { LayoutNode } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
-import { extensionClassAllowlist, liveElement, liveExtension } from "./registry.ts";
+import {
+  elementManifest,
+  extensionClassAllowlist,
+  liveElement,
+  liveExtension,
+} from "./registry.ts";
 import { validateExtensionProps } from "./schema.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { extensionPlaceholderVNode } from "./placeholder.ts";
@@ -206,13 +211,14 @@ export function renderExtensionNode(
   rendered?.(parsed.pkg);
 
   // extensionApi 1.5: the element's stored children render in its slot, and nowhere else. A marker
-  // the manifest does not declare renders nothing. Without a live element (the admin canvas) the
-  // slot takes every stored child; the editor's drop rules keep those valid.
-  const found = liveElement(type);
-  const declared = found?.manifest.slots?.[0];
+  // the manifest does not declare renders nothing. The manifest is the same on the server and in
+  // the admin, so the canvas draws what the public page draws. With no manifest at all, the slot
+  // takes every stored child.
+  const manifest = elementManifest(type);
+  const declared = manifest?.slots?.[0];
   const fill = (name: string): VNode[] => {
-    if (found && declared?.name !== name) return [];
-    return visitChildren(slotChildren(storedChildrenOf(node), found?.manifest));
+    if (manifest && declared?.name !== name) return [];
+    return visitChildren(slotChildren(storedChildrenOf(node), manifest));
   };
   const children = visitChildren(safe).map((child) => fillSlots(child, fill));
   return {
