@@ -53088,6 +53088,90 @@
       "expect": "\\(fail\\).*text that could leave its element"
     },
     {
+      "id": "ext15-limits/classes-512",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "The class allowlist stops at the old 512 names, so a kit's 619 are cut.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "const MAX_ALLOWED_CLASSES = 1024;",
+          "replace": "const MAX_ALLOWED_CLASSES = 512;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*1,024 names are kept"
+    },
+    {
+      "id": "ext15-limits/css-256kb",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "The stylesheet limit stays at the old 256 KB, so a 344 KB kit is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "export const MAX_EXTENSION_CSS_BYTES = 512 * 1024;",
+          "replace": "export const MAX_EXTENSION_CSS_BYTES = 256 * 1024;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*stylesheet of 512 KB is accepted"
+    },
+    {
+      "id": "ext15-limits/runtime-64kb",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "The script limit stays at the old 64 KB, so a kit with its own JS is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/classes.ts",
+          "search": "export const MAX_EXTENSION_RUNTIME_BYTES = 256 * 1024;",
+          "replace": "export const MAX_EXTENSION_RUNTIME_BYTES = 64 * 1024;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*script of 256 KB is accepted"
+    },
+    {
+      "id": "ext15-limits/elements-32",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "An extension is cut to the old 32 elements, so a 69-component kit loses most of them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/normalize.ts",
+          "search": "const MAX_ELEMENTS = 128;",
+          "replace": "const MAX_ELEMENTS = 32;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*128 elements are registered"
+    },
+    {
+      "id": "ext15-limits/output-32-nodes",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "One element's output is cut to the old 32 nodes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "const MAX_NODES = 200;",
+          "replace": "const MAX_NODES = 32;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*200 nodes are kept"
+    },
+    {
+      "id": "ext15-limits/output-depth-8",
+      "requirement": "extensionApi 1.5 limits (#43)",
+      "description": "One element's output is cut to the old depth of 8.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "const MAX_DEPTH = 12;",
+          "replace": "const MAX_DEPTH = 8;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
+      "expect": "\\(fail\\).*13 levels deep is kept whole"
+    },
+    {
       "id": "W-1086/assets-on-placeholder",
       "requirement": "W-1086",
       "description": "A page whose extension element shows the placeholder still gets the stylesheet and runtime.",
@@ -56975,90 +57059,6 @@
       ],
       "command": ["bun", "test", "./test/e2e-demo-data.test.ts"],
       "expect": "\\(fail\\).*W-1098: the production auth server hands off"
-    },
-    {
-      "id": "ext15-limits/classes-512",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "The class allowlist stops at the old 512 names, so a kit's 619 are cut.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/classes.ts",
-          "search": "const MAX_ALLOWED_CLASSES = 1024;",
-          "replace": "const MAX_ALLOWED_CLASSES = 512;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*1,024 names are kept"
-    },
-    {
-      "id": "ext15-limits/css-256kb",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "The stylesheet limit stays at the old 256 KB, so a 344 KB kit is refused.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/classes.ts",
-          "search": "export const MAX_EXTENSION_CSS_BYTES = 512 * 1024;",
-          "replace": "export const MAX_EXTENSION_CSS_BYTES = 256 * 1024;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*stylesheet of 512 KB is accepted"
-    },
-    {
-      "id": "ext15-limits/runtime-64kb",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "The script limit stays at the old 64 KB, so a kit with its own JS is refused.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/classes.ts",
-          "search": "export const MAX_EXTENSION_RUNTIME_BYTES = 256 * 1024;",
-          "replace": "export const MAX_EXTENSION_RUNTIME_BYTES = 64 * 1024;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*script of 256 KB is accepted"
-    },
-    {
-      "id": "ext15-limits/elements-32",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "An extension is cut to the old 32 elements, so a 69-component kit loses most of them.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/normalize.ts",
-          "search": "const MAX_ELEMENTS = 128;",
-          "replace": "const MAX_ELEMENTS = 32;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*128 elements are registered"
-    },
-    {
-      "id": "ext15-limits/output-32-nodes",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "One element's output is cut to the old 32 nodes.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "const MAX_NODES = 200;",
-          "replace": "const MAX_NODES = 32;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*200 nodes are kept"
-    },
-    {
-      "id": "ext15-limits/output-depth-8",
-      "requirement": "extensionApi 1.5 limits (#43)",
-      "description": "One element's output is cut to the old depth of 8.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "const MAX_DEPTH = 12;",
-          "replace": "const MAX_DEPTH = 8;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/extensions/limits.test.ts"],
-      "expect": "\\(fail\\).*13 levels deep is kept whole"
     }
   ]
 }
