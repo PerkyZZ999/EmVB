@@ -15,8 +15,8 @@ import type { ExtensionOutputNode } from "./types.ts";
 const PKG = "emvb-ext-cards";
 const CARD = `ext:${PKG}/card`;
 const TWO = `ext:${PKG}/two`;
-const TABS = `ext:${PKG}/tabs`;
-const PANEL = `ext:${PKG}/panel`;
+const TABS = `ext:${PKG}/tab-set`;
+const PANEL = `ext:${PKG}/tab-pane`;
 
 /** An element with one slot named `body`. Its output marks where the stored children go. */
 const element = (name: string, slots: { name: string; accepts?: string[] }[], output: string) => ({
@@ -37,8 +37,8 @@ const cards = () =>
       element("card", [{ name: "body", accepts: ["text"] }], "body"),
       element("two", [{ name: "a" }, { name: "b" }], "a"),
       element("undeclared", [{ name: "body" }], "other"),
-      { ...element("tabs", [{ name: "body" }], "body"), parts: ["panel"] },
-      element("panel", [{ name: "body" }], "body"),
+      { ...element("tab-set", [{ name: "body" }], "body"), parts: ["tab-pane"] },
+      element("tab-pane", [{ name: "body" }], "body"),
       {
         // A marker nested in a container. Its type allows a marker at the top level only, so the
         // nested form needs a cast; at runtime it works at any depth.
