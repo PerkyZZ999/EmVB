@@ -47428,6 +47428,20 @@
       "expect": "\\(fail\\).*synced section is reserved too"
     },
     {
+      "id": "ext15-markup/markup-classes-dropped",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "A markup node loses the kit's allowlisted classes, so a kit's own table or cell is drawn without its styling.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        attrs: { ...markup.attrs, ...(kitClasses?.length ? { class: kitClasses.join(\" \") } : {}) },",
+          "replace": "        attrs: { ...markup.attrs },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*carries the kit's allowlisted classes"
+    },
+    {
       "id": "W-1008/no-1.4-job",
       "requirement": "W-1008",
       "description": "CI stops testing the EmDash 1.4 floor.",

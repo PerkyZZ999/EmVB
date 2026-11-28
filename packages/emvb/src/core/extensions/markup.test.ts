@@ -87,6 +87,7 @@ const kit = () =>
   defineExtension({
     id: "emvb-ext-kit",
     label: "Kit",
+    classes: { prefix: "kit-", allow: ["kit-table", "kit-cell"] },
     elements: [
       {
         name: "table",
@@ -117,6 +118,24 @@ const kit = () =>
           { type: "markup", props: { tag: "p", attrs: { id: "title" }, text: "Copy" } },
           { type: "markup", props: { tag: "a", attrs: { href: "#title" }, text: "Jump" } },
           { type: "markup", props: { tag: "a", attrs: { href: "#nowhere" }, text: "Lost" } },
+        ],
+      },
+      {
+        // The kit's classes on markup nodes, as a kit's own table needs them.
+        name: "classed",
+        label: "Classed",
+        schema: { type: "object", properties: {} },
+        fields: [],
+        defaults: () => ({}),
+        render: (): ExtensionOutputNode[] => [
+          {
+            type: "markup",
+            props: { tag: "table" },
+            extClasses: ["kit-table", "not-allowed"],
+            children: [
+              { type: "markup", props: { tag: "td", text: "Cell" }, extClasses: ["kit-cell"] },
+            ],
+          },
         ],
       },
       {
@@ -181,6 +200,7 @@ function only<T>(items: readonly T[]): T {
 
 const EXT_TABLE = "ext:emvb-ext-kit/table";
 const EXT_ANCHORED = "ext:emvb-ext-kit/anchored";
+const EXT_CLASSED = "ext:emvb-ext-kit/classed";
 const EXT_FORMED = "ext:emvb-ext-kit/formed";
 const EXT_FOREIGN = "ext:emvb-ext-kit/foreign";
 const EXT_EMVBID = "ext:emvb-ext-kit/emvbid";
@@ -211,6 +231,15 @@ describe("render of the markup node", () => {
     });
     expect(page.html).toContain("<table>");
     expect(page.html).toContain('<td scope="col">Cell</td>');
+  });
+
+  test("a markup node carries the kit's allowlisted classes, and no others", () => {
+    const page = renderPage(pageOf([extNode("ext00001", EXT_CLASSED)]), emptyDesign(), {
+      mode: "public",
+    });
+    expect(page.html).toContain('<table class="kit-table">');
+    expect(page.html).toContain('<td class="kit-cell">Cell</td>');
+    expect(page.html).not.toContain("not-allowed");
   });
 
   test("a reference to an id outside the element is dropped", () => {

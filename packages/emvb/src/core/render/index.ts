@@ -811,9 +811,11 @@ export function renderPage(
     const markup = markupOf(stored);
     if (markup) {
       for (const child of nodeChildren(node)) parentOf.set(child, node);
+      // W-1086: the kit's classes an extension put on this node (`class` itself is refused above).
+      const kitClasses = extensionClassesOf(stored);
       return finish(node, {
         tag: markup.tag,
-        attrs: { ...markup.attrs },
+        attrs: { ...markup.attrs, ...(kitClasses?.length ? { class: kitClasses.join(" ") } : {}) },
         children:
           markup.text !== undefined ? [markup.text] : ctx.children(nodeChildren(node), dynamic),
       });
