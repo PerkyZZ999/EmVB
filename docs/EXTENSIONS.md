@@ -25,6 +25,7 @@ emvb({
 Use `defineExtension({ ... })` from `@perkyzz/emvb` so `extensionApi: 1` is set.
 See [`examples/emvb-ext-hello`](../examples/emvb-ext-hello) for a full sample
 (element + panel + source).
+An extension can register up to 128 elements; any beyond that are ignored.
 
 ## Namespace
 
@@ -113,7 +114,7 @@ servers through the plugin options. The module must sit in a package whose `pack
 - `prefix`: 2–16 characters, lowercase letters, digits and single hyphens, ending in `-`
   (`d-`, `acme-ui-`). It may not start with `emvb`. A refused prefix drops the whole allowlist
   (the extension still registers, without classes).
-- `allow`: up to 512 names, each `^[a-z][a-z0-9-]*$`, at most 64 characters, starting with the
+- `allow`: up to 1,024 names, each `^[a-z][a-z0-9-]*$`, at most 64 characters, starting with the
   prefix and longer than it. Other names are dropped one by one.
 - A node returned by `render()` may carry `extClasses: string[]`. EmVB keeps only exact names
   from this extension's allowlist, at most 16 per node, without duplicates; anything else (free
@@ -130,7 +131,7 @@ servers through the plugin options. The module must sit in a package whose `pack
   `//host`), absolute paths and `\` are refused, with a build-time warning.
 - They are read **once at build time** by `emvb()`, and their text travels in the plugin's
   serialized options. Nothing is fetched or `import()`ed at request time.
-- Limits: stylesheet 256 KB, runtime 64 KB. A stylesheet containing `</style` is refused; a
+- Limits: stylesheet 512 KB, runtime 256 KB. A stylesheet containing `</style` is refused; a
   runtime containing `<script`, `</script` or `<!--`, or a line starting with `import` or
   `export`, is refused.
 - The runtime must be a **self-contained browser script** (wrap it in an IIFE). Public pages

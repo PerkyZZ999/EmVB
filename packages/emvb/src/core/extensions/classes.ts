@@ -12,11 +12,11 @@ const CLASS_NAME = /^[a-z][a-z0-9-]*$/;
 
 const MAX_CLASS_PREFIX_LENGTH = 16;
 const MAX_CLASS_NAME_LENGTH = 64;
-const MAX_ALLOWED_CLASSES = 512;
+const MAX_ALLOWED_CLASSES = 1024;
 /** Extension classes kept on one output node; the rest are dropped. */
 export const MAX_CLASSES_PER_NODE = 16;
-export const MAX_EXTENSION_CSS_BYTES = 256 * 1024;
-export const MAX_EXTENSION_RUNTIME_BYTES = 64 * 1024;
+export const MAX_EXTENSION_CSS_BYTES = 512 * 1024;
+export const MAX_EXTENSION_RUNTIME_BYTES = 256 * 1024;
 
 /** Why a class prefix is refused, or undefined when it is fine. */
 export function classPrefixIssue(prefix: unknown): string | undefined {
