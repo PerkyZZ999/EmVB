@@ -1776,8 +1776,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
-          "search": "  \"tspan\",\n]);",
-          "replace": "  \"tspan\",\n  \"script\",\n]);"
+          "search": "  \"kbd\",\n]);",
+          "replace": "  \"kbd\",\n  \"script\",\n]);"
         },
         {
           "file": "packages/emvb/src/core/elements/index.ts",
@@ -41670,8 +41670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
-          "search": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n",
-          "replace": "      props: { ...(node.props as Record<string, unknown>) },\n      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children ? { children: children.map((c) => c.node) } : {}),\n"
+          "search": "      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n",
+          "replace": "      ...(node.style !== undefined ? { style: node.style } : {}),\n      ...(children || isMarkup ? { children: (children ?? []).map((c) => c.node) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
@@ -47206,8 +47206,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)",
-          "replace": "node.htmlId && HTML_ID.test(node.htmlId)"
+          "search": "const htmlId =\n      node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)",
+          "replace": "const htmlId =\n      node.htmlId && HTML_ID.test(node.htmlId)"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
@@ -47244,6 +47244,202 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
       "expect": "\\(fail\\).*shadows a browser global is left out"
+    },
+    {
+      "id": "W-1086/ext-id-shadowing-allowed",
+      "requirement": "W-1086",
+      "description": "an extension id that would replace a browser global is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "  !isShadowingId(value) &&",
+          "replace": "  true &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*author ids that shadow a browser global"
+    },
+    {
+      "id": "W-1086/ext-id-foreign-ref-kept",
+      "requirement": "W-1086",
+      "description": "a reference to an id the element does not own is kept, so it points at the host page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value);",
+          "replace": "if (ID_ATTRS.has(name) || name === ID_ATTRS_ARIA) return targetOf(owned, value) ?? value;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*a reference to an id the element does not own is dropped"
+    },
+    {
+      "id": "W-1086/ext-id-not-unique",
+      "requirement": "W-1086",
+      "description": "ids skip the render's uniqueId, so two copies of one element share an id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "owned.set(id, uniqueId(`${ID_BASE}${id}`));",
+          "replace": "owned.set(id, `${ID_BASE}${id}`);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*two copies of one element get different ids"
+    },
+    {
+      "id": "W-1086/ext-id-url-ref-not-scoped",
+      "requirement": "W-1086",
+      "description": "an SVG url(#id) reference keeps the raw id, so the gradient or clip path stops working",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "if (URL_REF_ATTRS.has(name) && value.includes(\"url(\")) return scopeUrlRefs(value, owned);",
+          "replace": "if (false && URL_REF_ATTRS.has(name) && value.includes(\"url(\")) return scopeUrlRefs(value, owned);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*SVG paint references"
+    },
+    {
+      "id": "W-1086/ext-id-repeat-ending-collides",
+      "requirement": "W-1086",
+      "description": "an id that ends in -r2 collides with the second copy of its base id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "  !GENERATED_ENDING.test(value);",
+          "replace": "  true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*ends like a generated repeat"
+    },
+    {
+      "id": "ext15-markup/emvb-foreign-ref-kept",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "A reference to an emvb- id that is not in the element's own output is kept, so output can point at another form's controls.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "  owned.get(id);",
+          "replace": "  owned.get(id) ?? (id.startsWith(\"emvb\") ? id : undefined);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*not in the output is dropped"
+    },
+    {
+      "id": "ext15-markup/emvb-generated-id-dropped",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "An emvb- id EmVB generated inside the output is not owned, so a form label loses its for.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/scope-ids.ts",
+          "search": "      if (id.startsWith(\"emvb\")) owned.set(id, id);",
+          "replace": "      if (id.startsWith(\"emvb\")) void 0;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/scope-ids.test.ts"],
+      "expect": "\\(fail\\).*EmVB generated \\(a form control\\) keeps its id"
+    },
+    {
+      "id": "ext15-markup/builtin-author-id-kept",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "A built-in output node keeps an author id, so an extension can write an emvb id that collides with one EmVB generates.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n",
+          "replace": "      props: isMarkup ? {} : { ...(node.props as Record<string, unknown>) },\n      ...(typeof node.htmlId === \"string\" ? { htmlId: node.htmlId } : {}),\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*built-in output node is not written"
+    },
+    {
+      "id": "ext15-markup/markup-emvb-id-allowed",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "The markup node accepts an author id that starts with emvb.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/markup.ts",
+          "search": "  if (name === \"id\" && value.startsWith(\"emvb\")) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*refuses the element"
+    },
+    {
+      "id": "ext15-markup/markup-url-unchecked",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "The markup node keeps a javascript: URL instead of refusing it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/markup.ts",
+          "search": "  return URL_ATTRS.has(name) ? sanitizeHref(cleaned) : cleaned;",
+          "replace": "  return cleaned;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*refuses a URL the href sanitizer rejects"
+    },
+    {
+      "id": "ext15-markup/tag-list-open",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "The markup node accepts a tag that is not on the serializer's list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/markup.ts",
+          "search": "  if (typeof tag !== \"string\" || !isAllowedTag(tag)) return undefined;",
+          "replace": "  if (typeof tag !== \"string\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*refuses a tag, attribute, class, style or emvb id"
+    },
+    {
+      "id": "ext15-markup/tfoot-allowed",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "tfoot joins the tags extensions may use, though the design leaves it out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "  \"kbd\",\n]);",
+          "replace": "  \"kbd\",\n  \"tfoot\",\n]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*tfoot, script and event handlers are not"
+    },
+    {
+      "id": "ext15-markup/synced-section-ids-unreserved",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "A synced section's author ids are not reserved, so an extension's generated id can take one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    ...Object.values(parts?.sectionTemplates ?? {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*synced section is reserved too"
+    },
+    {
+      "id": "ext15-markup/markup-classes-dropped",
+      "requirement": "extensionApi 1.5 markup and ids (#43, #52)",
+      "description": "A markup node loses the kit's allowlisted classes, so a kit's own table or cell is drawn without its styling.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        attrs: { ...markup.attrs, ...(kitClasses?.length ? { class: kitClasses.join(\" \") } : {}) },",
+          "replace": "        attrs: { ...markup.attrs },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/markup.test.ts"],
+      "expect": "\\(fail\\).*carries the kit's allowlisted classes"
     },
     {
       "id": "W-1008/no-1.4-job",

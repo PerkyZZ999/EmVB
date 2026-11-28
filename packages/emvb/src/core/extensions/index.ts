@@ -47,6 +47,7 @@ export {
   extensionStylesheets,
 } from "./registry.ts";
 export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
+export { markupOf } from "./markup.ts";
 export {
   syncSourceValues,
   resolveExtensionSource,
