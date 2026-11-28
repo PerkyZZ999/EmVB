@@ -6,6 +6,7 @@ import { defineExtension } from "./define.ts";
 import { clearExtensions, liveElement, rememberExtensions } from "./registry.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { slotNameOf } from "./slots.ts";
+import { validateLayout } from "../validate.ts";
 import { canHoldChild, clearSlotRules, holdsChildren, setSlotRules } from "./slot-rules.ts";
 import type { ExtensionOutputNode } from "./types.ts";
 
@@ -34,6 +35,15 @@ const cards = () =>
       element("card", [{ name: "body", accepts: ["text"] }], "body"),
       element("two", [{ name: "a" }, { name: "b" }], "a"),
       element("undeclared", [{ name: "body" }], "other"),
+      {
+        // A marker nested in a container. Its type allows a marker at the top level only, so the
+        // nested form needs a cast; at runtime it works at any depth.
+        ...element("boxed", [{ name: "body" }], "body"),
+        render: () =>
+          [
+            { type: "container", props: {}, children: [{ type: "ext-slot", name: "body" }] },
+          ] as unknown as ExtensionOutputNode[],
+      },
     ],
   });
 
@@ -86,6 +96,22 @@ describe("rendering the stored children into the slot", () => {
     rememberExtensions([cards()]);
     const page = renderPage(pageWithCard(CARD), emptyDesign(), { mode: "public" });
     expect(page.html).not.toContain("Skipped");
+  });
+
+  test("a marker nested in a container renders the children there", () => {
+    rememberExtensions([cards()]);
+    const page = renderPage(pageWithCard(`ext:${PKG}/boxed`), emptyDesign(), { mode: "public" });
+    expect(page.html).toContain("Kept copy");
+    expect(page.html).toContain("Skipped");
+  });
+
+  test("with the extension missing, the children stay saved and visitors see nothing", () => {
+    const stored = pageWithCard(CARD);
+    const page = renderPage(stored, emptyDesign(), { mode: "public" });
+    expect(page.html).not.toContain("Kept copy");
+    expect(page.html).not.toContain("Skipped");
+    expect(validateLayout(stored).ok).toBe(true);
+    expect(JSON.stringify(stored)).toContain("Kept copy");
   });
 
   test("a marker whose name the element does not declare renders nothing", () => {
