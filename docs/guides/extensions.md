@@ -161,7 +161,7 @@ and its `props`, plus `children` for boxes. The types and their props are the on
 - Don't return another extension's element (`ext:` types) or set `style` on the nodes. Style
   comes from your classes and stylesheet (step 3), or from the styles an editor gives the
   element itself.
-- At most 32 nodes, nested at most 8 deep.
+- At most 200 nodes, nested at most 12 deep.
 - If `render()` throws or returns something invalid, the element shows the placeholder in the
   editor and is left out for visitors; nothing else on the page is affected.
 
@@ -213,11 +213,11 @@ The published page then has `<div class="emvb-div-block hello-card">` and
 - **The prefix** keeps your classes apart from EmVB's (`emvb-…`) and from the site's own
   classes. It is 2 to 16 lowercase letters, digits and hyphens ending in `-` (`d-`, `acme-ui-`),
   and can't start with `emvb`.
-- **The list** (`allow`) holds up to 512 names, each starting with the prefix. Only exact names
+- **The list** (`allow`) holds up to 1,024 names, each starting with the prefix. Only exact names
   from the list reach the page, at most 16 per node; anything else on a node is dropped. Class
   names can't come from props, so an editor can't type a class in.
 - **The stylesheet** is a `.css` file inside your package, given relative to `module`, up to
-  256 KB. EmVB reads it once at build time. It is added once to each public page that shows one
+  512 KB. EmVB reads it once at build time. It is added once to each public page that shows one
   of your elements (however many times it appears, header and footer included), to the editor
   canvas when it shows one, and to the HTML export. Pages without your elements don't get it.
   It never reaches the admin's own interface.
@@ -255,7 +255,7 @@ export default defineExtension({
 - Write it as one self-contained script, wrapped in a function as above: no `import` or
   `export`, no top-level `await`. Public pages load it as a module script, the HTML export as a
   classic deferred script, so it must work as both. The build checks this and refuses a script
-  that doesn't parse. Size limit: 64 KB.
+  that doesn't parse. Size limit: 256 KB.
 - Find your elements by your own classes, and don't assume they exist only once on a page.
 - Sites with a Content Security Policy need to allow the inline script, as they already do for
   EmVB's page styles.

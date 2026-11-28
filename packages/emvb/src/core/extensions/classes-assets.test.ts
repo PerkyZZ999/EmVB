@@ -206,7 +206,7 @@ describe("css and runtime text (W-1086)", () => {
   test("text that could leave its element, or a module, is refused", () => {
     expect(extensionCssIssue(".a{}</style><script>x()</script>")).toBeDefined();
     expect(extensionCssIssue(".a{}</STYLE >")).toBeDefined();
-    expect(extensionCssIssue("x".repeat(300 * 1024))).toBeDefined();
+    expect(extensionCssIssue("x".repeat(600 * 1024))).toBeDefined();
     expect(extensionCssIssue(CSS)).toBeUndefined();
     expect(extensionRuntimeIssue("x()</script><script>y()")).toBeDefined();
     expect(extensionRuntimeIssue("a = '<!--';")).toBeDefined();
@@ -214,7 +214,7 @@ describe("css and runtime text (W-1086)", () => {
     expect(extensionRuntimeIssue("export const a = 1;")).toBeDefined();
     expect(extensionRuntimeIssue('  import("https://cdn.example/x.js");')).toBeDefined();
     expect(extensionRuntimeIssue("const importantThing = 1;\nexports.a = 1;")).toBeUndefined();
-    expect(extensionRuntimeIssue("x".repeat(70 * 1024))).toBeDefined();
+    expect(extensionRuntimeIssue("x".repeat(300 * 1024))).toBeDefined();
     expect(cleanExtensionAssets({ css: CSS, runtime: "x()</script>" })).toEqual({ css: CSS });
     expect(cleanExtensionAssets({ css: 1, runtime: "" })).toBeUndefined();
   });
